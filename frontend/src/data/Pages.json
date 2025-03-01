@@ -1,16 +1,12 @@
 {
     "data": [
       {
-        "name": "Home",
-        "href": "/"
+        "name": "Leaderboard",
+        "href": "/leaderboard"
       },
       {
-        "name": "Projects",
-        "href": "/projects"
-      },
-      {
-        "name": "Contact",
-        "href": "/contact"
+        "name": "About",
+        "href": "/about"
       }
     ]
 }
