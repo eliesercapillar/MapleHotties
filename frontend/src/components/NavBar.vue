@@ -1,7 +1,8 @@
 <template>
     <header class="z-50 py-6 bg-foreground">
       <div class="mx-5">
-        <nav class="flex justify-between items-center">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
           <div>
             <RouterLink to="/">
               <Icon icon="lucide:aperture" class="size-5 text-white" />
@@ -13,7 +14,7 @@
               <Icon :icon="isMenuOpen ? 'lucide:x' : 'lucide:align-justify'"/>
             </Button>
           </div>
-          <div v-if="isDesktopView" class="">
+          <nav v-if="isDesktopView" class="">
             <ul class="flex items-center gap-4 sm:gap-8">
               <li
                 v-for="(page, index) in Pages.data"
@@ -32,18 +33,34 @@
                 >
               </li>
             </ul>
-          </div>
-        </nav>
+          </nav>
+        </div>
       </div>
+      <nav v-if="!isDesktopView && isMenuOpen" class="m-5 font-bold text-4xl flex flex-col justify-between h-screen">
+        <ul class="flex flex-col gap-4">
+          <li v-for="(page, index) in Pages.data" :key="page.name"
+          class="text-muted-foreground hover:opacity-50"
+          >
+            <RouterLink v-if="index !== activeIndex" :to="page.href">{{ page.name }}</RouterLink>
+            <span v-else>{{ page.name }}</span>
+          </li>
+          <!-- TODO: Add V-IF to check if logged in. If logged in, show profile page link instead -->
+          <li class="text-muted-foreground hover:opacity-50">
+            <RouterLink to="/login">Login</RouterLink>
+          </li>
+        </ul>
+        <Socials/>
+      </nav>
     </header>
 </template>
 
 <script setup lang="ts">
+import Socials from "@/components/Socials.vue";
 import { Icon } from "@iconify/vue";
 import { Button } from "@/components/ui/button";
 import { ref, onMounted, onUnmounted } from "vue";
-import Pages from "@/data/Pages.json";
 import { RouterLink } from "vue-router";
+import Pages from "@/data/Pages.json";
 
 const isMenuOpen = ref(false);
 const isDesktopView = ref(false);

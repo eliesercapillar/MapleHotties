@@ -1,0 +1,24 @@
+{
+    "data": [
+      {
+        "name": "LinkedIn",
+        "link": "https://www.linkedin.com/in/eliesercapillar/",
+        "icon": "lucide:linkedin"
+      },
+      {
+        "name": "GitHub",
+        "link": "https://github.com/eliesercapillar",
+        "icon": "lucide:github"
+      },
+      {
+        "name": "Email",
+        "link": "mailto:elieser.capillar@gmail.com",
+        "icon": "lucide:mail"
+      },
+      {
+        "name": "X",
+        "link": "https://x.com/eliesercapillar",
+        "icon": "mynaui:brand-x"
+      }
+    ]
+}
