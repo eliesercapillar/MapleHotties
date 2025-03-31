@@ -8,10 +8,14 @@
         <!-- <NavBarAlt /> -->
         <!-- Hero Section -->
         <section>
-          <div class="relative">
-            <img src="/hero_bg.png" class="block w-full">
-            <div class="w-full absolute top-0 left-0 text-center">
-              <h1 class="relative text-[#ff0000] text-center text-9xl font-bold" >ARE YOU HENEHOE ENOUGH?</h1>
+          <div :class="`bg-[url(${heroBGPath})]`" class="h-screen flex justify-center items-center">
+            <div class="grid space-y-2">
+              <h1 class="text-[#fff500] text-center text-9xl font-bold capitalize" >Make The Next Move</h1>
+              <p class="text-center">It's better on the app.</p>
+              <div class="grid justify-center items-center space-y-2">
+                <Button class="">Download now</Button>
+                <Button class="">Sign In</Button>
+              </div>
             </div>
           </div>
         </section>
@@ -27,4 +31,8 @@
 
 <script setup lang="ts">
 import NavBar from "@/components/NavBar.vue";
+import Button from "@/components/ui/button/Button.vue";
+import { ref } from "vue";
+
+const heroBGPath = ref("/hero_bg.png");
 </script>
