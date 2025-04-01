@@ -1,5 +1,5 @@
 <template>
-    <header class="z-50 py-6 bg-foreground">
+    <header class="z-50 py-6 bg-foreground sticky top-0">
       <div class="mx-5">
         <div class="flex justify-between items-center">
           <!-- Logo -->
