@@ -17,7 +17,7 @@
             </div>
         </aside>
         <div class="w-full h-screen">
-            <main class="w-full h-screen flex justify-center items-center">
+            <main class="w-full h-screen flex justify-center items-center overflow-hidden">
                 <div class="grid justify-center items-center w-full">
                     <SwipeCard v-for="card in cardData" :key="card.id" 
                     :card="card" :isFront="card.id === cardData[cardData.length - 1].id" 
@@ -39,6 +39,13 @@ const cardData = ref([
   { id: 2, url: 'https://images.unsplash.com/photo-1512374382149-233c42b6a83b?q=80&w=2235&auto=format&fit=crop' },
   { id: 3, url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=2342&auto=format&fit=crop' },
   { id: 4, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 5, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 6, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 7, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 8, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 9, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 10, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  { id: 11, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
 ]);
 
 const removeCard = (id) => {
