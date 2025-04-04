@@ -17,11 +17,27 @@
             </div>
         </aside>
         <div class="w-full h-screen">
-            <main class="w-full h-screen flex justify-center items-center overflow-hidden">
-                <div class="grid justify-center items-center w-full">
+            <main class="w-full h-screen flex flex-col justify-center items-center overflow-hidden">
+                <div class="relative grid justify-center items-center w-full h-[667px]">
                     <SwipeCard v-for="card in cardData" :key="card.id" 
                     :card="card" :isFront="card.id === cardData[cardData.length - 1].id" 
                     @remove="removeCard" />
+                    <div class="flex justify-evenly items-center">
+                        <TinderButton
+                        v-for="(button, index) in ButtonLogos.data"
+                        :key="index"
+                        :button="button"
+                        />
+                    </div>
+                </div>
+                <div class="mt-5 bg-red-200">
+                    <p>Nope</p>
+                    <p>Like</p>
+                    <p>More Info</p>
+                    <section class="">
+                        <ul class="">
+                        </ul>
+                    </section>                  
                 </div>
             </main>
         
@@ -31,8 +47,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import Button from "@/components/ui/button/Button.vue";
+import TinderButton from "@/components/TinderButton.vue";
+import ButtonLogos from "@/data/ButtonSVGs.json";
 import SwipeCard from '@/components/SwipeCard.vue';
+import { Icon } from '@iconify/vue';
 
 const cardData = ref([
   { id: 1, url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2370&auto=format&fit=crop' },
