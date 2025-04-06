@@ -7,12 +7,13 @@
       draggable="false"
       :drag="isFront ? true : false" dragSnapToOrigin
       :style="{x, rotate}" :animate="{scale: isFront ? 1 : 0.95}"
+      @dragStart="handleDragStart"
       @dragEnd="handleDragEnd"
     />
 </template>
 
 <script setup lang="ts">
-import { motion, useMotionValue, useTransform, animate } from "motion-v"
+import { motion, useMotionValue, useTransform, animate, useMotionValueEvent } from "motion-v"
 
 const props = defineProps<{
   card: {
@@ -22,14 +23,27 @@ const props = defineProps<{
   isFront: Boolean
 }>();
 
-const emit = defineEmits(['remove']);
+
+const emit = defineEmits(['remove', 'swiping', 'dragStarted', 'dragEnded']);
 
 const x = useMotionValue(0);
 // const opacity = useTransform(x, [-300, 0, 300], [0, 1, 0])
 const rotate = useTransform(x, [-300, 300], [-30, 30])
 
+useMotionValueEvent(x, "change", (latest) => {
+  emit("swiping", latest);
+  // console.log("emitting swipe event:")
+})
+
+const handleDragStart = () => {
+  emit("dragStarted");
+  console.log("DRAG STARTED");
+}
 
 const handleDragEnd = () => {
+  emit("dragEnded");
+  console.log("DRAG ENDED");
+
   const currentX = x.get();
 
   if (Math.abs(currentX) > 300) {

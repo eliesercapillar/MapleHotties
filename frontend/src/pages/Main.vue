@@ -20,13 +20,20 @@
             <main class="w-full h-screen flex flex-col justify-center items-center overflow-hidden">
                 <div class="relative grid justify-center items-center w-full h-[667px]">
                     <SwipeCard v-for="card in cardData" :key="card.id" 
-                    :card="card" :isFront="card.id === cardData[cardData.length - 1].id" 
-                    @remove="removeCard" />
+                    :card="card" 
+                    :isFront="card.id === cardData[cardData.length - 1].id" 
+                    @remove="removeCard" 
+                    @swiping="handleSwiping" 
+                    @dragStarted="() => isDragging = true"
+                    @dragEnded="() => isDragging = false"
+                    />
                     <div class="flex justify-evenly items-center">
                         <TinderButton
-                        v-for="(button, index) in ButtonLogos.data"
+                        v-for="(button, index) in ButtonSVGs.data"
                         :key="index"
                         :button="button"
+                        :cardX="cardX"
+                        :isDragging = "isDragging"
                         />
                     </div>
                 </div>
@@ -48,9 +55,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import TinderButton from "@/components/TinderButton.vue";
-import ButtonLogos from "@/data/ButtonSVGs.json";
+import ButtonSVGs from "@/data/ButtonSVGs.json";
 import SwipeCard from '@/components/SwipeCard.vue';
-import { Icon } from '@iconify/vue';
 
 const cardData = ref([
   { id: 1, url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2370&auto=format&fit=crop' },
@@ -65,6 +71,11 @@ const cardData = ref([
   { id: 10, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
   { id: 11, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
 ]);
+
+const isDragging = ref(false);
+
+const cardX = ref(0);
+const handleSwiping = (x: number) => { cardX.value = x; };
 
 const removeCard = (id) => {
   cardData.value = cardData.value.filter((card) => card.id !== id);
