@@ -2,12 +2,13 @@
     "data": [
         {
             "name": "Nope",
-            "pressedGradient": "linear-gradient(135deg, #f13b2d, #ff7e5f)",
+            "pressedGradient": "linear-gradient(135deg, #f92999, #ff3f29)",
             "svg": {
                 "width": 24,
                 "height": 24,
                 "viewBox": "0 0 24 24",
                 "fill": "url(#tinder-nope-gradient)",
+                "stroke": "#ff4200",
                 "fillRule": "evenodd",
                 "clipRule": "evenodd",
                 "path": "M16.526 12 23.422 5.105a1.99 1.99 0 0 0-.005-2.809L21.706.585a1.986 1.986 0 0 0-2.81-.005L12 7.474 5.104.58a1.986 1.986 0 0 0-2.81.005L.583 2.296a1.99 1.99 0 0 0-.005 2.81L7.474 12 .578 18.895a1.99 1.99 0 0 0 .005 2.809l1.711 1.711c.778.778 2.036.78 2.81.006L12 16.526l6.896 6.895a1.986 1.986 0 0 0 2.81-.006l1.711-1.711a1.99 1.99 0 0 0 .005-2.81z"
@@ -15,12 +16,13 @@
         },
         {
             "name": "Love",
-            "pressedGradient": "linear-gradient(135deg, #00df8a, #00b5b8)",
+            "pressedGradient": "linear-gradient(135deg, #e4f10a, #37bb4e)",
             "svg": {
                 "width": 24,
                 "height": 24,
                 "viewBox": "0 0 24 24",
                 "fill": "url(#tinder-like-gradient)",
+                "stroke": "#0f9e69",
                 "fillRule": "evenodd",
                 "clipRule": "evenodd",
                 "path": "M24 8.845c0-4.253-2.89-7.34-6.87-7.34-2.134 0-3.283.777-5.128 2.537C10.155 2.279 9.005 1.5 6.871 1.5 2.89 1.5 0 4.587 0 8.84a7.17 7.17 0 0 0 1.839 4.804l9.632 8.659a.817.817 0 0 0 1.063.002l8.686-7.754.532-.475.199-.208.2-.208A7.168 7.168 0 0 0 24 8.845"

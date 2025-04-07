@@ -24,6 +24,7 @@
       >
         <path
           :fill="button.svg.fill"
+          :stroke="button.svg.stroke"
           :fill-rule="button.svg.fillRule"
           :clip-rule="button.svg.clipRule"
           :d="button.svg.path"
