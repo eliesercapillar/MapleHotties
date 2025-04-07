@@ -1,15 +1,41 @@
 <template>
-    <motion.img
+  <motion.div
+    class="relative h-[667px] w-[375px] row-[1] col-[1] hover:cursor-grab active:cursor-grabbing"
+    :class="{'z-[1]': isFront}"
+    :style="{ x, rotate }" :animate="{ scale: isFront ? 1 : 0.95 }"
+    :drag="isFront ? true : false" dragSnapToOrigin
+    @dragStart="handleDragStart"
+    @dragEnd="handleDragEnd"
+  >
+    <img
       :src="props.card.url"
       alt="SwipeCard"
-      class="h-[667px] w-[375px] rounded-lg object-cover row-[1] col-[1] hover:cursor-grab, active:cursor-grabbing"
-      :class="{'z-[1]': isFront}"
+      class="h-[667px] w-[375px] rounded-lg object-cover"
       draggable="false"
-      :drag="isFront ? true : false" dragSnapToOrigin
-      :style="{x, rotate}" :animate="{scale: isFront ? 1 : 0.95}"
-      @dragStart="handleDragStart"
-      @dragEnd="handleDragEnd"
     />
+    <!-- Like Overlay -->
+    <motion.div 
+      class="absolute top-[2%] left-[2%] z-[2] -rotate-12"
+      :style="{ opacity: likeOpacity }"
+    >
+      <img 
+        class="h-[256px] w-[256px]" 
+        src="/swipecard_like_overlay_24x24.svg"
+        draggable="false"
+      >
+    </motion.div>
+    <!-- Nope Overlay -->
+    <motion.div 
+      class="absolute top-[2%] right-[2%] z-[2] rotate-12"
+      :style="{ opacity: nopeOpacity }"
+    >
+      <img 
+        class="h-[216px] w-[216px]" 
+        src="/swipecard_nope_overlay_24x24.svg"
+        draggable="false"
+      >
+    </motion.div>
+  </motion.div>
 </template>
 
 <script setup lang="ts">
@@ -27,8 +53,9 @@ const props = defineProps<{
 const emit = defineEmits(['remove', 'swiping', 'dragStarted', 'dragEnded']);
 
 const x = useMotionValue(0);
-// const opacity = useTransform(x, [-300, 0, 300], [0, 1, 0])
 const rotate = useTransform(x, [-300, 300], [-30, 30])
+const likeOpacity  = useTransform(x, [0, 300], [0, 1])
+const nopeOpacity  = useTransform(x, [-300, 0], [1, 0])
 
 useMotionValueEvent(x, "change", (latest) => { emit("swiping", latest); })
 
