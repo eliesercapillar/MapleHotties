@@ -30,19 +30,12 @@ const x = useMotionValue(0);
 // const opacity = useTransform(x, [-300, 0, 300], [0, 1, 0])
 const rotate = useTransform(x, [-300, 300], [-30, 30])
 
-useMotionValueEvent(x, "change", (latest) => {
-  emit("swiping", latest);
-  // console.log("emitting swipe event:")
-})
+useMotionValueEvent(x, "change", (latest) => { emit("swiping", latest); })
 
-const handleDragStart = () => {
-  emit("dragStarted");
-  // console.log("DRAG STARTED");
-}
+const handleDragStart = () => { emit("dragStarted"); }
 
 const handleDragEnd = () => {
   emit("dragEnded");
-  // console.log("DRAG ENDED");
 
   const currentX = x.get();
 

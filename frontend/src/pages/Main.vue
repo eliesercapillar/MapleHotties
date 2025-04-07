@@ -32,8 +32,8 @@
                         v-for="(button, index) in ButtonSVGs.data"
                         :key="index"
                         :button="button"
-                        :cardX="cardX"
                         :isDragging = "isDragging"
+                        :cardDirection = "cardDirection"
                         />
                     </div>
                 </div>
@@ -75,8 +75,12 @@ const cardData = ref([
 
 const isDragging = ref(false);
 
-const cardX = ref(0);
-const handleSwiping = (x: number) => { cardX.value = x; };
+const cardDirection = ref<string>("");
+const handleSwiping = (x: number) => { 
+    if (x > 20)       cardDirection.value = "right";
+    else if (x < -20) cardDirection.value = "left";
+    else              cardDirection.value = "";
+};
 
 const removeCard = (id) => {
   cardData.value = cardData.value.filter((card) => card.id !== id);
