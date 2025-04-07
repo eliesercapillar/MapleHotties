@@ -1,50 +1,50 @@
 <template>
   <motion.button
-    class="relative flex items-center justify-center w-16 h-16 rounded-full shadow-lg 
-    transition-all duration-300 ease-in-out hover:scale-110 active:scale-75"
-    :class="props.isDragging ? (isActive ? 'scale-125' : 'scale-0'): 'scale-100'"
+    class="relative flex items-center justify-center w-16 h-16 rounded-full shadow-lg overflow-hidden"
     :style="{background: isPressed ? props.button.pressedGradient : '#21262e'}"
-    @mousedown="isPressed = true"
-    @mouseup="isPressed = false"
-    @mouseleave="isPressed = false"
+    :animate="{
+      scale: props.isDragging ? (isActive ? 1.25 : 0) : (isPressed ? 0.75 : 1)
+    }"
+    :transition="{ duration: 0.3, ease: 'easeInOut' }"
+    @pointerdown="onPointerDown"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerUp"
     draggable="false"
   >
   
     <!-- Default State Icon -->
     <motion.span
       class="absolute inset-0 flex items-center justify-center transition-all"
-      :class="{ 'scale-0': isPressed, 'scale-100': isActive }"
+      :class="{ 'scale-0': isPressed }"
     >
-      <svg
+      <motion.svg
         xmlns="http://www.w3.org/2000/svg"
+        :viewBox="button.svg.viewBox"
         :width="button.svg.width"
         :height="button.svg.height"
-        :viewBox="button.svg.viewBox"
-        :stroke="button.svg.stroke"
-        class="transition-all ease-out duration-300"
+        :animate="{ scale: isDragging && isActive ? 4 : 1 }"
+        :transition="{ duration: 0.3, ease: 'easeInOut' }"
       >
         <path
           :fill="button.svg.fill"
           :fill-rule="button.svg.fillRule"
           :clip-rule="button.svg.clipRule"
           :d="button.svg.path"
-          :style="{
-            transform: isActive ? 'scale(1.5)' : 'scale(1)'
-          }"
         />
-      </svg>
+      </motion.svg>
     </motion.span>
 
     <!-- Pressed State Icon (White X) -->
     <motion.span
-      class="absolute inset-0 flex items-center justify-center transition-all brightness-0 invert scale-0"
-      :class="{ 'scale-100': isPressed }"
+      class="absolute inset-0 flex items-center justify-center brightness-0 invert
+      transition-all scale-0"
+      :class="{ 'scale-100': isPressed || (isDragging && isActive) }"
     >
-      <svg
+      <motion.svg
         xmlns="http://www.w3.org/2000/svg"
+        :viewBox="button.svg.viewBox"
         :width="button.svg.width"
         :height="button.svg.height"
-        :viewBox="button.svg.viewBox"
       >
         <path
           :fill="button.svg.fill"
@@ -52,14 +52,14 @@
           :clip-rule="button.svg.clipRule"
           :d="button.svg.path"
         />
-      </svg>
+      </motion.svg>
     </motion.span>
   </motion.button>
 </template>
 
 <script setup lang="ts">
-import { motion, useMotionValue, useTransform, animate, useMotionValueEvent } from "motion-v"
-import { ref, computed} from "vue";
+import { motion, useMotionValue, useTransform, animate, useMotionValueEvent, time, easeInOut, easeOut } from "motion-v"
+import { ref, computed, watch } from "vue";
 
 const props = defineProps({
   button: {
@@ -76,10 +76,32 @@ const props = defineProps({
   }
 });
 
+const isPressed = ref(false);
+
+const onPointerDown = (e) => {
+  isPressed.value = true
+  e.target.setPointerCapture(e.pointerId)
+}
+
+const onPointerUp = () => {
+  isPressed.value = false
+}
+
+// const scale = useMotionValue(1);
+
+// watch(() => props.isDragging, (isDragging) => {
+//   const targetScale = isDragging ? 10 : 1;
+//   if ((props.cardX > 10 && props.button.name === "Love") || (props.cardX < -10 && props.button.name === "Nope")) {
+//     animate(scale, targetScale, { duration: 0.25, ease: "easeOut" });
+//   }
+  
+//   console.log(`scale is currently ${scale.get()}. I am calling from ${props.button.name}`)
+// });
+
+
 const isActive = computed(() => {
-  return (props.button.name === "Nope" && props.cardX < -10) ||
-         (props.button.name === "Love" && props.cardX > 10);
+  return (props.button.name === "Nope" && props.cardX < 0) ||
+         (props.button.name === "Love" && props.cardX > 0);
 });
 
-const isPressed = ref(false);
 </script>

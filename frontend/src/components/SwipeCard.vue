@@ -37,12 +37,12 @@ useMotionValueEvent(x, "change", (latest) => {
 
 const handleDragStart = () => {
   emit("dragStarted");
-  console.log("DRAG STARTED");
+  // console.log("DRAG STARTED");
 }
 
 const handleDragEnd = () => {
   emit("dragEnded");
-  console.log("DRAG ENDED");
+  // console.log("DRAG ENDED");
 
   const currentX = x.get();
 

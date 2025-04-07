@@ -54,6 +54,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import Button from "@/components/ui/button/Button.vue";
 import TinderButton from "@/components/TinderButton.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
 import SwipeCard from '@/components/SwipeCard.vue';
