@@ -15,9 +15,11 @@
       </div>
     </aside>
     <div class="w-full h-screen bg-black-grey-radial">
-      <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-        <div class="relative rounded-lg shadow-md shadow-slate-600">
-          <div class="grid justify-center items-center w-full h-[667px]">
+      <main
+        class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden"
+      >
+        <div class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
+          <div class="grid justify-center items-center">
             <SwipeCard
               v-for="card in cardData"
               :key="card.id"
@@ -47,7 +49,7 @@
             </div>
           </div>
         </div>
-        <Instructions />
+        <Instructions class="absolute bottom-6" />
       </main>
     </div>
   </div>

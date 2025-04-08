@@ -1,11 +1,11 @@
 <template>
   <section
     ref="wrapper"
-    class="absolute bottom-6 w-full text-[#444d5b] flex justify-center items-center gap-5"
+    class="w-full text-[#444d5b] flex justify-center items-center gap-5"
   >
     <button
       class="h-[24px] bg-slate-300 px-3 rounded-xl text-center text-sm"
-      @click="toggleInstructions"
+      @click="showInstructions = !showInstructions"
     >
       Hide
     </button>
@@ -130,9 +130,5 @@ import { useAutoAnimate } from "@formkit/auto-animate/vue";
 import { ref } from "vue";
 
 const [wrapper] = useAutoAnimate();
-const showInstructions = ref(false);
-
-const toggleInstructions = () => {
-  showInstructions.value = !showInstructions.value;
-};
+const showInstructions = ref(true);
 </script>
