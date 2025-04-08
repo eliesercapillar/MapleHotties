@@ -1,10 +1,10 @@
 <template>
   <section
     ref="wrapper"
-    class="absolute bottom-6 w-full text-black flex justify-center items-center gap-5"
+    class="absolute bottom-6 w-full text-[#444d5b] flex justify-center items-center gap-5"
   >
     <button
-      class="h-[24px] bg-slate-700 px-2 rounded-lg text-center text-sm"
+      class="h-[24px] bg-slate-300 px-3 rounded-xl text-center text-sm"
       @click="toggleInstructions"
     >
       Hide
