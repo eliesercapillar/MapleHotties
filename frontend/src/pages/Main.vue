@@ -49,27 +49,29 @@
                     </div>
                 </div>
                 <div class="mt-5 bg-red-200">
-                    <p>Nope</p>
-                    <p>Like</p>
-                    <p>More Info</p>
-                    <section class="">
-                        <ul class="">
-                        </ul>
-                    </section>                  
+                    <ul>
+                        <li v-for="(instruction, index) in InstructionIcons.data">
+                            <Icon 
+                                :icon="instruction.icon"
+                            />
+                            <span>{{ instruction.text }}</span>
+                        </li>
+                    </ul>             
                 </div>
             </main>
-        
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { motion, useMotionValue, useTransform, animate, useMotionValueEvent } from "motion-v"
+import { motion } from "motion-v"
 import Button from "@/components/ui/button/Button.vue";
+import { Icon } from '@iconify/vue';
+import SwipeCard from '@/components/SwipeCard.vue';
 import TinderButton from "@/components/TinderButton.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
-import SwipeCard from '@/components/SwipeCard.vue';
+import InstructionIcons from "@/data/InstructionIcons.json";
 
 const cardData = ref([
   { id: 1, url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2370&auto=format&fit=crop' },
