@@ -1,6 +1,6 @@
 <template>
     <div class="bg-background min-h-screen flex flex-row">
-        <aside class="min-w-80 max-w-96 w-full">
+        <aside class="min-w-80 max-w-96 w-full border-r-[1px] border-[#21262e]">
             <nav class="bg-red-300 flex items-center justify-evenly py-6 h-[--navbar-h]">
                 <Button>1</Button>
                 <Button>2</Button>
@@ -11,30 +11,41 @@
                     <a href="#" class="ml-6">Matches</a>
                     <a href="#" class="ml-6">Messages</a>
                 </div>
-                <div class="bg-green-400 h-full w-full">
+                <div class="bg-black-grey-radial h-full w-full">
                     
                 </div>
             </div>
         </aside>
-        <div class="w-full h-screen">
+        <div class="w-full h-screen bg-black-grey-radial">
             <main class="w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-                <div class="relative grid justify-center items-center w-full h-[667px]">
-                    <SwipeCard v-for="card in cardData" :key="card.id" 
-                    :card="card" 
-                    :isFront="card.id === cardData[cardData.length - 1].id" 
-                    @remove="removeCard" 
-                    @swiping="handleSwiping" 
-                    @dragStarted="() => isDragging = true"
-                    @dragEnded="() => isDragging = false"
-                    />
-                    <div class="flex justify-evenly items-center">
-                        <TinderButton
-                        v-for="(button, index) in ButtonSVGs.data"
-                        :key="index"
-                        :button="button"
-                        :isDragging = "isDragging"
-                        :cardDirection = "cardDirection"
+                <div class="relative rounded-lg shadow-md shadow-slate-600">
+                    <div class="grid justify-center items-center w-full h-[667px]">
+                        <SwipeCard v-for="card in cardData" :key="card.id" 
+                        :card="card" 
+                        :isFront="card.id === cardData[cardData.length - 1].id" 
+                        @remove="removeCard" 
+                        @swiping="handleSwiping" 
+                        @dragStarted="() => isDragging = true"
+                        @dragEnded="() => isDragging = false"
                         />
+                    </div>
+                    <motion.div class="absolute h-[60%] w-[95%] z-[0]
+                        rounded-lg bg-[#111418]" 
+                        style="bottom: -14px; left: 8px;"
+                        :animate="{ scale: isDragging ? 0.6 : 1 }"
+                        :transition="{ duration: 0.3, ease: 'easeInOut' }"
+                    />
+                    <div class="absolute z-20 isolate w-[375px] bottom-[-2rem] ">
+                        <div class="flex justify-around items-center">
+
+                            <TinderButton
+                            v-for="(button, index) in ButtonSVGs.data"
+                            :key="index"
+                            :button="button"
+                            :isDragging = "isDragging"
+                            :cardDirection = "cardDirection"
+                            />
+                        </div>
                     </div>
                 </div>
                 <div class="mt-5 bg-red-200">
@@ -54,6 +65,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { motion, useMotionValue, useTransform, animate, useMotionValueEvent } from "motion-v"
 import Button from "@/components/ui/button/Button.vue";
 import TinderButton from "@/components/TinderButton.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";

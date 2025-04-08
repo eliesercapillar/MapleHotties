@@ -4,6 +4,9 @@ export default {
     content: ['./index.html', './src/**/*.{ts,js,vue}'],
   theme: {
   	extend: {
+		backgroundImage: {
+			'black-grey-radial': 'radial-gradient(circle, rgba(47,47,55,1) 0%, rgba(0,0,0,1) 100%)',
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

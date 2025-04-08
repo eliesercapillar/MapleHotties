@@ -1,8 +1,10 @@
 <template>
   <motion.div
-    class="relative h-[667px] w-[375px] row-[1] col-[1] hover:cursor-grab active:cursor-grabbing"
-    :class="{'z-[1]': isFront}"
-    :style="{ x, rotate }" :animate="{ scale: isFront ? 1 : 0.95 }"
+    class="relative h-[667px] w-[375px] 
+      row-[1] col-[1] z-10
+      hover:cursor-grab active:cursor-grabbing"
+    :class="{'z-[11]': isFront}"
+    :style="{ x, y, rotate }"
     :drag="isFront ? true : false" dragSnapToOrigin
     @dragStart="handleDragStart"
     @dragEnd="handleDragEnd"
@@ -10,12 +12,24 @@
     <img
       :src="props.card.url"
       alt="SwipeCard"
-      class="h-[667px] w-[375px] rounded-lg object-cover"
+      class="h-[667px] w-[375px] object-cover rounded-lg"
       draggable="false"
     />
+    <!-- Fav Overlay -->
+    <!-- TODO: Add y checking logic -->
+    <motion.div 
+      class="absolute bottom-[2%] "
+      :style="{ opacity: favOpacity }"
+    >
+      <img 
+        class="h-[256px] w-[256px]" 
+        src="/swipecard_like_overlay_24x24.svg"
+        draggable="false"
+      >
+    </motion.div>
     <!-- Like Overlay -->
     <motion.div 
-      class="absolute top-[2%] left-[2%] z-[2] -rotate-12"
+      class="absolute top-[2%] left-[2%] -rotate-12"
       :style="{ opacity: likeOpacity }"
     >
       <img 
@@ -26,7 +40,7 @@
     </motion.div>
     <!-- Nope Overlay -->
     <motion.div 
-      class="absolute top-[2%] right-[2%] z-[2] rotate-12"
+      class="absolute top-[2%] right-[2%] rotate-12"
       :style="{ opacity: nopeOpacity }"
     >
       <img 
@@ -39,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { motion, useMotionValue, useTransform, animate, useMotionValueEvent } from "motion-v"
 
 const props = defineProps<{
@@ -53,7 +68,9 @@ const props = defineProps<{
 const emit = defineEmits(['remove', 'swiping', 'dragStarted', 'dragEnded']);
 
 const x = useMotionValue(0);
+const y = useMotionValue(0);
 const rotate = useTransform(x, [-300, 300], [-30, 30])
+const favOpacity = useTransform(y, [0, -300], [0, 1]);
 const likeOpacity  = useTransform(x, [0, 300], [0, 1])
 const nopeOpacity  = useTransform(x, [-300, 0], [1, 0])
 
