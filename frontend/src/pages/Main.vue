@@ -1,99 +1,134 @@
 <template>
-    <div class="bg-background min-h-screen flex flex-row">
-        <aside class="min-w-80 max-w-96 w-full border-r-[1px] border-[#21262e]">
-            <nav class="bg-red-300 flex items-center justify-evenly py-6 h-[--navbar-h]">
-                <Button>1</Button>
-                <Button>2</Button>
-                <Button>3</Button>
-            </nav>
-            <div class="bg-blue-300 flex flex-col items-start h-[calc(100vh-var(--navbar-h))]">
-                <div class="py-2 flex items-center justify-center">
-                    <a href="#" class="ml-6">Matches</a>
-                    <a href="#" class="ml-6">Messages</a>
-                </div>
-                <div class="bg-black-grey-radial h-full w-full">
-                    
-                </div>
-            </div>
-        </aside>
-        <div class="w-full h-screen bg-black-grey-radial">
-            <main class="w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-                <div class="relative rounded-lg shadow-md shadow-slate-600">
-                    <div class="grid justify-center items-center w-full h-[667px]">
-                        <SwipeCard v-for="card in cardData" :key="card.id" 
-                        :card="card" 
-                        :isFront="card.id === cardData[cardData.length - 1].id" 
-                        @remove="removeCard" 
-                        @swiping="handleSwiping" 
-                        @dragStarted="() => isDragging = true"
-                        @dragEnded="() => isDragging = false"
-                        />
-                    </div>
-                    <motion.div class="absolute h-[60%] w-[95%] z-[0]
-                        rounded-lg bg-[#111418]" 
-                        style="bottom: -14px; left: 8px;"
-                        :animate="{ scale: isDragging ? 0.6 : 1 }"
-                        :transition="{ duration: 0.3, ease: 'easeInOut' }"
-                    />
-                    <div class="absolute z-20 isolate w-[375px] bottom-[-2rem] ">
-                        <div class="flex justify-around items-center">
-
-                            <TinderButton
-                            v-for="(button, index) in ButtonSVGs.data"
-                            :key="index"
-                            :button="button"
-                            :isDragging = "isDragging"
-                            :cardDirection = "cardDirection"
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-5 bg-red-200">
-                    <ul>
-                        <li v-for="(instruction, index) in InstructionIcons.data">
-                            <Icon 
-                                :icon="instruction.icon"
-                            />
-                            <span>{{ instruction.text }}</span>
-                        </li>
-                    </ul>             
-                </div>
-            </main>
+  <div class="bg-background min-h-screen flex flex-row">
+    <aside class="min-w-80 max-w-96 w-full border-r-[1px] border-[#21262e]">
+      <nav class="bg-red-300 flex items-center justify-evenly py-6 h-[--navbar-h]">
+        <Button>1</Button>
+        <Button>2</Button>
+        <Button>3</Button>
+      </nav>
+      <div class="bg-blue-300 flex flex-col items-start h-[calc(100vh-var(--navbar-h))]">
+        <div class="py-2 flex items-center justify-center">
+          <a href="#" class="ml-6">Matches</a>
+          <a href="#" class="ml-6">Messages</a>
         </div>
+        <div class="bg-black-grey-radial h-full w-full"></div>
+      </div>
+    </aside>
+    <div class="w-full h-screen bg-black-grey-radial">
+      <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
+        <div class="relative rounded-lg shadow-md shadow-slate-600">
+          <div class="grid justify-center items-center w-full h-[667px]">
+            <SwipeCard
+              v-for="card in cardData"
+              :key="card.id"
+              :card="card"
+              :isFront="card.id === cardData[cardData.length - 1].id"
+              @remove="removeCard"
+              @swiping="handleSwiping"
+              @dragStarted="() => (isDragging = true)"
+              @dragEnded="() => (isDragging = false)"
+            />
+          </div>
+          <motion.div
+            class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
+            style="bottom: -14px; left: 8px"
+            :animate="{ scale: isDragging ? 0.6 : 1 }"
+            :transition="{ duration: 0.3, ease: 'easeInOut' }"
+          />
+          <div class="absolute z-20 isolate w-[375px] bottom-[-2rem]">
+            <div class="flex justify-around items-center">
+              <TinderButton
+                v-for="(button, index) in ButtonSVGs.data"
+                :key="index"
+                :button="button"
+                :isDragging="isDragging"
+                :cardDirection="cardDirection"
+              />
+            </div>
+          </div>
+        </div>
+        <Instructions />
+      </main>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { motion } from "motion-v"
+import { motion } from "motion-v";
 import Button from "@/components/ui/button/Button.vue";
-import { Icon } from '@iconify/vue';
-import SwipeCard from '@/components/SwipeCard.vue';
+import Instructions from "@/components/Instructions.vue";
+import { Icon } from "@iconify/vue";
+import SwipeCard from "@/components/SwipeCard.vue";
 import TinderButton from "@/components/TinderButton.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
 import InstructionIcons from "@/data/InstructionIcons.json";
 
 const cardData = ref([
-  { id: 1, url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2370&auto=format&fit=crop' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1512374382149-233c42b6a83b?q=80&w=2235&auto=format&fit=crop' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=2342&auto=format&fit=crop' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 5, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 6, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 7, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 8, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 9, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 10, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
-  { id: 11, url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop' },
+  {
+    id: 1,
+    url:
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2370&auto=format&fit=crop",
+  },
+  {
+    id: 2,
+    url:
+      "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?q=80&w=2235&auto=format&fit=crop",
+  },
+  {
+    id: 3,
+    url:
+      "https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=2342&auto=format&fit=crop",
+  },
+  {
+    id: 4,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 5,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 6,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 7,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 8,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 9,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 10,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
+  {
+    id: 11,
+    url:
+      "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2224&auto=format&fit=crop",
+  },
 ]);
 
 const isDragging = ref(false);
 
 const cardDirection = ref<string>("");
-const handleSwiping = (x: number) => { 
-    if (x > 20)       cardDirection.value = "right";
-    else if (x < -20) cardDirection.value = "left";
-    else              cardDirection.value = "";
+const handleSwiping = (x: number) => {
+  if (x > 20) cardDirection.value = "right";
+  else if (x < -20) cardDirection.value = "left";
+  else cardDirection.value = "";
 };
 
 const removeCard = (id) => {
