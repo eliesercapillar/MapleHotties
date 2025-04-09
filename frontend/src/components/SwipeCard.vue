@@ -58,7 +58,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import {
   motion,
   useMotionValue,
@@ -80,21 +79,51 @@ const emit = defineEmits(["remove", "swiping", "dragStarted", "dragEnded"]);
 const x = useMotionValue(0);
 const y = useMotionValue(0);
 const rotate = useTransform(x, [-300, 300], [-30, 30]);
-const likeOpacity = useTransform(x, [0, 300], [0, 1]);
-const nopeOpacity = useTransform(x, [-300, 0], [1, 0]);
+
+function mapRange(value: number, inMin: number, inMax: number, outMin = 0, outMax = 1) {
+  const ratio = (value - inMin) / (inMax - inMin);
+  return Math.min(outMax, Math.max(outMin, ratio * (outMax - outMin) + outMin));
+}
+
+const likeOpacity = useTransform([x, y], (values: number[]) => {
+  const currentX = values[0];
+  const currentY = values[1];
+  const xThreshold = 150;
+  const yThreshold = 0;
+
+  const isCentered = Math.abs(currentX) < xThreshold;
+  const isSwipingUp = currentY < yThreshold;
+
+  return isSwipingUp && isCentered ? 0 : mapRange(currentX, 0, 300);
+});
+
+const nopeOpacity = useTransform([x, y], (values: number[]) => {
+  const currentX = values[0];
+  const currentY = values[1];
+  const xThreshold = 150;
+  const yThreshold = 0;
+
+  const isCentered = Math.abs(currentX) < xThreshold;
+  const isSwipingUp = currentY < yThreshold;
+
+  return isSwipingUp && isCentered ? 0 : mapRange(currentX, 0, -300);
+});
+
 const favOpacity = useTransform([x, y], (values: number[]) => {
   const currentX = values[0];
   const currentY = values[1];
+  const xThreshold = 150;
+  const yThreshold = 0;
 
-  const isCentered = Math.abs(currentX) < 150;
-  const isSwipingUp = currentY < 0;
+  const isCentered = Math.abs(currentX) < xThreshold;
+  const isSwipingUp = currentY < yThreshold;
 
-  if (isCentered && isSwipingUp) {
-    return Math.min(1, Math.abs(currentY) / 300);
-  }
+  const targetOpacity = isCentered && isSwipingUp ? mapRange(currentY, 0, -300) : 0;
 
-  return 0;
+  // return isCentered && isSwipingUp ? mapRange(currentY, 0, -300) : 0;
+  return targetOpacity;
 });
+
 
 useMotionValueEvent(x, "change", (latest) => {
   emit("swiping", latest);
