@@ -22,7 +22,10 @@
       draggable="false"/>
     <!-- Fav Overlay -->
     <!-- TODO: Add y checking logic -->
-    <motion.div class="absolute bottom-[2%]" :style="{ opacity: favOpacity }">
+    <motion.div 
+      class="absolute bottom-[2%]" 
+      :style="{ opacity: favOpacity }"
+    >
       <img
         class="h-[256px] w-[256px]"
         src="/swipecard_like_overlay_24x24.svg"
@@ -55,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref } from "vue";
 import {
   motion,
   useMotionValue,
@@ -77,13 +80,30 @@ const emit = defineEmits(["remove", "swiping", "dragStarted", "dragEnded"]);
 const x = useMotionValue(0);
 const y = useMotionValue(0);
 const rotate = useTransform(x, [-300, 300], [-30, 30]);
-const favOpacity = useTransform(y, [0, -300], [0, 1]);
-const likeOpacity = useTransform(x, [150, 300], [0, 1]);
-const nopeOpacity = useTransform(x, [-300, -150], [1, 0]);
+const likeOpacity = useTransform(x, [0, 300], [0, 1]);
+const nopeOpacity = useTransform(x, [-300, 0], [1, 0]);
+const favOpacity = useTransform([x, y], (values: number[]) => {
+  const currentX = values[0];
+  const currentY = values[1];
+
+  const isCentered = Math.abs(currentX) < 150;
+  const isSwipingUp = currentY < 0;
+
+  if (isCentered && isSwipingUp) {
+    return Math.min(1, Math.abs(currentY) / 300);
+  }
+
+  return 0;
+});
 
 useMotionValueEvent(x, "change", (latest) => {
   emit("swiping", latest);
 });
+
+useMotionValueEvent(y, "change", (latest) => {
+  emit("swiping", latest);
+});
+
 
 const handleDragStart = () => {
   emit("dragStarted");
@@ -94,18 +114,20 @@ const handleDragEnd = () => {
 
   const currentX = x.get();
   const currentY = y.get();
-  console.log(`X is: ${currentX}\nY is: ${currentY}`)
+  const isCentered = Math.abs(currentX) < 150;
+  const xThresholdHit = currentX < -300;
+  const yThresholdHit = currentY < -300;
 
-  if (Math.abs(currentX) < 150 && currentY < -300) {
-    const targetY = -window.innerHeight; // Move beyond viewport
-
+  if (isCentered && yThresholdHit) {
+    const targetY = -window.innerHeight; // Move outside viewport
+    
     animate(y, targetY, {
       duration: 0.15,
       onComplete: () => emit("remove", props.card.id),
     });
   } 
-  else if (Math.abs(currentX) > 300) {
-    const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move beyond viewport
+  else if (xThresholdHit) {
+    const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move outside viewport
 
     animate(x, targetX, {
       duration: 0.15,
