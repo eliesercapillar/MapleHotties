@@ -14,6 +14,12 @@
       class="h-[667px] w-[375px] object-cover rounded-lg select-none"
       draggable="false"
     />
+    <img 
+      src="/rockoguy_up5.png"
+      alt="Player Character"
+      class="absolute top-[50%] left-[50%] scale-[1]"
+      style="transform: translate(-50%, -50%); "
+      draggable="false"/>
     <!-- Fav Overlay -->
     <!-- TODO: Add y checking logic -->
     <motion.div class="absolute bottom-[2%]" :style="{ opacity: favOpacity }">
@@ -72,8 +78,8 @@ const x = useMotionValue(0);
 const y = useMotionValue(0);
 const rotate = useTransform(x, [-300, 300], [-30, 30]);
 const favOpacity = useTransform(y, [0, -300], [0, 1]);
-const likeOpacity = useTransform(x, [0, 300], [0, 1]);
-const nopeOpacity = useTransform(x, [-300, 0], [1, 0]);
+const likeOpacity = useTransform(x, [150, 300], [0, 1]);
+const nopeOpacity = useTransform(x, [-300, -150], [1, 0]);
 
 useMotionValueEvent(x, "change", (latest) => {
   emit("swiping", latest);
@@ -87,8 +93,18 @@ const handleDragEnd = () => {
   emit("dragEnded");
 
   const currentX = x.get();
+  const currentY = y.get();
+  console.log(`X is: ${currentX}\nY is: ${currentY}`)
 
-  if (Math.abs(currentX) > 300) {
+  if (Math.abs(currentX) < 150 && currentY < -300) {
+    const targetY = -window.innerHeight; // Move beyond viewport
+
+    animate(y, targetY, {
+      duration: 0.15,
+      onComplete: () => emit("remove", props.card.id),
+    });
+  } 
+  else if (Math.abs(currentX) > 300) {
     const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move beyond viewport
 
     animate(x, targetX, {
