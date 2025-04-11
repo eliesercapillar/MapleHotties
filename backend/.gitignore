@@ -1,0 +1,48 @@
+## Build artifacts
+bin/
+obj/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Visual Studio workspace
+.vs/
+
+## VS Code
+.vscode/
+
+## Rider
+.idea/
+
+## MacOS files
+.DS_Store
+
+## DotNet tools
+*.dbmdl
+*.bak
+
+## Logs
+*.log
+
+## Secrets (if using `secrets.json` for local config)
+secrets.json
+
+## Docker
+**/Dockerfile
+**/docker-compose*.yml
+**/.dockerignore
+
+## Published output
+publish/
+*.publish.xml
+
+## Entity Framework
+Migrations/
+
+## Optional:
+# Ignore appsettings.* unless you have environment-specific overrides
+# Be cautious and include appsettings.Development.json only if it contains no secrets
+appsettings.Development.json

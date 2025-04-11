@@ -97,7 +97,8 @@ const onPointerUp = () => {
 
 const isActive = computed(() => {
   return (props.button.name === "Nope" && props.cardDirection === "left") ||
-         (props.button.name === "Love" && props.cardDirection === "right");
+         (props.button.name === "Love" && props.cardDirection === "right") ||
+         (props.button.name === "Favourite" && props.cardDirection === "up");
 });
 
 </script>

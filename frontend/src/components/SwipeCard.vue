@@ -74,7 +74,7 @@ const props = defineProps<{
   isFront: Boolean;
 }>();
 
-const emit = defineEmits(["remove", "swiping", "dragStarted", "dragEnded"]);
+const emit = defineEmits(["remove", "changeX", "changeY", "dragStarted", "dragEnded"]);
 
 const x = useMotionValue(0);
 const y = useMotionValue(0);
@@ -126,11 +126,11 @@ const favOpacity = useTransform([x, y], (values: number[]) => {
 
 
 useMotionValueEvent(x, "change", (latest) => {
-  emit("swiping", latest);
+  emit("changeX", latest);
 });
 
 useMotionValueEvent(y, "change", (latest) => {
-  emit("swiping", latest);
+  emit("changeY", latest);
 });
 
 

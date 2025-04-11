@@ -24,7 +24,8 @@
               :card="card"
               :isFront="card.id === cardData[cardData.length - 1].id"
               @remove="removeCard"
-              @swiping="handleSwiping"
+              @changeX="handleChangeX"
+              @changey="handleChangeY"
               @dragStarted="() => (isDragging = true)"
               @dragEnded="() => (isDragging = false)"
             />
@@ -109,11 +110,20 @@ const cardData = ref([
 const isDragging = ref(false);
 
 const cardDirection = ref<string>("");
-const handleSwiping = (x: number) => {
+const handleChangeX = (x: number) => {
   if (x > 20) cardDirection.value = "right";
   else if (x < -20) cardDirection.value = "left";
   else cardDirection.value = "";
 };
+
+const handleChangeY = (y: number) => {
+  if (y < -20) cardDirection.value = "up";
+  else cardDirection.value = "";
+};
+
+const handleDragStart = () => {
+  
+}
 
 const removeCard = (id) => {
   cardData.value = cardData.value.filter((card) => card.id !== id);
