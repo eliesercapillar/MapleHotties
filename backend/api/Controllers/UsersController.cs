@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using api.Models;
 using api.Data;
+using api.Models.Entities;
 
 namespace api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PlayersController : ControllerBase
+    public class UsersController : ControllerBase
     {
-        private readonly PlayerDbContext _context;
+        private readonly MapleTinderDbContext _context;
 
-        public PlayersController(PlayerDbContext context)
+        public UsersController(MapleTinderDbContext context)
         {
             _context = context;
         }
@@ -25,15 +25,15 @@ namespace api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPlayers()
         {
-            var players = await _context.Players.ToListAsync();
+            var players = await _context.Users.ToListAsync();
             return Ok(players);
         }
 
         // GET: api/Players/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Player>> GetPlayer(int id)
+        public async Task<ActionResult<User>> GetPlayer(int id)
         {
-            var player = await _context.Players.FindAsync(id);
+            var player = await _context.Users.FindAsync(id);
 
             if (player == null) return NotFound(null);
 
@@ -43,7 +43,7 @@ namespace api.Controllers
         // PUT: api/Players/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPlayer(int id, Player player)
+        public async Task<IActionResult> PutPlayer(int id, User player)
         {
             if (id != player.Id)
             {
@@ -74,9 +74,9 @@ namespace api.Controllers
         // POST: api/Players
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Player>> PostPlayer(Player player)
+        public async Task<ActionResult<User>> PostPlayer(User player)
         {
-            _context.Players.Add(player);
+            _context.Users.Add(player);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
@@ -86,13 +86,13 @@ namespace api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlayer(int id)
         {
-            var player = await _context.Players.FindAsync(id);
+            var player = await _context.Users.FindAsync(id);
             if (player == null)
             {
                 return NotFound();
             }
 
-            _context.Players.Remove(player);
+            _context.Users.Remove(player);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -100,7 +100,7 @@ namespace api.Controllers
 
         private bool PlayerExists(int id)
         {
-            return _context.Players.Any(e => e.Id == id);
+            return _context.Users.Any(e => e.Id == id);
         }
     }
 }
