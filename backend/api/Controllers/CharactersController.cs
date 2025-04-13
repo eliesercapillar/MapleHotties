@@ -25,14 +25,14 @@ namespace api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Character>>> GetMapleCharacters()
         {
-            return await _context.MapleCharacters.ToListAsync();
+            return await _context.Characters.ToListAsync();
         }
 
         // GET: api/Characters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Character>> GetCharacter(int id)
         {
-            var character = await _context.MapleCharacters.FindAsync(id);
+            var character = await _context.Characters.FindAsync(id);
 
             if (character == null)
             {
@@ -78,7 +78,7 @@ namespace api.Controllers
         [HttpPost]
         public async Task<ActionResult<Character>> PostCharacter(Character character)
         {
-            _context.MapleCharacters.Add(character);
+            _context.Characters.Add(character);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCharacter", new { id = character.Id }, character);
@@ -88,13 +88,13 @@ namespace api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCharacter(int id)
         {
-            var character = await _context.MapleCharacters.FindAsync(id);
+            var character = await _context.Characters.FindAsync(id);
             if (character == null)
             {
                 return NotFound();
             }
 
-            _context.MapleCharacters.Remove(character);
+            _context.Characters.Remove(character);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,7 +102,7 @@ namespace api.Controllers
 
         private bool CharacterExists(int id)
         {
-            return _context.MapleCharacters.Any(e => e.Id == id);
+            return _context.Characters.Any(e => e.Id == id);
         }
     }
 }

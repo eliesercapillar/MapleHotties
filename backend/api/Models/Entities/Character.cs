@@ -7,9 +7,9 @@ namespace api.Models.Entities
     {   
         public int Id { get; set; }
         [Required]
-        public required string CharacterName { get; set; }
+        public required string Name { get; set; }
         [Required]
-        public required string VisualHash { get; set; } // The hash found in the file names of the sprite images from the Official Maplestory Rankings.
+        public required string Hash { get; set; } // The hash found in the file names of the sprite images from the Official Maplestory Rankings.
         [Required]
         public required int Level { get; set; }
         [Required]

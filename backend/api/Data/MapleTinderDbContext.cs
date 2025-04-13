@@ -10,6 +10,6 @@ namespace api.Data
         public MapleTinderDbContext(DbContextOptions<MapleTinderDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Character> MapleCharacters { get; set; }
+        public DbSet<Character> Characters { get; set; }
     }
 }
