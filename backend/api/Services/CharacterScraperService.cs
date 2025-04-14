@@ -1,39 +1,73 @@
 ﻿using api.Data;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace api.Services
 {
-    /// <summary>
-    /// Scrapes the Official Maplestory Rankings site for the latest  
-    /// </summary>
     public class CharacterScraperService : BackgroundService
     {
-        private readonly IServiceProvider _services;
         private readonly ILogger<CharacterScraperService> _logger;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly TimeSpan _period = TimeSpan.FromDays(7); // Run once a week
+        private int _maxPagesToScrape = 50000; // Default value
 
-        public CharacterScraperService(IServiceProvider services, ILogger<CharacterScraperService> logger)
+        public CharacterScraperService(ILogger<CharacterScraperService> logger, IServiceProvider serviceProvider)
         {
-            _services = services;
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            _logger.LogInformation("Character Scraper Service is starting.");
+
+            // Initial delay before first run to allow application to fully start
+            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+
+            using var timer = new PeriodicTimer(_period);
+
+            // Initial run
+            await DoWorkAsync(stoppingToken);
+
+            // Continue running on schedule
+            while (await timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
             {
-                using (var scope = _services.CreateScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<MapleTinderDbContext>();
-
-                    // TODO: Put your scraping logic here
-                    // Use HttpClient + HtmlAgilityPack to scrape the MapleStory ranking site
-                    // Then use dbContext.MapleCharacters.Add/Update to persist
-
-                    _logger.LogInformation("Character scraping done at: {time}", DateTimeOffset.Now);
-                }
-
-                // Run every 6 hours (adjust as needed)
-                await Task.Delay(TimeSpan.FromHours(6), stoppingToken);
+                await DoWorkAsync(stoppingToken);
             }
+        }
+
+        private async Task DoWorkAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("Character Scraper Service is running at: {time}", DateTimeOffset.Now);
+
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var scraper = scope.ServiceProvider.GetRequiredService<CharacterScraper>();
+
+                _logger.LogInformation("Starting scheduled character scraping. Max pages: {maxPages}", _maxPagesToScrape);
+
+                var characters = await scraper.ScrapeAllCharactersAsync(_maxPagesToScrape);
+                await scraper.SaveCharactersToDatabase(characters);
+
+                _logger.LogInformation("Scheduled character scraping completed. Characters processed: {count}",
+                    characters is ICollection<api.Models.Entities.Character> collection ? collection.Count : "unknown");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during scheduled character scraping");
+            }
+        }
+
+        // Method to allow dynamic configuration changes
+        public void UpdateConfiguration(int maxPages)
+        {
+            _maxPagesToScrape = maxPages;
+            _logger.LogInformation("Character Scraper configuration updated. Max pages: {maxPages}", maxPages);
         }
     }
 }

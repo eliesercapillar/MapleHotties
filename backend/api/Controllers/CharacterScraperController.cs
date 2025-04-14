@@ -12,13 +12,15 @@ namespace api.Controllers
     public class CharacterScraperController : ControllerBase
     {
         private readonly CharacterScraper _scraper;
+        private static Dictionary<Guid, Task> _runningJobs = new();
 
         public CharacterScraperController(CharacterScraper scraper)
         {
             _scraper = scraper;
         }
 
-        [HttpGet("scrape/character/{characterName}")]
+        // POST: api/CharacterScraper/scrape/character/ROCKOGUY
+        [HttpPost("scrape/character/{characterName}")]
         public async Task<ActionResult<Character>> ScrapeCharacter(string characterName)
         {
             try
@@ -33,11 +35,13 @@ namespace api.Controllers
             }
         }
 
-        [HttpGet("scrape/all")]
-        public async Task<ActionResult> ScrapeAllCharacters([FromQuery] int maxPages = 50000)
+        // POST: api/CharacterScraper/scrape/all?maxPages=50000
+        [HttpPost("scrape/all")]
+        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000)
         {
-            // Start a background task for large scraping operations
-            _ = Task.Run(async () =>
+            var jobId = Guid.NewGuid();
+
+            _runningJobs[jobId] = Task.Run(async () =>
             {
                 try
                 {
@@ -46,22 +50,36 @@ namespace api.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Log the error
-                    Console.WriteLine($"Error in background scraping task: {ex}");
+                    Console.WriteLine($"Error in job {jobId}: {ex}");
+                }
+                finally
+                {
+                    // Clean up completed job
+                    _runningJobs.Remove(jobId);
                 }
             });
 
-            return Accepted("Scraping process started in the background.");
+            return Accepted(new
+            {
+                message = "Scraping all process started",
+                jobId = jobId
+            });
         }
 
-        [HttpGet("scrape/status")]
-        public ActionResult GetScrapingStatus()
+        [HttpGet("scrape/status/{jobId}")]
+        public ActionResult GetJobStatus(Guid jobId)
         {
-            // This would be enhanced with a real status tracking system
+            if (!_runningJobs.TryGetValue(jobId, out var job))
+            {
+                return NotFound("Job not found or already completed");
+            }
+
             return Ok(new
             {
-                Status = "Not implemented yet",
-                Message = "Status tracking will be implemented in future versions"
+                jobId = jobId,
+                status = job.IsCompleted ? "Completed" :
+                         job.IsFaulted ? "Failed" :
+                         job.IsCanceled ? "Canceled" : "Running"
             });
         }
     }

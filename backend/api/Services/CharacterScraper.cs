@@ -25,13 +25,30 @@ public class CharacterScraper
     public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000)
     {
         var characters = new List<Character>();
+
         using var playwright = await Playwright.CreateAsync();
-        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        var browserType = playwright.Chromium;
+
+        // Launch browser with specific executable path if we're running in Docker
+        var browserTypeLaunchOptions = new BrowserTypeLaunchOptions
         {
             Headless = true,
-            // Add some performance options to handle large-scale scraping
+            // Some performance options to handle large-scale scraping
             Args = new[] { "--disable-gpu", "--disable-dev-shm-usage", "--disable-setuid-sandbox", "--no-sandbox" }
-        });
+        };
+
+        // Check if we're in Docker by looking for a common Docker environment variable
+        // or checking for the existence of a Docker-specific file
+        bool isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
+                        || System.IO.File.Exists("/.dockerenv");
+
+        if (isDocker)
+        {
+            // Set environment variables for Playwright in Docker
+            Environment.SetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH", "/app/.cache/ms-playwright");
+        }
+
+        await using var browser = await browserType.LaunchAsync(browserTypeLaunchOptions);
 
         var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
@@ -118,7 +135,26 @@ public class CharacterScraper
     public async Task<Character> ScrapeCharacterAsync(string characterName)
     {
         using var playwright = await Playwright.CreateAsync();
-        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        var browserType = playwright.Chromium;
+
+        // Launch browser with specific executable path if we're running in Docker
+        var browserTypeLaunchOptions = new BrowserTypeLaunchOptions
+        {
+            Headless = true
+        };
+
+        // Check if we're in Docker by looking for a common Docker environment variable
+        // or checking for the existence of a Docker-specific file
+        bool isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
+                        || System.IO.File.Exists("/.dockerenv");
+
+        if (isDocker)
+        {
+            // Set environment variables for Playwright in Docker
+            Environment.SetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH", "/app/.cache/ms-playwright");
+        }
+
+        await using var browser = await browserType.LaunchAsync(browserTypeLaunchOptions);
         var page = await browser.NewPageAsync();
 
         var url = $"https://www.nexon.com/maplestory/rankings/north-america/overall-ranking/legendary?world_type=both&search_type=character-name&search={characterName}";

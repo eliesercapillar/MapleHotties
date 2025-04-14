@@ -30,11 +30,6 @@ obj/
 ## Secrets (if using `secrets.json` for local config)
 secrets.json
 
-## Docker
-**/Dockerfile
-**/docker-compose*.yml
-**/.dockerignore
-
 ## Published output
 publish/
 *.publish.xml
