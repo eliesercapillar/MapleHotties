@@ -39,3 +39,18 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+//add argument when calling docker run or include commandLineArgs in launchSettings.json.
+//Or just leave as it always try to install
+if (args.Length > 0 && args[0] == "-i")
+    PerformInitialPlaywrightInstall();
+
+
+static void PerformInitialPlaywrightInstall()
+{
+    var exitCode = Microsoft.Playwright.Program.Main(new[] { "install", "--with-deps", "chromium" });
+    if (exitCode != 0)
+    {
+        throw new Exception($"Playwright exited with code {exitCode}");
+    }
+}

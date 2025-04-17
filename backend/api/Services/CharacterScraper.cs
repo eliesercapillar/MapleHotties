@@ -1,15 +1,9 @@
 ﻿using api.Data;
 using api.Models.Entities;
 using Microsoft.Playwright;
-using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 public class CharacterScraper
 {

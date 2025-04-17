@@ -5,8 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>d79dde54-2107-489b-9dbc-dc1068af1a1a</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<PlaywrightPlatform>Linux</PlaywrightPlatform>
+	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+	<Dockerfile>Dockerfile</Dockerfile>
   </PropertyGroup>
 
   <ItemGroup>
