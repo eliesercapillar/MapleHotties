@@ -1,5 +1,4 @@
-using api.Data;
-using api.Services;
+using MapleTinder.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -15,7 +14,6 @@ builder.Configuration
 // Add services to the container.
 
 builder.Services.AddControllers();
-
 builder.Services.AddDbContext<MapleTinderDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace api.Models.Entities
+namespace MapleTinder.Shared.Models.Entities
 {
     public class Character
     {   

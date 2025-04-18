@@ -1,5 +1,5 @@
-﻿using api.Data;
-using api.Models.Entities;
+﻿using MapleTinder.Shared.Data;
+using MapleTinder.Shared.Models.Entities;
 using Microsoft.Playwright;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;

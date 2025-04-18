@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 using System;
-using api.Models.Entities;
+using MapleTinder.Shared.Models.Entities;
 
-namespace api.Data
+namespace MapleTinder.Shared.Data
 {
     public class MapleTinderDbContext : DbContext
     {

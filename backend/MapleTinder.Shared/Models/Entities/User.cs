@@ -1,4 +1,4 @@
-﻿namespace api.Models.Entities
+﻿namespace MapleTinder.Shared.Models.Entities
 {
     public class User
     {

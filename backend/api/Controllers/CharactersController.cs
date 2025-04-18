@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using api.Data;
-using api.Models.Entities;
+using MapleTinder.Shared.Data;
+using MapleTinder.Shared.Models.Entities;
 
 namespace api.Controllers
 {

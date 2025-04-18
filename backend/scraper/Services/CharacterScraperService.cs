@@ -1,4 +1,4 @@
-﻿namespace api.Services
+﻿namespace scraper.Services
 {
     public class CharacterScraperService : BackgroundService
     {
