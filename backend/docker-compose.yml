@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./api
+    ports:
+      - "5051:8080"
+    networks:
+      - maple-net
+    depends_on:
+      - scraper
+
+  scraper:
+    build:
+      context: ./scraper
+    networks:
+      - maple-net
+
+networks:
+  maple-net:
+    driver: bridge
