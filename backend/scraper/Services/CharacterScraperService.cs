@@ -47,7 +47,7 @@
                 await scraper.SaveCharactersToDatabase(characters);
 
                 _logger.LogInformation("Scheduled character scraping completed. Characters processed: {count}",
-                    characters is ICollection<api.Models.Entities.Character> collection ? collection.Count : "unknown");
+                    characters is ICollection<MapleTinder.Shared.Models.Entities.Character> collection ? collection.Count : "unknown");
             }
             catch (Exception ex)
             {

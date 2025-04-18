@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MapleTinder.Shared.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using api.Interfaces;
 
 namespace api.Controllers
 {
@@ -11,22 +12,19 @@ namespace api.Controllers
     [Route("api/[controller]")]
     public class CharacterScraperController : ControllerBase
     {
-        private readonly CharacterScraper _scraper;
-        private static Dictionary<Guid, Task> _runningJobs = new();
+        private readonly ICharacterScraperClient _scraperClient;
 
-        public CharacterScraperController(CharacterScraper scraper)
+        public CharacterScraperController(ICharacterScraperClient scraperClient)
         {
-            _scraper = scraper;
+            _scraperClient = scraperClient;
         }
 
-        // POST: api/CharacterScraper/scrape/character/ROCKOGUY
         [HttpPost("scrape/character/{characterName}")]
         public async Task<ActionResult<Character>> ScrapeCharacter(string characterName)
         {
             try
             {
-                var character = await _scraper.ScrapeCharacterAsync(characterName);
-                await _scraper.SaveCharacterToDatabase(character);
+                var character = await _scraperClient.ScrapeCharacterAsync(characterName);
                 return Ok(character);
             }
             catch (Exception ex)
@@ -35,52 +33,18 @@ namespace api.Controllers
             }
         }
 
-        // POST: api/CharacterScraper/scrape/all?maxPages=50000
         [HttpPost("scrape/all")]
-        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000)
+        public async Task<ActionResult> ScrapeAllCharacters([FromQuery] int maxPages = 50000)
         {
-            var jobId = Guid.NewGuid();
-
-            _runningJobs[jobId] = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    var characters = await _scraper.ScrapeAllCharactersAsync(maxPages);
-                    await _scraper.SaveCharactersToDatabase(characters);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error in job {jobId}: {ex}");
-                }
-                finally
-                {
-                    // Clean up completed job
-                    _runningJobs.Remove(jobId);
-                }
-            });
-
-            return Accepted(new
-            {
-                message = "Scraping all process started",
-                jobId = jobId
-            });
-        }
-
-        [HttpGet("scrape/status/{jobId}")]
-        public ActionResult GetJobStatus(Guid jobId)
-        {
-            if (!_runningJobs.TryGetValue(jobId, out var job))
-            {
-                return NotFound("Job not found or already completed");
+                await _scraperClient.TriggerScrapeAllAsync(maxPages);
+                return Accepted(new { message = "Scraping all process started" });
             }
-
-            return Ok(new
+            catch (Exception ex)
             {
-                jobId = jobId,
-                status = job.IsCompleted ? "Completed" :
-                         job.IsFaulted ? "Failed" :
-                         job.IsCanceled ? "Canceled" : "Running"
-            });
+                return BadRequest($"Error: {ex.Message}");
+            }
         }
     }
 }

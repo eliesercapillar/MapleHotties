@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.52.0-noble
+﻿FROM mcr.microsoft.com/playwright:v1.51.0-noble
 
 # Install .NET SDK
 RUN apt-get update && apt-get install -y wget apt-transport-https software-properties-common && \
@@ -7,13 +7,16 @@ RUN apt-get update && apt-get install -y wget apt-transport-https software-prope
     apt-get update && apt-get install -y dotnet-sdk-8.0 && \
     rm -rf /var/lib/apt/lists/*
 
-# Set up app directory
 WORKDIR /app
 
-# Copy and build
-COPY . . 
-RUN dotnet publish "scraper.csproj" -c Release -o /app/publish
+# 👇 Copy both scraper and shared project folders into the build context
+COPY ./scraper/ ./scraper/
+COPY ./MapleTinder.Shared/ ./MapleTinder.Shared/
 
-# Set working dir and entrypoint
+WORKDIR /app/scraper
+
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
+
 WORKDIR /app/publish
 ENTRYPOINT ["dotnet", "scraper.dll"]
