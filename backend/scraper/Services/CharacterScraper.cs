@@ -8,48 +8,107 @@ using Microsoft.EntityFrameworkCore;
 public class CharacterScraper
 {
     private readonly IServiceProvider _serviceProvider;
+    private static Lazy<Task<IBrowser>> _lazyBrowserInstance = new(() => InitializeBrowserOnceAsync());
 
     public CharacterScraper(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    #region Scraping
+    #region Playwright Initialization/Disposal
 
-    public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000)
+    private static async Task<IBrowser> InitializeBrowserOnceAsync()
     {
-        var characters = new List<Character>();
-
-        using var playwright = await Playwright.CreateAsync();
+        var playwright = await Playwright.CreateAsync();
         var browserType = playwright.Chromium;
 
-        // Launch browser with specific executable path if we're running in Docker
-        var browserTypeLaunchOptions = new BrowserTypeLaunchOptions
-        {
-            Headless = true,
-            // Some performance options to handle large-scale scraping
-            Args = new[] { "--disable-gpu", "--disable-dev-shm-usage", "--disable-setuid-sandbox", "--no-sandbox" }
-        };
-
-        // Check if we're in Docker by looking for a common Docker environment variable
-        // or checking for the existence of a Docker-specific file
         bool isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
                         || System.IO.File.Exists("/.dockerenv");
 
         if (isDocker)
         {
-            // Set environment variables for Playwright in Docker
             Environment.SetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH", "/app/.cache/ms-playwright");
         }
 
-        await using var browser = await browserType.LaunchAsync(browserTypeLaunchOptions);
+        return await browserType.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true,
+            Args = new[] { "--disable-gpu", "--disable-dev-shm-usage", "--disable-setuid-sandbox", "--no-sandbox" }
+        });
+    }
 
+    public static async Task DisposeBrowserAsync()
+    {
+        if (_lazyBrowserInstance.IsValueCreated)
+        {
+            var browser = await _lazyBrowserInstance.Value;
+            await browser.CloseAsync();
+        }
+    }
+
+    #endregion Playwright Initialization/Disposal
+
+    #region Scraping
+
+    public async Task<Character> ScrapeCharacterAsync(string characterName)
+    {
+        Console.WriteLine("Starting ScrapeCHARACTER");
+
+        Console.WriteLine("Getting Browser Instance");
+        var browser = await _lazyBrowserInstance.Value;
+
+        Console.WriteLine("Setting Browser Context");
         var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
             ViewportSize = new ViewportSize { Width = 1920, Height = 1080 }
         });
 
+        Console.WriteLine("Creating new Browser Page");
+        var page = await browser.NewPageAsync();
+
+        Console.WriteLine("Going to URL");
+        var url = $"https://www.nexon.com/maplestory/rankings/north-america/overall-ranking/legendary?world_type=both&search_type=character-name&search={characterName}";
+        await page.GotoAsync(url);
+
+        Console.WriteLine("Locating Table element in DOM");
+        // Wait for the page to load and JavaScript to finish rendering (adjust the selector as needed)
+        var tableLocator = page.Locator("table[data-section-name='Contents']");
+        await tableLocator.WaitForAsync();
+
+        Console.WriteLine("Retrieving Number of rows in DOM");
+        // Check if we found any results
+        var rowLocator = tableLocator.Locator("tbody tr");
+
+        if (await rowLocator.CountAsync() == 0)
+        {
+            throw new Exception($"Character '{characterName}' not found in rankings.");
+        }
+
+        Console.WriteLine("Processing Row");
+        // Parse the first result (you might want to refine this if there are multiple matches)
+        var character = await ParseCharacterFromRow(rowLocator.First);
+
+        await page.CloseAsync();
+        return character;
+    }
+
+    public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000)
+    {
+        Console.WriteLine("Starting ScrapeALL");
+        var characters = new List<Character>();
+
+        Console.WriteLine("Getting Browser Instance");
+        var browser = await _lazyBrowserInstance.Value;
+
+        Console.WriteLine("Setting Browser Context");
+        var context = await browser.NewContextAsync(new BrowserNewContextOptions
+        {
+            UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
+            ViewportSize = new ViewportSize { Width = 1920, Height = 1080 }
+        });
+
+        Console.WriteLine("Creating new Browser Page");
         var page = await context.NewPageAsync();
 
         // Set a reasonable timeout for page navigation and elements
@@ -61,13 +120,16 @@ public class CharacterScraper
         {
             try
             {
+                Console.WriteLine("Going to URL");
                 string url = $"https://www.nexon.com/maplestory/rankings/north-america/overall-ranking/legendary?world_type=both&page_index={pageIndex}";
                 await page.GotoAsync(url);
 
+                Console.WriteLine("Locating Table element in DOM");
                 // Wait for the table to be loaded
                 var tableLocator = page.Locator("table[data-section-name='Contents']");
                 await tableLocator.WaitForAsync();
 
+                Console.WriteLine("Retrieving Number of rows in DOM");
                 // Get all rows in the table
                 var rowsLocator = tableLocator.Locator("tbody tr");
                 var rowCount = await rowsLocator.CountAsync();
@@ -85,6 +147,7 @@ public class CharacterScraper
                 {
                     try
                     {
+                        Console.WriteLine("Processing Row " + i);
                         var rowLocator = rowsLocator.Nth(i);
                         var character = await ParseCharacterFromRow(rowLocator);
                         characters.Add(character);
@@ -121,58 +184,15 @@ public class CharacterScraper
             }
         }
 
-        await browser.CloseAsync();
         Console.WriteLine($"Scraping complete. Total characters scraped: {characters.Count}");
+
+        await context.CloseAsync();
         return characters;
     }
 
-    public async Task<Character> ScrapeCharacterAsync(string characterName)
-    {
-        using var playwright = await Playwright.CreateAsync();
-        var browserType = playwright.Chromium;
+    #endregion Scraping
 
-        // Launch browser with specific executable path if we're running in Docker
-        var browserTypeLaunchOptions = new BrowserTypeLaunchOptions
-        {
-            Headless = true
-        };
-
-        // Check if we're in Docker by looking for a common Docker environment variable
-        // or checking for the existence of a Docker-specific file
-        bool isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
-                        || System.IO.File.Exists("/.dockerenv");
-
-        if (isDocker)
-        {
-            // Set environment variables for Playwright in Docker
-            Environment.SetEnvironmentVariable("PLAYWRIGHT_BROWSERS_PATH", "/app/.cache/ms-playwright");
-        }
-
-        await using var browser = await browserType.LaunchAsync(browserTypeLaunchOptions);
-        var page = await browser.NewPageAsync();
-
-        var url = $"https://www.nexon.com/maplestory/rankings/north-america/overall-ranking/legendary?world_type=both&search_type=character-name&search={characterName}";
-        await page.GotoAsync(url);
-
-        // Wait for the page to load and JavaScript to finish rendering (adjust the selector as needed)
-        var tableLocator = page.Locator("table[data-section-name='Contents']");
-        await tableLocator.WaitForAsync();
-
-        // Check if we found any results
-        var rowLocator = tableLocator.Locator("tbody tr");
-
-        if (await rowLocator.CountAsync() == 0)
-        {
-            await browser.CloseAsync();
-            throw new Exception($"Character '{characterName}' not found in rankings.");
-        }
-
-        // Parse the first result (you might want to refine this if there are multiple matches)
-        var character = await ParseCharacterFromRow(rowLocator.First);
-
-        await browser.CloseAsync();
-        return character;
-    }
+    #region Utils
 
     private async Task<Character> ParseCharacterFromRow(ILocator row)
     {
@@ -231,8 +251,6 @@ public class CharacterScraper
         var match = Regex.Match(url, @"Character\/([^.]+)\.png");
         return match.Success ? match.Groups[1].Value : string.Empty;
     }
-
-    #endregion Scraping
 
     public async Task SaveCharacterToDatabase(Character character)
     {
@@ -313,4 +331,6 @@ public class CharacterScraper
 
         await dbContext.SaveChangesAsync();
     }
+
+    #endregion Utils
 }

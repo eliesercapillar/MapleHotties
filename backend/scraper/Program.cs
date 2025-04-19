@@ -16,6 +16,11 @@ builder.Services.AddScoped<CharacterScraper>();
 
 var app = builder.Build();
 
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+lifetime.ApplicationStopping.Register(() =>
+{
+    _ = CharacterScraper.DisposeBrowserAsync();
+});
 
 app.MapPost("/scrape/character/{name}", async (string name, CharacterScraper scraper) =>
 {
