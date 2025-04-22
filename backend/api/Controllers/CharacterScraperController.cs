@@ -13,10 +13,12 @@ namespace api.Controllers
     public class CharacterScraperController : ControllerBase
     {
         private readonly ICharacterScraperClient _scraperClient;
+        private readonly ILogger<CharacterScraperController> _logger;
 
-        public CharacterScraperController(ICharacterScraperClient scraperClient)
+        public CharacterScraperController(ICharacterScraperClient scraperClient, ILogger<CharacterScraperController> logger)
         {
             _scraperClient = scraperClient;
+            _logger = logger;
         }
 
         [HttpPost("scrape/character/{characterName}")]
@@ -34,17 +36,29 @@ namespace api.Controllers
         }
 
         [HttpPost("scrape/all")]
-        public async Task<ActionResult> ScrapeAllCharacters([FromQuery] int maxPages = 50000)
+        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000)
         {
+            _logger.LogInformation("Manual ALL scrape triggered via API. Max pages: {maxPages}", maxPages);
             try
             {
-                await _scraperClient.TriggerScrapeAllAsync(maxPages);
-                return Accepted(new { message = "Scraping all process started" });
+                var jobId = _scraperClient.TriggerScrapeAllAsync(maxPages);
+                return Accepted(new {
+                    message = "Scraping ALL process started", 
+                    jobId, 
+                    statusUrl = Url.Action(nameof(GetScrapeStatus), new {jobId}) 
+                });
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
             }
+        }
+
+        [HttpGet("scrape/status/{jobId}")]
+        public async Task<ActionResult> GetScrapeStatus(string jobId)
+        {
+            var json = await _scraperClient.GetScrapeStatus(jobId);
+            return Content(json, "application/json");
         }
     }
 }

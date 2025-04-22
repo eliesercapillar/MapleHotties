@@ -23,31 +23,31 @@
             using var timer = new PeriodicTimer(_period);
 
             // Initial run
-            await DoWorkAsync(stoppingToken);
+            await PerformScrape(stoppingToken);
 
             // Continue running on schedule
             while (await timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
             {
-                await DoWorkAsync(stoppingToken);
+                await PerformScrape(stoppingToken);
             }
         }
 
-        private async Task DoWorkAsync(CancellationToken stoppingToken)
+        private async Task PerformScrape(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Character Scraper Service is running at: {time}", DateTimeOffset.Now);
 
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var scraper = scope.ServiceProvider.GetRequiredService<CharacterScraper>();
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var scraper = scope.ServiceProvider.GetRequiredService<CharacterScraper>();
+                    _logger.LogInformation("Starting scheduled character scraping. Max pages: {maxPages}", _maxPagesToScrape);
 
-                _logger.LogInformation("Starting scheduled character scraping. Max pages: {maxPages}", _maxPagesToScrape);
-
-                var characters = await scraper.ScrapeAllCharactersAsync(_maxPagesToScrape);
-                await scraper.SaveCharactersToDatabase(characters);
-
-                _logger.LogInformation("Scheduled character scraping completed. Characters processed: {count}",
-                    characters is ICollection<MapleTinder.Shared.Models.Entities.Character> collection ? collection.Count : "unknown");
+                    var characters = await scraper.ScrapeAllCharactersAsync(_maxPagesToScrape);
+                    await scraper.SaveCharactersToDatabase(characters);
+                    _logger.LogInformation("Scheduled character scraping completed. Characters processed: {count}",
+                        characters is ICollection<MapleTinder.Shared.Models.Entities.Character> collection ? collection.Count : "unknown");
+                }
             }
             catch (Exception ex)
             {
@@ -60,6 +60,12 @@
         {
             _maxPagesToScrape = maxPages;
             _logger.LogInformation("Character Scraper configuration updated. Max pages: {maxPages}", maxPages);
+        }
+
+        // Method to trigger scraping manually
+        public async Task RunOnceAsync(CancellationToken cancellationToken = default)
+        {
+            await PerformScrape(cancellationToken);
         }
     }
 }

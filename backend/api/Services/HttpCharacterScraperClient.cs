@@ -1,5 +1,6 @@
 ﻿using api.Interfaces;
 using MapleTinder.Shared.Models.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api.Services
 {
@@ -19,10 +20,19 @@ namespace api.Services
             return await response.Content.ReadFromJsonAsync<Character>();
         }
 
-        public async Task TriggerScrapeAllAsync(int maxPages = 50000)
+        public string TriggerScrapeAllAsync(int maxPages = 50000)
         {
-            var response = await _http.PostAsync($"/scrape/all?maxPages={maxPages}", null);
-            response.EnsureSuccessStatusCode();
+            var jobId = Guid.NewGuid().ToString();
+
+            _ = Task.Run(() => _http.PostAsync($"/scrape/all?maxPages={maxPages}&jobId={jobId}", null));
+
+            return jobId;
+        }
+
+        public async Task<string> GetScrapeStatus(string jobId)
+        {
+            var response = await _http.GetAsync($"/scrape/status/{jobId}");
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }

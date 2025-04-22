@@ -3,6 +3,7 @@ using MapleTinder.Shared.Models.Entities;
 using Microsoft.Playwright;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 
 public class CharacterScraper
@@ -108,16 +109,13 @@ public class CharacterScraper
             ViewportSize = new ViewportSize { Width = 1920, Height = 1080 }
         });
 
-        Console.WriteLine("Creating new Browser Page");
-        var page = await context.NewPageAsync();
-
-        // Set a reasonable timeout for page navigation and elements
-        page.SetDefaultTimeout(30000);
-
         Console.WriteLine($"Starting scraping of up to {maxPages} pages...");
-
         for (int pageIndex = 1; pageIndex <= maxPages; pageIndex++)
         {
+            Console.WriteLine("Creating new Browser Page");
+            var page = await context.NewPageAsync();
+            // Set a reasonable timeout for page navigation and elements
+            page.SetDefaultTimeout(30000);
             try
             {
                 Console.WriteLine("Going to URL");
@@ -132,6 +130,8 @@ public class CharacterScraper
                 Console.WriteLine("Retrieving Number of rows in DOM");
                 // Get all rows in the table
                 var rowsLocator = tableLocator.Locator("tbody tr");
+                // Wait 2 seconds for DOM to fully render
+                await rowsLocator.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 2000 });
                 var rowCount = await rowsLocator.CountAsync();
 
                 if (rowCount == 0)
@@ -159,8 +159,11 @@ public class CharacterScraper
                     }
                 }
 
-                // Optional: Implement a delay to avoid overloading the server
-                await Task.Delay(1000);
+                await page.CloseAsync();
+
+                // Delay to act human lol
+                var delay = Random.Shared.Next(800, 1500);
+                await Task.Delay(delay);
 
                 // Optional: Save characters in batches (every 1000 characters or every 100 pages)
                 if (characters.Count % 1000 == 0)
@@ -184,7 +187,7 @@ public class CharacterScraper
             }
         }
 
-        Console.WriteLine($"Scraping complete. Total characters scraped: {characters.Count}");
+        Console.WriteLine($"Scraping complete. Total characters scraped: {characters.Count}. With {maxPages} and 10 characters per page, we have a {(characters.Count/maxPages * 10.0) * 100.0} successful scrape rate.");
 
         await context.CloseAsync();
         return characters;
