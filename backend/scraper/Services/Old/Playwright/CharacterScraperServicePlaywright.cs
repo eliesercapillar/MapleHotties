@@ -1,13 +1,13 @@
-﻿namespace scraper.Services
+﻿namespace scraper.Services.Old.Playwright
 {
-    public class CharacterScraperService : BackgroundService
+    public class CharacterScraperServicePlaywright : BackgroundService
     {
-        private readonly ILogger<CharacterScraperService> _logger;
+        private readonly ILogger<CharacterScraperServicePlaywright> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly TimeSpan _period = TimeSpan.FromDays(7); // Run once a week
         private int _maxPagesToScrape = 50000; // Default value
 
-        public CharacterScraperService(ILogger<CharacterScraperService> logger, IServiceProvider serviceProvider)
+        public CharacterScraperServicePlaywright(ILogger<CharacterScraperServicePlaywright> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -40,7 +40,7 @@
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var scraper = scope.ServiceProvider.GetRequiredService<CharacterScraper>();
+                    var scraper = scope.ServiceProvider.GetRequiredService<CharacterScraperPlaywright>();
                     _logger.LogInformation("Starting scheduled character scraping. Max pages: {maxPages}", _maxPagesToScrape);
 
                     var characters = await scraper.ScrapeAllCharactersAsync(_maxPagesToScrape);

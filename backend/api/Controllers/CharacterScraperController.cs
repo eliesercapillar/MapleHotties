@@ -36,12 +36,12 @@ namespace api.Controllers
         }
 
         [HttpPost("scrape/all")]
-        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000)
+        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000, [FromQuery] int batchSize = 5)
         {
             _logger.LogInformation("Manual ALL scrape triggered via API. Max pages: {maxPages}", maxPages);
             try
             {
-                var jobId = _scraperClient.TriggerScrapeAllAsync(maxPages);
+                var jobId = _scraperClient.TriggerScrapeAllAsync(maxPages, batchSize);
                 return Accepted(new {
                     message = "Scraping ALL process started", 
                     jobId, 

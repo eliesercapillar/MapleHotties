@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 
-public class CharacterScraper
+public class CharacterScraperPlaywright
 {
     private readonly IServiceProvider _serviceProvider;
     private static Lazy<Task<IBrowser>> _lazyBrowserInstance = new(() => InitializeBrowserOnceAsync());
 
-    public CharacterScraper(IServiceProvider serviceProvider)
+    public CharacterScraperPlaywright(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
@@ -94,102 +94,105 @@ public class CharacterScraper
         return character;
     }
 
-    public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000)
+    public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000, int batchSize = 100)
     {
         Console.WriteLine("Starting ScrapeALL");
         var characters = new List<Character>();
 
-        Console.WriteLine("Getting Browser Instance");
-        var browser = await _lazyBrowserInstance.Value;
+        for (int i = 0; i <= maxPages; i += batchSize)
+        {
+            var batchTasks = new List<Task<IEnumerable<Character>>>();
 
-        Console.WriteLine("Setting Browser Context");
+            for (int j = 0; j < batchSize && (i + j) <= maxPages; j++)
+            {
+                batchTasks.Add(ScrapeAllCharactersFromPageAsync(i + j));
+            }
+
+            var batchResults = await Task.WhenAll(batchTasks);
+
+            foreach (var chars in batchResults)
+            {
+                characters.AddRange(chars);
+            }
+
+            Console.WriteLine($"Scraped {characters.Count} characters so far.");
+
+            if (characters.Count >= 1000)
+            {
+                Console.WriteLine($"Saving to {characters.Count} characters to database.");
+                await SaveCharactersToDatabase(characters);
+                characters.Clear();
+            }
+
+            int delay = Random.Shared.Next(1000, 3000);
+            await Task.Delay(delay);
+        }
+
+        await SaveCharactersToDatabase(characters); // Save any remaining
+
+        Console.WriteLine($"Scraping complete. Total characters scraped: {characters.Count}. With {maxPages} and 10 characters per page, we have a {(characters.Count / maxPages * 10.0) * 100.0} successful scrape rate.");
+        return characters;
+    }
+    
+    public async Task<IEnumerable<Character>> ScrapeAllCharactersFromPageAsync(int pageIndex)
+    {
+        var characters = new List<Character>();
+
+        var browser = await _lazyBrowserInstance.Value;
         var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
             ViewportSize = new ViewportSize { Width = 1920, Height = 1080 }
         });
+        var page = await context.NewPageAsync();
 
-        Console.WriteLine($"Starting scraping of up to {maxPages} pages...");
-        for (int pageIndex = 1; pageIndex <= maxPages; pageIndex++)
+        try
         {
-            Console.WriteLine("Creating new Browser Page");
-            var page = await context.NewPageAsync();
+            string url = $"https://www.nexon.com/maplestory/rankings/north-america/overall-ranking/legendary?world_type=both&page_index={pageIndex}";
+
             // Set a reasonable timeout for page navigation and elements
             page.SetDefaultTimeout(30000);
-            try
+            await page.GotoAsync(url);
+
+            var tableLocator = page.Locator("table[data-section-name='Contents']");
+            await tableLocator.WaitForAsync();
+
+            var rowsLocator = tableLocator.Locator("tbody tr");
+            await rowsLocator.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 2000 }); // Wait 2 seconds for DOM to fully render
+
+            var rowCount = await rowsLocator.CountAsync();
+            if (rowCount == 0)
             {
-                Console.WriteLine("Going to URL");
-                string url = $"https://www.nexon.com/maplestory/rankings/north-america/overall-ranking/legendary?world_type=both&page_index={pageIndex}";
-                await page.GotoAsync(url);
-
-                Console.WriteLine("Locating Table element in DOM");
-                // Wait for the table to be loaded
-                var tableLocator = page.Locator("table[data-section-name='Contents']");
-                await tableLocator.WaitForAsync();
-
-                Console.WriteLine("Retrieving Number of rows in DOM");
-                // Get all rows in the table
-                var rowsLocator = tableLocator.Locator("tbody tr");
-                // Wait 2 seconds for DOM to fully render
-                await rowsLocator.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 2000 });
-                var rowCount = await rowsLocator.CountAsync();
-
-                if (rowCount == 0)
-                {
-                    Console.WriteLine($"No characters found on page {pageIndex}. Ending scrape.");
-                    break;
-                }
-
-                Console.WriteLine($"Processing page {pageIndex} with {rowCount} characters");
-
-                // Process each row of character data
-                for (int i = 0; i < rowCount; i++)
-                {
-                    try
-                    {
-                        Console.WriteLine("Processing Row " + i);
-                        var rowLocator = rowsLocator.Nth(i);
-                        var character = await ParseCharacterFromRow(rowLocator);
-                        characters.Add(character);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error parsing row {i} on page {pageIndex}: {ex.Message}");
-                        // Continue with the next row instead of stopping the entire process
-                    }
-                }
-
-                await page.CloseAsync();
-
-                // Delay to act human lol
-                var delay = Random.Shared.Next(800, 1500);
-                await Task.Delay(delay);
-
-                // Optional: Save characters in batches (every 1000 characters or every 100 pages)
-                if (characters.Count % 1000 == 0)
-                {
-                    Console.WriteLine($"Total characters scraped so far: {characters.Count}");
-                    // You could save batch to database here if needed
-                    // SaveCharactersToDatabase(characters);
-                }
+                Console.WriteLine($"No characters found on page {pageIndex}. Ending scrape.");
+                return characters;
             }
-            catch (Exception ex)
+
+            Console.WriteLine($"Processing page {pageIndex} with {rowCount} characters");
+            // Process each row of character data
+            for (int i = 0; i < rowCount; i++)
             {
-                Console.WriteLine($"Error processing page {pageIndex}: {ex.Message}");
-                // Decide whether to continue or break based on the error
-                if (ex.Message.Contains("Navigation timeout") || ex.Message.Contains("net::ERR"))
+                try
                 {
-                    // Network error, wait longer and retry
-                    await Task.Delay(5000);
-                    pageIndex--; // Retry the current page
-                    continue;
+                    var rowLocator = rowsLocator.Nth(i);
+                    var character = await ParseCharacterFromRow(rowLocator);
+                    characters.Add(character);
+                }
+                catch (Exception ex)
+                {
+                    // Continue with the next row instead of stopping the entire process
+                    Console.WriteLine($"Error parsing row {i} on page {pageIndex}: {ex.Message}");
                 }
             }
         }
-
-        Console.WriteLine($"Scraping complete. Total characters scraped: {characters.Count}. With {maxPages} and 10 characters per page, we have a {(characters.Count/maxPages * 10.0) * 100.0} successful scrape rate.");
-
-        await context.CloseAsync();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing page {pageIndex}: {ex.Message}");
+        }
+        finally
+        {
+            await page.CloseAsync();
+            await context.CloseAsync();
+        }
         return characters;
     }
 
@@ -228,7 +231,7 @@ public class CharacterScraper
             Level = level,
             Job = jobTitle,
             World = world,
-            Hash = hash,
+            ImageUrl = hash,
             ScrapedAt = DateTime.UtcNow
         };
     }
@@ -269,7 +272,7 @@ public class CharacterScraper
             // Update existing character
             existingCharacter.Level = character.Level;
             existingCharacter.Job = character.Job;
-            existingCharacter.Hash = character.Hash;
+            existingCharacter.ImageUrl = character.ImageUrl;
             existingCharacter.ScrapedAt = DateTime.UtcNow;
         }
         else
@@ -322,7 +325,7 @@ public class CharacterScraper
                 // Update existing character
                 existingCharacter.Level = character.Level;
                 existingCharacter.Job = character.Job;
-                existingCharacter.Hash = character.Hash;
+                existingCharacter.ImageUrl = character.ImageUrl;
                 existingCharacter.ScrapedAt = DateTime.UtcNow;
             }
             else

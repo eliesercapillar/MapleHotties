@@ -5,7 +5,7 @@ namespace api.Interfaces
     public interface ICharacterScraperClient
     {
         Task<Character> ScrapeCharacterAsync(string name);
-        string TriggerScrapeAllAsync(int maxPages = 50000);
+        string TriggerScrapeAllAsync(int maxPages = 50000, int batchSize = 5);
         Task<string> GetScrapeStatus(string jobId);
     }
 }
