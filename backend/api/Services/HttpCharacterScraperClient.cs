@@ -20,11 +20,11 @@ namespace api.Services
             return await response.Content.ReadFromJsonAsync<Character>();
         }
 
-        public string TriggerScrapeAllAsync(int maxPages = 50000, int batchSize = 5)
+        public string TriggerScrapeAllAsync(int maxPages = 50000, int concurrency = 10)
         {
             var jobId = Guid.NewGuid().ToString();
 
-            _ = Task.Run(() => _http.PostAsync($"/scrape/all?maxPages={maxPages}&batchSize={batchSize}&jobId={jobId}", null));
+            _ = Task.Run(() => _http.PostAsync($"/scrape/all?maxPages={maxPages}&concurrency={concurrency}&jobId={jobId}", null));
 
             return jobId;
         }

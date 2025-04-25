@@ -26,26 +26,24 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
 
 # Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-COPY api/ ./api/
+COPY ./scraper/ ./scraper/
 COPY MapleTinder.Shared/ ./MapleTinder.Shared/
 
-WORKDIR /src/api
+WORKDIR /src/scraper
 RUN dotnet restore
-RUN dotnet build "./api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./scraper.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src/api
-RUN dotnet publish "./api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR /src/scraper
+RUN dotnet publish "./scraper.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Final
 FROM base AS final
@@ -53,4 +51,4 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 # Set the entry point
-ENTRYPOINT ["dotnet", "api.dll"]
+ENTRYPOINT ["dotnet", "scraper.dll"]

@@ -8,6 +8,13 @@ using scraper.Services.Old.Playwright;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(options =>
+{
+    options.LogToStandardErrorThreshold = LogLevel.Warning;
+});
+builder.Logging.SetMinimumLevel(LogLevel.Warning);
+
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true)
@@ -15,12 +22,16 @@ builder.Configuration
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
-builder.Services.AddDbContext<MapleTinderDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<MapleTinderDbContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .LogTo(_ => { }) // silence everything
+);
+
 builder.Services.AddScoped<CharacterJSONScraper>();
-builder.Services.AddScoped<CharacterScraperPlaywright>();
-builder.Services.AddSingleton<CharacterScraperServicePlaywright>();
+//builder.Services.AddScoped<CharacterScraperPlaywright>();
+//builder.Services.AddSingleton<CharacterScraperServicePlaywright>();
 builder.Services.AddSingleton<IScrapeJobTracker, ScrapeJobTracker>();
-builder.Services.AddHostedService(provider => provider.GetRequiredService<CharacterScraperServicePlaywright>());
+//builder.Services.AddHostedService(provider => provider.GetRequiredService<CharacterScraperServicePlaywright>());
 
 var app = builder.Build();
 
@@ -37,7 +48,7 @@ app.MapPost("/scrape/character/{name}", async (string name, CharacterJSONScraper
     return Results.Ok(character);
 });
 
-app.MapPost("/scrape/all", async (int maxPages, int batchSize, string jobId,
+app.MapPost("/scrape/all", async (int maxPages, int concurrency, string jobId,
                            CharacterJSONScraper scraper, IScrapeJobTracker tracker) =>
 {
     if (string.IsNullOrWhiteSpace(jobId)) return Results.BadRequest(new { error = "Missing jobId in query string" });
@@ -45,7 +56,7 @@ app.MapPost("/scrape/all", async (int maxPages, int batchSize, string jobId,
     tracker.StartJob(jobId);
     try
     {
-        var characters = await scraper.ScrapeAllCharactersAsync(maxPages);
+        var characters = await scraper.ScrapeAllCharactersAsync(maxPages, concurrency);
         await scraper.SaveCharactersToDatabase(characters);
         tracker.CompleteJob(jobId);
         return Results.Accepted($"/scrape/status/{jobId}", new
