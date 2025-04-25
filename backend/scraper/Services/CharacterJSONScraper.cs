@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Collections.Concurrent;
+using System;
 
 namespace scraper.Services
 {
@@ -84,6 +85,30 @@ namespace scraper.Services
 
             List<int> failedPages = new();
 
+            string[] agents = new string[]
+            {
+
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv: 124.0) Gecko/20100101 Firefox/124.0",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.81",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv: 124.0) Gecko/20100101 Firefox/124.0",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15(KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (X11; Linux i686; rv: 124.0) Gecko/20100101 Firefox/124.0",
+
+            };
+
+            var languages = new[]
+            {
+                "en-CA,en-US;q=0.9,en;q=0.8",
+                "en-CA,en-US;q=0.7,en;q=0.3",
+                "en-US,en;q=0.9"
+            };
+
             for (int i = 0; i < maxPages; i++)
             {
                 await semaphore.WaitAsync();
@@ -96,9 +121,30 @@ namespace scraper.Services
                         var url = $"https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=legendary&reboot_index=1&page_index={i}1";
 
                         var request = new HttpRequestMessage(HttpMethod.Get, url);
-                        request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-                        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        
+
+                        // Headers
+                        request.Headers.UserAgent.ParseAdd(agents[Random.Shared.Next(agents.Length)]);
+
+                        request.Headers.Accept.Clear();
+                        request.Headers.Accept.Add(new("application/json"));
+                        request.Headers.Accept.Add(new("text/plain"));
+                        request.Headers.Accept.Add(new("*/*"));
+
+                        request.Headers.AcceptLanguage.Clear();
+                        request.Headers.AcceptLanguage.ParseAdd(languages[Random.Shared.Next(languages.Length)]);
+
+                        request.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate, br, zstd");
+
+                        request.Headers.ConnectionClose = false;
+
+                        request.Headers.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
+
+                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+
+                        // ---! Cookie !---
+                        request.Headers.TryAddWithoutValidation("Cookie", "arenaSid=87f22a2d-7bc0-4a65-b738-79a98c84bfc3; OptanonConsent=isGpcEnabled=0&datestamp=Thu+Apr+24+2025+23%3A00%3A17+GMT-0400+(Eastern+Daylight+Saving+Time)&version=202503.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=6029dbd9-dae3-4f8c-b443-fc9c060ec8b3&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=3&geolocation=CA%3BMB&AwaitingReconsent=false; OptanonAlertBoxClosed=2025-04-25T03:00:17.962Z; __zlcmid=1QHnPBhUr9RWcsy; partner_key=3267; ProdId=10100; utmSource=www.nexon.com; utmMedium=; utmCampaign=; utmTerm=none; utmContent=US");
+
                         var response = await _http.SendAsync(request);
                         if (!response.IsSuccessStatusCode)
                         {
@@ -143,7 +189,7 @@ namespace scraper.Services
                         }
 
                         Console.WriteLine($"Finished scraping page {i}1. Currently tracking {characters.Count} characters.");
-                        await Task.Delay(Random.Shared.Next(250, 600));
+                        await Task.Delay(Random.Shared.Next(500, 1500));
                     }
                     catch (Exception ex)
                     {
