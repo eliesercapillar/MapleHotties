@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Collections.Concurrent;
 using System;
+using Microsoft.Playwright;
+using System.Net;
 
 namespace scraper.Services
 {
@@ -18,6 +20,28 @@ namespace scraper.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly HttpClient _http;
 
+        private string[] userAgents = new string[]
+        {
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.81",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux i686; rv:124.0) Gecko/20100101 Firefox/124.0",
+        };
+
+        private string[] acceptLanguages = new string[]
+        {
+            "en-CA,en-US;q=0.9,en;q=0.8",
+            "en-CA,en-US;q=0.7,en;q=0.3",
+            "en-US,en;q=0.9"
+        };
+
         public CharacterJSONScraper(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -25,6 +49,8 @@ namespace scraper.Services
         }
 
         #region Scraping
+
+        //TODO: Fix ScrapeCharacterAsync to queue requests until 403 has passed.
         public async Task<Character> ScrapeCharacterAsync(string characterName)
         {
             Console.WriteLine("Starting ScrapeCHARACTER");
@@ -75,85 +101,70 @@ namespace scraper.Services
             }
         }
 
-        public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000, int concurrency = 10)
+        public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000, int concurrency = 50)
         {
             Console.WriteLine($"Starting Scrape ALL Characters: {maxPages} pages with {concurrency} workers.");
 
             var characters = new ConcurrentBag<Character>();
+            var failedPages = new ConcurrentBag<int>();
+            int savedCharacters = 0;
+
             var semaphore = new SemaphoreSlim(concurrency);
             var tasks = new List<Task>();
 
-            List<int> failedPages = new();
-
-            string[] agents = new string[]
-            {
-
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv: 124.0) Gecko/20100101 Firefox/124.0",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.81",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv: 124.0) Gecko/20100101 Firefox/124.0",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15(KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (X11; Linux i686; rv: 124.0) Gecko/20100101 Firefox/124.0",
-
-            };
-
-            var languages = new[]
-            {
-                "en-CA,en-US;q=0.9,en;q=0.8",
-                "en-CA,en-US;q=0.7,en;q=0.3",
-                "en-US,en;q=0.9"
-            };
+            string currentCookie = await GetNewCookieHeaderAsync();
+            var cts = new CancellationTokenSource();
 
             for (int i = 0; i < maxPages; i++)
             {
+                if (cts.Token.IsCancellationRequested)
+                {
+                    savedCharacters += characters.Count();
+                    await SaveCharactersToDatabase(characters);
+                    characters.Clear();
+
+                    Console.WriteLine("Cancellation requested. Pausing scraping for 10 minutes to wait out 403");
+                    await Task.Delay(TimeSpan.FromMinutes(10));
+
+                    Console.WriteLine($"Continuing scraping. Currently at page {i}1");
+                    currentCookie = await GetNewCookieHeaderAsync();
+
+                    cts = new CancellationTokenSource();
+                }
+
+                if (i > 0 && i % 100 == 0) currentCookie = await GetNewCookieHeaderAsync();
+
                 await semaphore.WaitAsync();
 
-                var currentIndex = i;
+                // Closure
+                int currentIndex = i;
+                string cookie = currentCookie;
+
                 tasks.Add(Task.Run(async () =>
                 {
                     try
                     {
-                        var url = $"https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=legendary&reboot_index=1&page_index={i}1";
+                        if (cts.Token.IsCancellationRequested)
+                        {
+                            Console.WriteLine($"Task for page {currentIndex}1 canceled before starting.");
+                            return;
+                        }
 
-                        var request = new HttpRequestMessage(HttpMethod.Get, url);
-
-                        // Headers
-                        request.Headers.UserAgent.ParseAdd(agents[Random.Shared.Next(agents.Length)]);
-
-                        request.Headers.Accept.Clear();
-                        request.Headers.Accept.Add(new("application/json"));
-                        request.Headers.Accept.Add(new("text/plain"));
-                        request.Headers.Accept.Add(new("*/*"));
-
-                        request.Headers.AcceptLanguage.Clear();
-                        request.Headers.AcceptLanguage.ParseAdd(languages[Random.Shared.Next(languages.Length)]);
-
-                        request.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate, br, zstd");
-
-                        request.Headers.ConnectionClose = false;
-
-                        request.Headers.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
-
-                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
-                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
-
-                        // ---! Cookie !---
-                        request.Headers.TryAddWithoutValidation("Cookie", "arenaSid=87f22a2d-7bc0-4a65-b738-79a98c84bfc3; OptanonConsent=isGpcEnabled=0&datestamp=Thu+Apr+24+2025+23%3A00%3A17+GMT-0400+(Eastern+Daylight+Saving+Time)&version=202503.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=6029dbd9-dae3-4f8c-b443-fc9c060ec8b3&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=3&geolocation=CA%3BMB&AwaitingReconsent=false; OptanonAlertBoxClosed=2025-04-25T03:00:17.962Z; __zlcmid=1QHnPBhUr9RWcsy; partner_key=3267; ProdId=10100; utmSource=www.nexon.com; utmMedium=; utmCampaign=; utmTerm=none; utmContent=US");
-
+                        var request = GetAndConfigureNewHttpRequestMessage(currentIndex, cookie);
                         var response = await _http.SendAsync(request);
+
                         if (!response.IsSuccessStatusCode)
                         {
-                            Console.WriteLine("Headers:");
-                            foreach (var header in response.Headers)
-                                Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+                            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                            {
+                                Console.WriteLine($"403 Forbidden hit on page {currentIndex}1. Cancelling all tasks.");
+                                cts.Cancel();
+                            }
 
                             var body = await response.Content.ReadAsStringAsync();
-                            Console.WriteLine($"Request for page {currentIndex} failed with status {response.StatusCode}:\n{body}");
+                            Console.WriteLine($"Request for page {currentIndex}1 failed with status {response.StatusCode}:\n{body}");
+
+                            failedPages.Add(currentIndex);
                             return;
                         }
 
@@ -161,6 +172,7 @@ namespace scraper.Services
                         if (string.IsNullOrWhiteSpace(json))
                         {
                             Console.WriteLine("Empty response received from Nexon API.");
+                            failedPages.Add(currentIndex);
                             return;
                         }
 
@@ -171,7 +183,8 @@ namespace scraper.Services
 
                         if (data?.Ranks == null || data.Ranks.Count == 0)
                         {
-                            Console.WriteLine($"Rankings at page {currentIndex} returned 0 characters.");
+                            Console.WriteLine($"Rankings at page {currentIndex}1 returned 0 characters.");
+                            failedPages.Add(currentIndex);
                             return;
                         }
 
@@ -188,14 +201,13 @@ namespace scraper.Services
                             });
                         }
 
-                        Console.WriteLine($"Finished scraping page {i}1. Currently tracking {characters.Count} characters.");
+                        Console.WriteLine($"Finished scraping page {currentIndex}1. Currently tracking {characters.Count} characters.");
                         await Task.Delay(Random.Shared.Next(500, 1500));
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error while scraping:\n{ex.Message}");
-                        //failedPages.Add(currentIndex);
-                        return;
+                        failedPages.Add(currentIndex);
                     }
                     finally 
                     { 
@@ -212,13 +224,69 @@ namespace scraper.Services
 
             await Task.WhenAll(tasks);
 
-            Console.WriteLine($"Finished scraping. Total characters collected: {characters.Count}");
+            Console.WriteLine($"Finished scraping. Total characters collected: {characters.Count}. Total pages failed: {failedPages.Count}");
             return characters;
         }
 
         #endregion Scraping
 
         #region Utils
+
+        private async Task<string> GetNewCookieHeaderAsync()
+        {
+            using var playwright = await Playwright.CreateAsync();
+            var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                Headless = true
+            });
+
+            var context = await browser.NewContextAsync();
+            var page = await browser.NewPageAsync();
+
+            await page.GotoAsync("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
+
+            // Wait for cookies to set
+            await page.Locator("#maplestory").WaitForAsync();
+
+            var cookies = await context.CookiesAsync();
+
+            var cookieHeader = string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
+
+            await browser.CloseAsync();
+            return cookieHeader;
+        }
+
+        private HttpRequestMessage GetAndConfigureNewHttpRequestMessage(int currentIndex, string cookie)
+        {
+            var url = $"https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=legendary&reboot_index=1&page_index={currentIndex}1";
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            // Headers
+            request.Headers.UserAgent.ParseAdd(userAgents[Random.Shared.Next(userAgents.Length)]);
+
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new("application/json"));
+            request.Headers.Accept.Add(new("text/plain"));
+            request.Headers.Accept.Add(new("*/*"));
+
+            request.Headers.AcceptLanguage.Clear();
+            request.Headers.AcceptLanguage.ParseAdd(acceptLanguages[Random.Shared.Next(acceptLanguages.Length)]);
+
+            request.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate, br, zstd");
+
+            request.Headers.ConnectionClose = false;
+
+            request.Headers.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
+
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
+            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
+
+            // ---! Cookie !---
+            request.Headers.TryAddWithoutValidation("Cookie", cookie);
+
+            return request;
+        }
 
         private string GetJobFromId(int jobID, int jobDetail)
         {

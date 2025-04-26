@@ -36,7 +36,7 @@ namespace api.Controllers
         }
 
         [HttpPost("scrape/all")]
-        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000, [FromQuery] int concurrency = 10)
+        public ActionResult ScrapeAllCharacters([FromQuery] int maxPages = 50000, [FromQuery] int concurrency = 50)
         {
             _logger.LogInformation("Manual ALL scrape triggered via API. Max pages: {maxPages}", maxPages);
             try
