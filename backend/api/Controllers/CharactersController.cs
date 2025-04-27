@@ -23,9 +23,36 @@ namespace api.Controllers
 
         // GET: api/Characters
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Character>>> GetMapleCharacters()
+        public async Task<ActionResult<IEnumerable<Character>>> GetMapleCharacters(int page = 1, int pageSize = 10)
         {
-            return await _context.Characters.ToListAsync();
+            if (page <= 0 || pageSize <= 0)
+                return BadRequest("Page and PageSize must be greater than zero.");
+
+            var characters = await _context.Characters
+                .OrderBy(c => c.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(characters);
+        }
+
+        // GET: api/Characters/random?userId=123
+        [HttpGet("random")]
+        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters(int userId, int count = 10)
+        {
+            var seenCharacterIds = await _context.UserSeenCharacters
+                .Where(usc => usc.UserId == userId)
+                .Select(usc => usc.CharacterId)
+                .ToListAsync();
+
+            var unseenCharacters = await _context.Characters
+                .Where(c => !seenCharacterIds.Contains(c.Id))
+                .OrderBy(c => Guid.NewGuid()) // TODO: Change to a more efficient random sampling method. 
+                .Take(count)
+                .ToListAsync();
+
+            return Ok(unseenCharacters);
         }
 
         // GET: api/Characters/5
@@ -84,6 +111,7 @@ namespace api.Controllers
             return CreatedAtAction("GetCharacter", new { id = character.Id }, character);
         }
 
+        // TODO: Add verification. Users can delete their own characters, Admins can delete any character.
         // DELETE: api/Characters/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCharacter(int id)

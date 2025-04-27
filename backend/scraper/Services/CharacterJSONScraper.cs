@@ -123,8 +123,8 @@ namespace scraper.Services
                     await SaveCharactersToDatabase(characters);
                     characters.Clear();
 
-                    Console.WriteLine("Cancellation requested. Pausing scraping for 10 minutes to wait out 403");
-                    await Task.Delay(TimeSpan.FromMinutes(10));
+                    Console.WriteLine("Cancellation requested. Pausing scraping for 5 minutes to wait out 403");
+                    await Task.Delay(TimeSpan.FromMinutes(5));
 
                     Console.WriteLine($"Continuing scraping. Currently at page {i}1");
                     currentCookie = await GetNewCookieHeaderAsync();
