@@ -41,7 +41,7 @@ namespace api.Controllers
         [HttpGet("random")]
         public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters(int userId, int count = 10)
         {
-            var seenCharacterIds = await _context.UserSeenCharacters
+            var seenCharacterIds = await _context.UserHistory
                 .Where(usc => usc.UserId == userId)
                 .Select(usc => usc.CharacterId)
                 .ToListAsync();

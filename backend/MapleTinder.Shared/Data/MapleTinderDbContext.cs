@@ -12,6 +12,6 @@ namespace MapleTinder.Shared.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Character> Characters { get; set; }
 
-        public DbSet<UserSeenCharacter> UserSeenCharacters { get; set; }
+        public DbSet<UserHistory> UserHistory { get; set; }
     }
 }
