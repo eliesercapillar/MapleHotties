@@ -1,59 +1,64 @@
 <template>
   <motion.div
     class="relative h-[667px] w-[375px] row-[1] col-[1] z-10 hover:cursor-grab active:cursor-grabbing"
-    :class="{ 'z-[11]': isFront }"
+    :class="{ 'z-[11]': isActive }"
     :style="{ x, y, rotate }"
-    :drag="isFront ? true : false"
+    :drag="isActive ? true : false"
     dragSnapToOrigin
     @dragStart="handleDragStart"
     @dragEnd="handleDragEnd"
   >
     <img
+      id="card_background"
       :src="props.card.url"
       alt="SwipeCard"
       class="h-[667px] w-[375px] object-cover rounded-lg select-none"
       draggable="false"
     />
     <img 
+      id="character_sprite"
       src="/rockoguy_up5.png"
       alt="Player Character"
       class="absolute top-[50%] left-[50%] scale-[1]"
       style="transform: translate(-50%, -50%); "
-      draggable="false"/>
-    <!-- Fav Overlay -->
-    <!-- TODO: Add y checking logic -->
-    <motion.div 
+      draggable="false"
+    />
+    <div id="overlays">
+      <!-- Fav Overlay -->
+      <!-- TODO: Add y checking logic -->
+      <motion.div 
       class="absolute bottom-[2%]" 
       :style="{ opacity: favOpacity }"
-    >
-      <img
-        class="h-[256px] w-[256px]"
-        src="/swipecard_like_overlay_24x24.svg"
-        draggable="false"
-      />
-    </motion.div>
-    <!-- Like Overlay -->
-    <motion.div
-      class="absolute top-[2%] left-[2%] -rotate-12"
-      :style="{ opacity: likeOpacity }"
-    >
-      <img
-        class="h-[256px] w-[256px]"
-        src="/swipecard_like_overlay_24x24.svg"
-        draggable="false"
-      />
-    </motion.div>
-    <!-- Nope Overlay -->
-    <motion.div
-      class="absolute top-[2%] right-[2%] rotate-12"
-      :style="{ opacity: nopeOpacity }"
-    >
-      <img
-        class="h-[216px] w-[216px]"
-        src="/swipecard_nope_overlay_24x24.svg"
-        draggable="false"
-      />
-    </motion.div>
+      >
+        <img
+          class="h-[256px] w-[256px]"
+          src="/swipecard_like_overlay_24x24.svg"
+          draggable="false"
+        />
+      </motion.div>
+      <!-- Like Overlay -->
+      <motion.div
+        class="absolute top-[2%] left-[2%] -rotate-12"
+        :style="{ opacity: likeOpacity }"
+      >
+        <img
+          class="h-[256px] w-[256px]"
+          src="/swipecard_like_overlay_24x24.svg"
+          draggable="false"
+        />
+      </motion.div>
+      <!-- Nope Overlay -->
+      <motion.div
+        class="absolute top-[2%] right-[2%] rotate-12"
+        :style="{ opacity: nopeOpacity }"
+      >
+        <img
+          class="h-[216px] w-[216px]"
+          src="/swipecard_nope_overlay_24x24.svg"
+          draggable="false"
+        />
+      </motion.div>
+    </div>
   </motion.div>
 </template>
 
@@ -65,16 +70,17 @@ import {
   animate,
   useMotionValueEvent,
 } from "motion-v";
+import { useSwipeStore } from '@/stores/swipeStore'
 
 const props = defineProps<{
   card: {
     id: number;
     url: string;
   };
-  isFront: Boolean;
+  isActive: Boolean;
 }>();
 
-const emit = defineEmits(["remove", "changeX", "changeY", "dragStarted", "dragEnded"]);
+const swipeStore = useSwipeStore()
 
 const x = useMotionValue(0);
 const y = useMotionValue(0);
@@ -125,26 +131,20 @@ const favOpacity = useTransform([x, y], (values: number[]) => {
 });
 
 
-useMotionValueEvent(x, "change", (latest) => {
-  emit("changeX", latest);
-});
+useMotionValueEvent(x, "change", (latest) => { swipeStore.saveXPos(latest); });
 
-useMotionValueEvent(y, "change", (latest) => {
-  emit("changeY", latest);
-});
+useMotionValueEvent(y, "change", (latest) => { swipeStore.saveYPos(latest); });
 
 
-const handleDragStart = () => {
-  emit("dragStarted");
-};
+const handleDragStart = () => { swipeStore.setDragging(true); };
 
 const handleDragEnd = () => {
-  emit("dragEnded");
+  swipeStore.setDragging(false);
 
   const currentX = x.get();
   const currentY = y.get();
   const isCentered = Math.abs(currentX) < 150;
-  const xThresholdHit = currentX < -300;
+  const xThresholdHit = Math.abs(currentX) > 300;
   const yThresholdHit = currentY < -300;
 
   if (isCentered && yThresholdHit) {
@@ -152,7 +152,7 @@ const handleDragEnd = () => {
     
     animate(y, targetY, {
       duration: 0.15,
-      onComplete: () => emit("remove", props.card.id),
+      onComplete: () => swipeStore.removeCard(props.card.id),
     });
   } 
   else if (xThresholdHit) {
@@ -160,7 +160,7 @@ const handleDragEnd = () => {
 
     animate(x, targetX, {
       duration: 0.15,
-      onComplete: () => emit("remove", props.card.id),
+      onComplete: () => swipeStore.removeCard(props.card.id),
     });
   }
 };

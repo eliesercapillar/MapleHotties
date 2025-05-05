@@ -19,21 +19,16 @@
         <div class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
           <div class="grid justify-center items-center">
             <SwipeCard
-              v-for="card in cardData"
+              v-for="card in swipeStore.cards"
               :key="card.id"
               :card="card"
-              :isFront="card.id === cardData[cardData.length - 1].id"
-              @remove="removeCard"
-              @changeX="handleChangeX"
-              @changey="handleChangeY"
-              @dragStarted="() => (isDragging = true)"
-              @dragEnded="() => (isDragging = false)"
+              :isActive="card.id === swipeStore.cards[swipeStore.cards.length - 1].id"
             />
           </div>
           <motion.div
             class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
             style="bottom: -14px; left: 8px"
-            :animate="{ scale: isDragging ? 0.6 : 1 }"
+            :animate="{ scale: swipeStore.isDragging ? 0.6 : 1 }"
             :transition="{ duration: 0.3, ease: 'easeInOut' }"
           />
           <div class="absolute z-20 isolate w-[375px] bottom-[-2rem]">
@@ -42,8 +37,7 @@
                 v-for="(button, index) in ButtonSVGs.data"
                 :key="index"
                 :button="button"
-                :isDragging="isDragging"
-                :cardDirection="cardDirection"
+                :isDragging="swipeStore.isDragging"
               />
             </div>
           </div>
@@ -55,77 +49,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted } from "vue";
 import { motion } from "motion-v";
 import Button from "@/components/ui/button/Button.vue";
 import SwipeCard from "@/components/SwipeCard.vue";
 import TinderButton from "@/components/TinderButton.vue";
 import Instructions from "@/components/Instructions.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
+import { useSwipeStore } from "@/stores/swipeStore";
 
-const cardData = ref([
-  {
+const swipeStore = useSwipeStore();
+
+onMounted(() => {
+  swipeStore.initializeCards([
+    {
     id: 1,
     url:
       "/bgs/kerning_city.png",
-  },
-  {
-    id: 2,
-    url:
-      "/bgs/leafre.png",
-  },
-  {
-    id: 3,
-    url:
-      "/bgs/maple_island.png",
-  },
-  {
-    id: 4,
-    url:
-      "/bgs/florina_beach.png",
-  },
-  {
-    id: 5,
-    url:
-      "/bgs/partem.png",
-  },
-  {
-    id: 6,
-    url:
-      "/bgs/ellinia_forest.png",
-  },
-  {
-    id: 7,
-    url:
-      "/bgs/fairy_fountain.png",
-  },
-  {
-    id: 8,
-    url:
-      "/bgs/elluel.png",
-  },
-  
-]);
+    },
+    {
+      id: 2,
+      url:
+        "/bgs/leafre.png",
+    },
+    {
+      id: 3,
+      url:
+        "/bgs/maple_island.png",
+    },
+    {
+      id: 4,
+      url:
+        "/bgs/florina_beach.png",
+    },
+    {
+      id: 5,
+      url:
+        "/bgs/partem.png",
+    },
+    {
+      id: 6,
+      url:
+        "/bgs/ellinia_forest.png",
+    },
+    {
+      id: 7,
+      url:
+        "/bgs/fairy_fountain.png",
+    },
+    {
+      id: 8,
+      url:
+        "/bgs/elluel.png",
+    },
+  ]);
+})
 
-const isDragging = ref(false);
-
-const cardDirection = ref<string>("");
-const handleChangeX = (x: number) => {
-  if (x > 20) cardDirection.value = "right";
-  else if (x < -20) cardDirection.value = "left";
-  else cardDirection.value = "";
-};
-
-const handleChangeY = (y: number) => {
-  if (y < -20) cardDirection.value = "up";
-  else cardDirection.value = "";
-};
-
-const handleDragStart = () => {
-  
-}
-
-const removeCard = (id) => {
-  cardData.value = cardData.value.filter((card) => card.id !== id);
-};
 </script>
