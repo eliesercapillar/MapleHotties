@@ -70,25 +70,18 @@ const props = defineProps({
 const swipeStore = useSwipeStore();
 
 const isHovering = ref(false);
-
-const onPointerHover = () => {
-  isHovering.value = true;
-}
-
-const onPointerLeave = () => {
-  isHovering.value = false;
-}
-
 const isPressed = ref(false);
+
+const onPointerHover = () => { isHovering.value = true; }
+
+const onPointerLeave = () => { isHovering.value = false; }
 
 const onPointerDown = (e) => {
   isPressed.value = true;
   e.target.setPointerCapture(e.pointerId);
 }
 
-const onPointerUp = () => {
-  isPressed.value = false;
-}
+const onPointerUp = () => { isPressed.value = false; }
 
 const isActive = computed(() => {
   const swipeThreshold = 20;

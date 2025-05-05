@@ -26,6 +26,16 @@ builder.Services.AddHttpClient<ICharacterScraperClient, HttpCharacterScraperClie
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevAllowVue", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // The Vite frontend URL
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,6 +47,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseCors("DevAllowVue");
 app.MapControllers();
 
 app.Run();

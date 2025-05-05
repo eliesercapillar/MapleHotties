@@ -37,7 +37,6 @@
                 v-for="(button, index) in ButtonSVGs.data"
                 :key="index"
                 :button="button"
-                :isDragging="swipeStore.isDragging"
               />
             </div>
           </div>
@@ -49,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { motion } from "motion-v";
 import Button from "@/components/ui/button/Button.vue";
 import SwipeCard from "@/components/SwipeCard.vue";
@@ -60,7 +59,8 @@ import { useSwipeStore } from "@/stores/swipeStore";
 
 const swipeStore = useSwipeStore();
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchCharacters();
   swipeStore.initializeCards([
     {
     id: 1,
@@ -102,7 +102,31 @@ onMounted(() => {
       url:
         "/bgs/elluel.png",
     },
+    {
+      id: 9,
+      url:
+        "/bgs/elodin.png",
+    },
+    {
+      id: 10,
+      url:
+        "/bgs/crimson_queen.png",
+    },
   ]);
 })
+
+const characters = ref([])
+const page = ref(1);
+const pageSize = 10
+const fetchCharacters = async () => {
+  try {
+    const response = await fetch(`http://localhost:5051/api/Characters?page=${page.value}&pageSize=${pageSize}`)
+    if (!response.ok) throw new Error('Failed to fetch characters')
+    characters.value = await response.json()
+  } 
+  catch (error) {
+    console.error(error)
+  }
+}
 
 </script>
