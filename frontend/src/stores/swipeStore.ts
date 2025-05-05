@@ -3,8 +3,9 @@ import { ref, computed } from 'vue'
 
 interface Card 
 {
-  id: number
-  url: string
+  id: number;
+  bgURL: string;
+  spriteURL: string;
 }
 
 export const useSwipeStore = defineStore('swipe', () => 

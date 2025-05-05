@@ -18,7 +18,9 @@
       <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
         <div class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
           <div class="grid justify-center items-center">
+            <p v-if="isLoading" class="text-white">Loading...</p>
             <SwipeCard
+              v-else
               v-for="card in swipeStore.cards"
               :key="card.id"
               :card="card"
@@ -56,77 +58,34 @@ import TinderButton from "@/components/TinderButton.vue";
 import Instructions from "@/components/Instructions.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
 import { useSwipeStore } from "@/stores/swipeStore";
+import Backgrounds from "@/data/Backgrounds.json";
 
 const swipeStore = useSwipeStore();
 
-onMounted(async () => {
-  await fetchCharacters();
-  swipeStore.initializeCards([
-    {
-    id: 1,
-    url:
-      "/bgs/kerning_city.png",
-    },
-    {
-      id: 2,
-      url:
-        "/bgs/leafre.png",
-    },
-    {
-      id: 3,
-      url:
-        "/bgs/maple_island.png",
-    },
-    {
-      id: 4,
-      url:
-        "/bgs/florina_beach.png",
-    },
-    {
-      id: 5,
-      url:
-        "/bgs/partem.png",
-    },
-    {
-      id: 6,
-      url:
-        "/bgs/ellinia_forest.png",
-    },
-    {
-      id: 7,
-      url:
-        "/bgs/fairy_fountain.png",
-    },
-    {
-      id: 8,
-      url:
-        "/bgs/elluel.png",
-    },
-    {
-      id: 9,
-      url:
-        "/bgs/elodin.png",
-    },
-    {
-      id: 10,
-      url:
-        "/bgs/crimson_queen.png",
-    },
-  ]);
-})
+const isLoading = ref(false)
 
-const characters = ref([])
 const page = ref(1);
 const pageSize = 10
-const fetchCharacters = async () => {
+onMounted(async () => {
   try {
     const response = await fetch(`http://localhost:5051/api/Characters?page=${page.value}&pageSize=${pageSize}`)
-    if (!response.ok) throw new Error('Failed to fetch characters')
-    characters.value = await response.json()
+    if (!response.ok) throw new Error("Failed to fetch characters")
+    const data = await response.json()
+
+    const cards = data.map((character: any, index: number) => ({
+      id: character.id,
+      bgURL: Backgrounds.data[index % Backgrounds.data.length],
+      spriteURL: character.imageUrl
+    }))
+
+    swipeStore.initializeCards(cards)
   } 
   catch (error) {
     console.error(error)
+  } 
+  finally {
+    isLoading.value = false
   }
-}
+})
 
 </script>

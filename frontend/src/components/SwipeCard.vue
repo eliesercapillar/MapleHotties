@@ -10,14 +10,22 @@
   >
     <img
       id="card_background"
-      :src="props.card.url"
+      :src="card.bgURL"
       alt="SwipeCard"
       class="h-[667px] w-[375px] object-cover rounded-lg select-none"
       draggable="false"
     />
-    <img 
+    <!-- <img 
       id="character_sprite"
       src="/rockoguy_up5.png"
+      alt="Player Character"
+      class="absolute top-[50%] left-[50%] scale-[1]"
+      style="transform: translate(-50%, -50%); "
+      draggable="false"
+    /> -->
+    <img 
+      id="character_sprite"
+      :src="card.spriteURL"
       alt="Player Character"
       class="absolute top-[50%] left-[50%] scale-[1]"
       style="transform: translate(-50%, -50%); "
@@ -75,7 +83,8 @@ import { useSwipeStore } from '@/stores/swipeStore'
 const props = defineProps<{
   card: {
     id: number;
-    url: string;
+    bgURL: string;
+    spriteURL: string;
   };
   isActive: Boolean;
 }>();
