@@ -46,8 +46,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
 app.UseCors("DevAllowVue");
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

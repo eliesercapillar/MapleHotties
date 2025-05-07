@@ -1,11 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-interface Card 
+interface CharacterCard 
 {
   id: number;
   bgURL: string;
   spriteURL: string;
+  info: CharacterInfo;
+}
+
+interface CharacterInfo {
+  ranking: number;
+  name: string;
+  level: number;
+  job: string;
+  world: string;
 }
 
 export const useSwipeStore = defineStore('swipe', () => 
@@ -15,8 +24,8 @@ export const useSwipeStore = defineStore('swipe', () =>
    *   initializeCards @params - cardList : Card[]
    *   removeCard      @params - id : number
    *=====================================*/
-  const cards = ref([] as Card[]);
-  function initializeCards(cardList : Card[]) {
+  const cards = ref([] as CharacterCard[]);
+  function initializeCards(cardList : CharacterCard[]) {
     cards.value = cardList;
     currentIndex.value = 0
   }

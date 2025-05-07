@@ -75,7 +75,14 @@ onMounted(async () => {
     const cards = data.map((character: any, index: number) => ({
       id: character.id,
       bgURL: Backgrounds.data[index % Backgrounds.data.length],
-      spriteURL: character.imageUrl
+      spriteURL: character.imageUrl,
+      info: {
+        ranking: character.id,
+        name: character.name,
+        level: character.level,
+        job: character.job,
+        world: character.world
+      }
     }))
 
     swipeStore.initializeCards(cards)

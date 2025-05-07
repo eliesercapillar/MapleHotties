@@ -15,22 +15,22 @@
       class="h-[667px] w-[375px] object-cover rounded-lg select-none"
       draggable="false"
     />
-    <!-- <img 
+    <img 
       id="character_sprite"
       src="/rockoguy_up5.png"
       alt="Player Character"
       class="absolute top-[50%] left-[50%] scale-[1]"
       style="transform: translate(-50%, -50%); "
       draggable="false"
-    /> -->
-    <img 
+    />
+    <!-- <img 
       id="character_sprite"
       :src="card.spriteURL"
       alt="Player Character"
       class="absolute top-[50%] left-[50%] scale-[1]"
       style="transform: translate(-50%, -50%); "
       draggable="false"
-    />
+    /> -->
     <div id="overlays">
       <!-- Fav Overlay -->
       <!-- TODO: Add y checking logic -->
@@ -174,3 +174,4 @@ const handleDragEnd = () => {
   }
 };
 </script>
+
