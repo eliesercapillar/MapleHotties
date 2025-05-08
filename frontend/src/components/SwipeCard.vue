@@ -31,6 +31,14 @@
       style="transform: translate(-50%, -50%); "
       draggable="false"
     /> -->
+    <div id="character_info" class="absolute top-[75%]">
+      <div id="character_name_and_level" class="ml-2 text-2xl">
+        <span class="font-bold">{{ card.info.name }}</span>
+        &nbsp;
+        <span class="font-normal">{{ card.info.level }}</span>
+      </div>
+      
+    </div>
     <div id="overlays">
       <!-- Fav Overlay -->
       <!-- TODO: Add y checking logic -->
@@ -85,6 +93,14 @@ const props = defineProps<{
     id: number;
     bgURL: string;
     spriteURL: string;
+    info: 
+    {
+      ranking: number,
+      name: string,
+      level: number,
+      job: string,
+      world: string,
+    };
   };
   isActive: Boolean;
 }>();
