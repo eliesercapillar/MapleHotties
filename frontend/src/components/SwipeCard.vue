@@ -31,11 +31,16 @@
       style="transform: translate(-50%, -50%); "
       draggable="false"
     /> -->
-    <div id="character_info" class="absolute top-[75%]">
-      <div id="character_name_and_level" class="ml-2 text-2xl">
+    <div id="character_info" class="absolute bottom-[10%] ml-2 text-white bg-yellow-900">
+      <div id="character_name_and_level" class="text-2xl">
         <span class="font-bold">{{ card.info.name }}</span>
         &nbsp;
         <span class="font-normal">{{ card.info.level }}</span>
+      </div>
+      <div id="character_job_and_world" class="">
+        <span class="font-bold">{{ card.info.world }}</span>
+        &nbsp;
+        <span class="font-normal">{{ card.info.job }}</span>
       </div>
       
     </div>
@@ -43,7 +48,7 @@
       <!-- Fav Overlay -->
       <!-- TODO: Add y checking logic -->
       <motion.div 
-      class="absolute bottom-[2%]" 
+      class="absolute bottom-[2%] left-[50%]" 
       :style="{ opacity: favOpacity }"
       >
         <img
