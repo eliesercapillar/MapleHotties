@@ -48,12 +48,12 @@
       <!-- Fav Overlay -->
       <!-- TODO: Add y checking logic -->
       <motion.div 
-      class="absolute bottom-[2%] left-[50%]" 
+      class="absolute bottom-[2%] right-[0%]" 
       :style="{ opacity: favOpacity }"
       >
         <img
           class="h-[256px] w-[256px]"
-          src="/swipecard_like_overlay_24x24.svg"
+          src="/swipecard_fav_overlay_24x24.svg"
           draggable="false"
         />
       </motion.div>
