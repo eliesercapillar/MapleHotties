@@ -1,6 +1,8 @@
 <template>
   <motion.div
-    class="relative h-[667px] w-[375px] row-[1] col-[1] z-10 hover:cursor-grab active:cursor-grabbing"
+    class="relative
+           h-[667px] w-[375px] row-[1] col-[1] z-10 
+           hover:cursor-grab active:cursor-grabbing"
     :class="{ 'z-[11]': isActive }"
     :style="{ x, y, rotate }"
     :drag="isActive ? true : false"
@@ -31,48 +33,41 @@
       style="transform: translate(-50%, -50%); "
       draggable="false"
     /> -->
-    <div id="character_info" class="absolute bottom-[10%] ml-2 text-white bg-yellow-900">
-      <div id="character_name_and_level" class="text-2xl">
-        <span class="font-bold">{{ card.info.name }}</span>
+    <div class="absolute bottom-[0%] h-[30%] w-full image-"style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
+    <div id="character_info" class="absolute bottom-[5%] ml-2 text-white">
+      <div id="character_name_and_level" class="flex items-center text-3xl">
+        <span class="font-extrabold">{{ card.info.name }}</span>
         &nbsp;
         <span class="font-normal">{{ card.info.level }}</span>
       </div>
-      <div id="character_job_and_world" class="">
-        <span class="font-bold">{{ card.info.world }}</span>
+      <div id="character_world" class="flex items-center text-md">
+        <Icon icon="lucide:globe"></Icon>
+        &nbsp;
+        <span class="font-normal">{{ card.info.world }}</span>
+      </div>
+      <div id="character_job" class="flex items-center text-md">
+        <Icon icon="lucide:swords"></Icon>
         &nbsp;
         <span class="font-normal">{{ card.info.job }}</span>
       </div>
-      
     </div>
     <div id="overlays">
-      <!-- Fav Overlay -->
       <!-- TODO: Add y checking logic -->
-      <motion.div 
-      class="absolute bottom-[2%] right-[0%]" 
-      :style="{ opacity: favOpacity }"
-      >
+      <motion.div id="fav_overlay" class="absolute bottom-[2%] right-[0%]" :style="{ opacity: favOpacity }">
         <img
           class="h-[256px] w-[256px]"
           src="/swipecard_fav_overlay_24x24.svg"
           draggable="false"
         />
       </motion.div>
-      <!-- Like Overlay -->
-      <motion.div
-        class="absolute top-[2%] left-[2%] -rotate-12"
-        :style="{ opacity: likeOpacity }"
-      >
+      <motion.div id="like_overlay" class="absolute top-[2%] left-[2%] -rotate-12" :style="{ opacity: likeOpacity }">
         <img
           class="h-[256px] w-[256px]"
           src="/swipecard_like_overlay_24x24.svg"
           draggable="false"
         />
       </motion.div>
-      <!-- Nope Overlay -->
-      <motion.div
-        class="absolute top-[2%] right-[2%] rotate-12"
-        :style="{ opacity: nopeOpacity }"
-      >
+      <motion.div id="nope_overlay" class="absolute top-[2%] right-[2%] rotate-12" :style="{ opacity: nopeOpacity }">
         <img
           class="h-[216px] w-[216px]"
           src="/swipecard_nope_overlay_24x24.svg"
@@ -84,6 +79,7 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from "@iconify/vue/dist/iconify.js";
 import {
   motion,
   useMotionValue,
