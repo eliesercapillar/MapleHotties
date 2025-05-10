@@ -16,24 +16,23 @@
     </aside>
     <div class="w-full h-screen bg-black-grey-radial">
       <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-        <div class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
+        <SkeletonCard v-if="swipeStore.isLoading && swipeStore.cards.length == 0"/>
+        <div v-else class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
+          <motion.div id="button_anim_bar"
+            class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
+            style="bottom: -14px; left: 8px"
+            :animate="{ scale: swipeStore.isDragging ? 0.6 : 1 }"
+            :transition="{ duration: 0.3, ease: 'easeInOut' }"
+          />
           <div class="grid justify-center items-center">
-            <p v-if="isLoading" class="text-white">Loading...</p>
             <SwipeCard
-              v-else
               v-for="card in swipeStore.cards"
               :key="card.id"
               :card="card"
               :isActive="card.id === swipeStore.cards[swipeStore.cards.length - 1].id"
             />
           </div>
-          <motion.div
-            class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
-            style="bottom: -14px; left: 8px"
-            :animate="{ scale: swipeStore.isDragging ? 0.6 : 1 }"
-            :transition="{ duration: 0.3, ease: 'easeInOut' }"
-          />
-          <div class="absolute z-20 isolate w-[375px] bottom-[-2rem]">
+          <div id="buttons" class="absolute z-20 isolate w-[375px] bottom-[-2rem]">
             <div class="flex justify-around items-center">
               <TinderButton
                 v-for="(button, index) in ButtonSVGs.data"
@@ -50,49 +49,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import { motion } from "motion-v";
 import Button from "@/components/ui/button/Button.vue";
+import SkeletonCard from "@/components/SkeletonCard.vue";
 import SwipeCard from "@/components/SwipeCard.vue";
 import TinderButton from "@/components/TinderButton.vue";
 import Instructions from "@/components/Instructions.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
 import { useSwipeStore } from "@/stores/swipeStore";
-import Backgrounds from "@/data/Backgrounds.json";
 
 const swipeStore = useSwipeStore();
 
-const isLoading = ref(false)
-
-const page = ref(1);
-const pageSize = 10
 onMounted(async () => {
-  try {
-    const response = await fetch(`http://localhost:5051/api/Characters?page=${page.value}&pageSize=${pageSize}`)
-    if (!response.ok) throw new Error("Failed to fetch characters")
-    const data = await response.json()
-
-    const cards = data.map((character: any, index: number) => ({
-      id: character.id,
-      bgURL: Backgrounds.data[index % Backgrounds.data.length],
-      spriteURL: character.imageUrl,
-      info: {
-        ranking: character.id,
-        name: character.name,
-        level: character.level,
-        job: character.job,
-        world: character.world
-      }
-    }))
-
-    swipeStore.initializeCards(cards)
-  } 
-  catch (error) {
-    console.error(error)
-  } 
-  finally {
-    isLoading.value = false
-  }
+  swipeStore.fetchCards();
 })
+
+watch(() => swipeStore.cards.length, (len) => {
+  if (!swipeStore.isLoading && len <= 5) {
+    swipeStore.fetchCards()
+  }}
+)
 
 </script>

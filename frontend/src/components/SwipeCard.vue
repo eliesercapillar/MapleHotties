@@ -1,6 +1,6 @@
 <template>
   <motion.div
-    class="relative
+    class="relative overflow-hidden
            h-[667px] w-[375px] row-[1] col-[1] z-10 
            hover:cursor-grab active:cursor-grabbing"
     :class="{ 'z-[11]': isActive }"
@@ -17,23 +17,26 @@
       class="h-[667px] w-[375px] object-cover rounded-lg select-none"
       draggable="false"
     />
-    <img 
+    <!-- <img 
       id="character_sprite"
       src="/rockoguy_up5.png"
       alt="Player Character"
       class="absolute top-[50%] left-[50%] scale-[1]"
       style="transform: translate(-50%, -50%); "
       draggable="false"
-    />
-    <!-- <img 
+    /> -->
+    <!-- TODO: Add remove width & height once upscaled pngs are implemented -->
+    <img 
       id="character_sprite"
       :src="card.spriteURL"
       alt="Player Character"
-      class="absolute top-[50%] left-[50%] scale-[1]"
+      class="absolute top-[50%] left-[50%]"
+      width="480" height="480"
       style="transform: translate(-50%, -50%); "
       draggable="false"
-    /> -->
-    <div class="absolute bottom-[0%] h-[30%] w-full image-"style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
+    />
+    <div class="absolute bottom-[0%] h-[30%] w-full rounded-lg"
+         style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
     <div id="character_info" class="absolute bottom-[5%] ml-2 text-white">
       <div id="character_name_and_level" class="flex items-center text-3xl">
         <span class="font-extrabold">{{ card.info.name }}</span>
