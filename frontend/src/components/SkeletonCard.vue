@@ -1,5 +1,5 @@
 <template>
-  <div id="skeleton_card" class="">
+  <div id="skeleton_card">
     <img
       id="card_background"
       src="/bgs/fairy_fountain.png"

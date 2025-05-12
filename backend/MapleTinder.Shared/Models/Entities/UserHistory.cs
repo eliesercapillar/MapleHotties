@@ -15,6 +15,8 @@ namespace MapleTinder.Shared.Models.Entities
         public int UserId { get; set; }
 
         [ForeignKey("Character")] public int CharacterId { get; set; }
+
+        public string? Status { get; set; } // "Nope" | "Like" | "Favourite"
         public DateTime SeenAt { get; set; }
     }
 }

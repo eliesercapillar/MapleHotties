@@ -16,7 +16,7 @@
     </aside>
     <div class="w-full h-screen bg-black-grey-radial">
       <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-        <SkeletonCard v-if="swipeStore.isLoading && swipeStore.cards.length == 0"/>
+        <SkeletonCard v-if="swipeStore.cards.length == 0"/>
         <div v-else class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
           <motion.div id="button_anim_bar"
             class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
@@ -25,11 +25,9 @@
             :transition="{ duration: 0.3, ease: 'easeInOut' }"
           />
           <div class="grid justify-center items-center">
-            <SwipeCard
-              v-for="card in swipeStore.cards"
+            <SwipeCard v-for="(card, index) in swipeStore.cards"
               :key="card.id"
-              :card="card"
-              :isActive="card.id === swipeStore.cards[swipeStore.cards.length - 1].id"
+              :index="index"
             />
           </div>
           <div id="buttons" class="absolute z-20 isolate w-[375px] bottom-[-2rem]">

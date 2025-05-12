@@ -41,10 +41,6 @@ export const useSwipeStore = defineStore('swipe', () =>
   const isLoading = ref(false);
   const curPage = ref(1);
 
-  function initializeCards(cardList : CharacterCard[]) {
-    cards.value = cardList;
-    currentIndex.value = 0
-  }
 
   async function fetchCards() {
     if (isLoading.value) return;
@@ -85,15 +81,6 @@ export const useSwipeStore = defineStore('swipe', () =>
     cards.value = cards.value.filter((card) => card.id !== id);
   }
 
-  /* currentIndex
-   *   The index of the current active card.
-   *
-   * currentCard
-   *   The current active card object.
-   *=====================================*/
-  const currentIndex = ref(0); // I dont think this is necessary?
-  const currentCard = computed(() => cards[currentIndex.value] || null); // I dont think this is necessary?
-
 
   /* xPos
    *   The X position of the current active card.
@@ -123,9 +110,8 @@ export const useSwipeStore = defineStore('swipe', () =>
   }
 
 
-  return { cards, initializeCards, isLoading,
+  return { cards, isLoading,
            fetchCards, removeCard, 
-           currentIndex, currentCard,
            xPos, saveXPos, 
            yPos, saveYPos,
            isDragging, setDragging}

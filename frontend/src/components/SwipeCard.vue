@@ -1,7 +1,7 @@
 <template>
   <motion.div
     class="relative overflow-hidden
-           h-[667px] w-[375px] row-[1] col-[1] z-10 
+           row-[1] col-[1] z-10 
            hover:cursor-grab active:cursor-grabbing"
     :class="{ 'z-[11]': isActive }"
     :style="{ x, y, rotate }"
@@ -17,27 +17,19 @@
       class="h-[667px] w-[375px] object-cover rounded-lg select-none"
       draggable="false"
     />
-    <!-- <img 
-      id="character_sprite"
-      src="/rockoguy_up5.png"
-      alt="Player Character"
-      class="absolute top-[50%] left-[50%] scale-[1]"
-      style="transform: translate(-50%, -50%); "
-      draggable="false"
-    /> -->
     <!-- TODO: Add remove width & height once upscaled pngs are implemented -->
     <img 
       id="character_sprite"
       :src="card.spriteURL"
       alt="Player Character"
-      class="absolute top-[50%] left-[50%]"
+      class="absolute top-[50%] left-[50%] select-none"
       width="480" height="480"
       style="transform: translate(-50%, -50%); "
       draggable="false"
     />
     <div class="absolute bottom-[0%] h-[30%] w-full rounded-lg"
          style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
-    <div id="character_info" class="absolute bottom-[5%] ml-2 text-white">
+    <div id="character_info" class="absolute bottom-[5%] ml-2 select-none text-white">
       <div id="character_name_and_level" class="flex items-center text-3xl">
         <span class="font-extrabold">{{ card.info.name }}</span>
         &nbsp;
@@ -82,6 +74,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { Icon } from "@iconify/vue/dist/iconify.js";
 import {
   motion,
@@ -93,23 +86,13 @@ import {
 import { useSwipeStore } from '@/stores/swipeStore'
 
 const props = defineProps<{
-  card: {
-    id: number;
-    bgURL: string;
-    spriteURL: string;
-    info: 
-    {
-      ranking: number,
-      name: string,
-      level: number,
-      job: string,
-      world: string,
-    };
-  };
-  isActive: Boolean;
+  index: number;
 }>();
 
-const swipeStore = useSwipeStore()
+const swipeStore = useSwipeStore();
+const cards = computed(() => swipeStore.cards)
+const card = computed(() => cards.value[props.index])
+const isActive = computed(() => props.index === cards.value.length - 1)
 
 const x = useMotionValue(0);
 const y = useMotionValue(0);
@@ -181,7 +164,7 @@ const handleDragEnd = () => {
     
     animate(y, targetY, {
       duration: 0.15,
-      onComplete: () => swipeStore.removeCard(props.card.id),
+      onComplete: () => swipeStore.removeCard(card.value.id),
     });
   } 
   else if (xThresholdHit) {
@@ -189,7 +172,7 @@ const handleDragEnd = () => {
 
     animate(x, targetX, {
       duration: 0.15,
-      onComplete: () => swipeStore.removeCard(props.card.id),
+      onComplete: () => swipeStore.removeCard(card.value.id),
     });
   }
 };
