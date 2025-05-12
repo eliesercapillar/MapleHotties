@@ -4,7 +4,6 @@ using MapleTinder.Shared.Models.Entities;
 using scraper.Services;
 using scraper.Interfaces;
 using System;
-using scraper.Services.Old.Playwright;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,10 +35,7 @@ builder.Services.AddSingleton<IScrapeJobTracker, ScrapeJobTracker>();
 var app = builder.Build();
 
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-lifetime.ApplicationStopping.Register(() =>
-{
-    _ = CharacterScraperPlaywright.DisposeBrowserAsync();
-});
+// TODO: Add background process to rescrape characters weekly.
 
 app.MapPost("/scrape/character/{name}", async (string name, CharacterJSONScraper scraper) =>
 {
