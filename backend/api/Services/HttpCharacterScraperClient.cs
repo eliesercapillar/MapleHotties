@@ -13,11 +13,11 @@ namespace api.Services
             _http = http;
         }
 
-        public async Task<Character> ScrapeCharacterAsync(string name)
+        public async Task<Character?> ScrapeCharacterAsync(string name)
         {
             var response = await _http.PostAsync($"/scrape/character/{name}", null);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<Character>();
+            return await response.Content.ReadFromJsonAsync<Character?>();
         }
 
         public string TriggerScrapeAllAsync(int maxPages = 50000, int concurrency = 10)

@@ -94,7 +94,7 @@ namespace api.Controllers
             {
                 UserId = userId,
                 CharacterId = e.CharacterId,
-                Status = e.Status,
+                Status = e.Status!,
                 SeenAt = e.SeenAt
             });
             await _context.UserHistory.AddRangeAsync(entities);

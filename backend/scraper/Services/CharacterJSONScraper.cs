@@ -20,8 +20,8 @@ namespace scraper.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly HttpClient _http;
 
-        private string[] userAgents = new string[]
-        {
+        private string[] userAgents =
+        [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0",
@@ -33,14 +33,14 @@ namespace scraper.Services
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 OPR/109.0.0.0",
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
             "Mozilla/5.0 (X11; Linux i686; rv:124.0) Gecko/20100101 Firefox/124.0",
-        };
+        ];
 
-        private string[] acceptLanguages = new string[]
-        {
+        private string[] acceptLanguages =
+        [
             "en-CA,en-US;q=0.9,en;q=0.8",
             "en-CA,en-US;q=0.7,en;q=0.3",
             "en-US,en;q=0.9"
-        };
+        ];
 
         public CharacterJSONScraper(IServiceProvider serviceProvider)
         {
