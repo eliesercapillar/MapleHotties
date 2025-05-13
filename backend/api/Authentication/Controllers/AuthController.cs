@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Rewrite;
+using api.Authentication.Interfaces;
 
 namespace api.Authentication.Controllers
 {
@@ -17,15 +18,16 @@ namespace api.Authentication.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IConfiguration _config;
+
+        private readonly ITokenService _tokenService;
 
         public AuthController(UserManager<ApplicationUser> userManager,
                               SignInManager<ApplicationUser> signInManager,
-                              IConfiguration config)
+                              ITokenService tokenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _config = config;
+            _tokenService = tokenService;
         }
 
         // POST: api/Auth/register
@@ -41,7 +43,6 @@ namespace api.Authentication.Controllers
                     UserName = dto.Email,
                     Email = dto.Email
                 };
-
                 
                 var createResult = await _userManager.CreateAsync(user, dto.Password);
                 if (!createResult.Succeeded) return StatusCode(500, createResult.Errors);
@@ -68,29 +69,8 @@ namespace api.Authentication.Controllers
             var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
             if (!result.Succeeded) return BadRequest("Invalid password.");
 
-            var token = GenerateJwtToken(user);
+            var token = _tokenService.CreateToken(user);
             return Ok(new { token });
-        }
-
-        private string GenerateJwtToken(ApplicationUser user)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetValue<string>("AppSettings:Token")!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new List<Claim> {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var tokenDescriptor = new JwtSecurityToken(
-                issuer: _config.GetValue<string>("AppSettings:Issuer"),
-                audience: _config.GetValue<string>("AppSettings:Audience"),
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
     }
 }

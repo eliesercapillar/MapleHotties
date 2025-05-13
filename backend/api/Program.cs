@@ -1,3 +1,5 @@
+using api.Authentication.Interfaces;
+using api.Authentication.Service;
 using api.Interfaces;
 using api.Services;
 using MapleTinder.Shared.Data;
@@ -13,6 +15,11 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 
+
+// ----------------------------------------------------------
+// Build
+// ----------------------------------------------------------
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -22,8 +29,11 @@ builder.Configuration
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
-// Add services to the container.
+// ----------------------------------------------------------
+// Build - Services
+// ----------------------------------------------------------
 
+// ASP.NET Controllers
 builder.Services.AddControllers();
 
 // EF Core
@@ -116,6 +126,13 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+// Other Services
+builder.Services.AddScoped<ITokenService, TokenService>(); // JWT Token Creation Service
+
+// ----------------------------------------------------------
+// App
+// ----------------------------------------------------------
 
 var app = builder.Build();
 
