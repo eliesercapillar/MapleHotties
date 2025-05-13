@@ -7,7 +7,7 @@ using MapleTinder.Shared.Models.Entities;
 
 namespace MapleTinder.Shared.Data
 {
-    public class MapleTinderDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
+    public class MapleTinderDbContext : IdentityDbContext<ApplicationUser>
     {
         public MapleTinderDbContext(DbContextOptions<MapleTinderDbContext> options) : base(options) { }
 
@@ -19,14 +19,22 @@ namespace MapleTinder.Shared.Data
         {
             base.OnModelCreating(builder);
 
-            // (Optional) rename Identity tables to match your naming conventions
-            builder.Entity<ApplicationUser>().ToTable("Users");
-            builder.Entity<IdentityRole<int>>().ToTable("Roles");
-            builder.Entity<IdentityUserRole<int>>().ToTable("UserRoles");
-            builder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
-            builder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
-            builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
-            builder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+            builder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "94afe2ef-c68e-4009-8d54-fc834f9c6083",
+                    ConcurrencyStamp = null,
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                },
+                new IdentityRole
+                {
+                    Id = "e5807ebd-8836-4f0f-9bc8-80f8efb18b99",
+                    ConcurrencyStamp = null,
+                    Name = "User",
+                    NormalizedName = "USER"
+                }
+            );
         }
     }
 }

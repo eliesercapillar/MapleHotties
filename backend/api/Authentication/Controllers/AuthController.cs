@@ -1,5 +1,5 @@
 ﻿using MapleTinder.Shared.Models.Entities;
-using MapleTinder.Shared.DTOs;
+using api.Authentication.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,8 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Rewrite;
 
-namespace api.Controllers
+namespace api.Authentication.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -31,27 +32,41 @@ namespace api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
         {
-            var user = new ApplicationUser 
-            { 
-                UserName = dto.Email, 
-                Email = dto.Email 
-            };
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded) return BadRequest(result.Errors);
+                var user = new ApplicationUser
+                {
+                    UserName = dto.Email,
+                    Email = dto.Email
+                };
 
-            // TODO: Add confirmation email logic.
-            return Ok();
+                
+                var createResult = await _userManager.CreateAsync(user, dto.Password);
+                if (!createResult.Succeeded) return StatusCode(500, createResult.Errors);
+
+                var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                if (!roleResult.Succeeded) return StatusCode(500, roleResult.Errors);
+
+                // TODO: Add confirmation email logic.
+
+                return Ok("User created!");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null) return Unauthorized();
+            if (user == null) return BadRequest("Email not found.");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
-            if (!result.Succeeded) return Unauthorized();
+            if (!result.Succeeded) return BadRequest("Invalid password.");
 
             var token = GenerateJwtToken(user);
             return Ok(new { token });
@@ -59,24 +74,23 @@ namespace api.Controllers
 
         private string GenerateJwtToken(ApplicationUser user)
         {
-            var jwt = _config.GetSection("Jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetValue<string>("AppSettings:Token")!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[] {
+            var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var token = new JwtSecurityToken(
-                issuer: jwt["Issuer"],
-                audience: jwt["Audience"],
+            var tokenDescriptor = new JwtSecurityToken(
+                issuer: _config.GetValue<string>("AppSettings:Issuer"),
+                audience: _config.GetValue<string>("AppSettings:Audience"),
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
     }
 }

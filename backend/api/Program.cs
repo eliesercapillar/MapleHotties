@@ -30,10 +30,14 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<MapleTinderDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
+
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.User.RequireUniqueEmail = true;
 })
@@ -41,54 +45,55 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
     .AddDefaultTokenProviders();
 
 // Authentication: JWT, Google, Discord
-var jwt = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
+    options.DefaultAuthenticateScheme =
+    options.DefaultChallengeScheme =
+    options.DefaultForbidScheme =
+    options.DefaultScheme =
+    options.DefaultSignInScheme =
+    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = jwt["Issuer"],
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
             ValidateAudience = true,
-            ValidAudience = jwt["Audience"],
-            ValidateLifetime = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!)),
-            ValidateIssuerSigningKey = true
-        };
-    })
-    .AddGoogle("Google", options =>
-    {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-        options.SignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddOAuth("Discord", options =>
-    {
-        options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
-        options.CallbackPath = "/signin-discord";
-        options.AuthorizationEndpoint = "https://discord.com/api/oauth2/authorize";
-        options.TokenEndpoint = "https://discord.com/api/oauth2/token";
-        options.UserInformationEndpoint = "https://discord.com/api/users/@me";
-        options.SaveTokens = true;
-        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
-        options.Scope.Add("identify");
-        options.Events = new OAuthEvents
-        {
-            OnCreatingTicket = async ctx =>
-            {
-                var userJson = await ctx.Backchannel.GetStringAsync(ctx.Options.UserInformationEndpoint);
-                var user = JsonDocument.Parse(userJson);
-                ctx.RunClaimActions(user.RootElement);
-            }
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!)),
+            ValidateLifetime = true
         };
     });
-builder.Services.AddAuthorization();
+    //.AddGoogle("Google", options =>
+    //{
+    //    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    //    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+    //    options.SignInScheme = IdentityConstants.ExternalScheme;
+    //})
+    //.AddOAuth("Discord", options =>
+    //{
+    //    options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
+    //    options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
+    //    options.CallbackPath = "/signin-discord";
+    //    options.AuthorizationEndpoint = "https://discord.com/api/oauth2/authorize";
+    //    options.TokenEndpoint = "https://discord.com/api/oauth2/token";
+    //    options.UserInformationEndpoint = "https://discord.com/api/users/@me";
+    //    options.SaveTokens = true;
+    //    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+    //    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
+    //    options.Scope.Add("identify");
+    //    options.Events = new OAuthEvents
+    //    {
+    //        OnCreatingTicket = async ctx =>
+    //        {
+    //            var userJson = await ctx.Backchannel.GetStringAsync(ctx.Options.UserInformationEndpoint);
+    //            var user = JsonDocument.Parse(userJson);
+    //            ctx.RunClaimActions(user.RootElement);
+    //        }
+    //    };
+    //});
 
 // Expose scraper container
 builder.Services.AddHttpClient<ICharacterScraperClient, HttpCharacterScraperClient>(client =>
@@ -123,6 +128,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("DevAllowVue");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
