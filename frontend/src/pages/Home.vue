@@ -1,12 +1,11 @@
 <template>
   <main>
-    <Analytics />
     <div class="bg-background">
       <NavBar :activeIndex="0" />
       <!-- Hero Section -->
       <section>
         <div
-          :class="`bg-[url(${heroBGPath})] bg-no-repeat bg-cover`"
+          :class="`bg-[url(/hero_bg_temp.png)] bg-no-repeat bg-cover`"
           class="h-[calc(100vh-4.5rem)] flex justify-center items-center"
         >
           <div class="grid gap-2">
@@ -78,5 +77,5 @@ import Socials from "@/components/Socials.vue";
 import Button from "@/components/ui/button/Button.vue";
 import { ref } from "vue";
 
-const heroBGPath = ref("/hero_bg.png");
+const heroBGPath = ref("/hero_bg_temp.png");
 </script>
