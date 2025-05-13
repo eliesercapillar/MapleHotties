@@ -2,7 +2,7 @@
   <div class="bg-background min-h-screen flex flex-row">
     <aside class="min-w-80 max-w-96 w-full border-r-[1px] border-[#21262e]">
       <nav class="bg-red-300 flex items-center justify-evenly py-6 h-[--navbar-h]">
-        <Button>1</Button>
+        <Button @click="logout">Logout</Button>
         <Button>Leaderboard</Button>
         <Button>CogWheel</Button>
       </nav>
@@ -56,6 +56,7 @@ import TinderButton from "@/components/TinderButton.vue";
 import Instructions from "@/components/Instructions.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
 import { useSwipeStore } from "@/stores/swipeStore";
+import router from "@/router"
 
 const swipeStore = useSwipeStore();
 
@@ -68,5 +69,11 @@ watch(() => swipeStore.cards.length, (len) => {
     swipeStore.fetchCards()
   }}
 )
+
+function logout() {
+  localStorage.removeItem('token');
+  router.push('/')
+}
+
 
 </script>

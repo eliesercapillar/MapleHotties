@@ -12,19 +12,19 @@
             <div class="grid items-center w-full gap-4">
               <div class="flex flex-col space-y-1.5">
                 <Label for="name">Email</Label>
-                <Input id="email" />
+                <Input id="email" type="email" v-model="email"/>
               </div>
               <div class="flex flex-col space-y-1.5">
                 <Label for="framework">Password</Label>
-                <Input id="password" type="password" />
+                <Input id="password" type="password" v-model="password"/>
               </div>
               <div class="flex flex-col space-y-1.5">
                 <Label for="framework">Confim Password</Label>
-                <Input id="password" type="password" />
+                <Input id="password" type="password" v-model="confirmPassword"/>
               </div>
             </div>
           </form>
-          <Button class="w-full mb-6">Create Account</Button>
+          <Button @click="register" class="w-full mb-6">Create Account</Button>
         </CardContent>
         <CardFooter class="flex justify-center px-6 pb-6">
           <span class="text-sm">
@@ -49,16 +49,37 @@ import {
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
 import Button from "@/components/ui/button/Button.vue";
-import { Icon } from "@iconify/vue/dist/iconify.js";
+import { ref } from "vue";
+import router from "@/router"
+
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
 
 async function register() {
   try {
     const url = `http://localhost:5051/api/Auth/register`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`${response.status}`);
-  } catch (err) {
-    console.error("Failed to sign in:", err);
-  } finally {
-  }
+    const payload = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value
+        })
+      }
+
+      const response = await fetch(url, payload);
+      if (!response.ok) 
+      {
+        throw new Error(`${response.status}`);
+      }
+
+      router.push('/login')
+    }
+    catch (err) {
+      console.error("Failed to create new account:", err);
+    }
 }
 </script>
