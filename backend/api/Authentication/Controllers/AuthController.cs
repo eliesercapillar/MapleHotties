@@ -63,14 +63,16 @@ namespace api.Authentication.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null) return BadRequest("Email not found.");
+            if (user == null) return BadRequest("Email not found or incorrect password.");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
-            if (!result.Succeeded) return BadRequest("Invalid password.");
+            if (!result.Succeeded) return Unauthorized("Email not found or incorrect password.");
 
             var token = _tokenService.CreateToken(user);
-            return Ok(new { token });
+            return Ok( new {token} );
         }
     }
 }
