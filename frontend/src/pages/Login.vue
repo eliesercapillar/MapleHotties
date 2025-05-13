@@ -13,15 +13,15 @@
                 <div class="grid items-center w-full gap-4">
                   <div class="flex flex-col space-y-1.5">
                     <Label for="name">Email</Label>
-                    <Input id="email"/>
+                    <Input id="email" type="email" v-model="email"/>
                   </div>
                   <div class="flex flex-col space-y-1.5">
                     <Label for="framework">Password</Label>
-                    <Input id="password" type="password"/>
+                    <Input id="password" type="password" v-model="password"/>
                   </div>
                 </div>
               </form>
-              <Button class="w-full mb-6">Sign in</Button>
+              <Button @click="login" class="w-full mb-6">Sign in</Button>
               <div class="flex items-center mb-6">
                 <div class="border-b-[1px] flex-1"></div>
                 <span class="mx-2 flex-1 text-center">Or Sign in with</span>
@@ -60,21 +60,38 @@ import Input  from '@/components/ui/input/Input.vue';
 import Label  from '@/components/ui/label/Label.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Icon } from '@iconify/vue/dist/iconify.js';
+import { ref } from "vue";
+import router from "@/router"
 
+const email = ref('');
+const password = ref('');
 
 async function login() {
     try {
       const url = `http://localhost:5051/api/Auth/login`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`${response.status}`);
+      const payload = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value
+        })
+      }
+
+      const response = await fetch(url, payload);
+      if (!response.ok) 
+      {
+        throw new Error(`${response.status}`);
+      }
       
-    
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      router.push('/main')
     }
     catch (err) {
       console.error("Failed to sign in:", err);
-    }
-    finally {
-      
     }
   }
 </script>

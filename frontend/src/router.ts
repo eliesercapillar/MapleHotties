@@ -5,6 +5,7 @@ import Login from '@/pages/Login.vue';
 import Register from './pages/Register.vue';
 // import Contact from '@/pages/Contact.vue';
 import NotFound from '@/pages/404.vue'
+import { isLoggedIn } from './utils/auth';
 
 const routes = [
   { path: '/', component: Home },
@@ -21,5 +22,12 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+router.beforeEach((to, from, next) => {
+  if ((to.path === '/login' || to.path === '/register') && isLoggedIn()) 
+    next('/main')
+  else 
+    next()
+})
 
 export default router;
