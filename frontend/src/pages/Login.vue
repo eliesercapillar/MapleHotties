@@ -21,7 +21,7 @@
                   </div>
                 </div>
               </form>
-              <Button class="w-full mb-6">Log in</Button>
+              <Button class="w-full mb-6">Sign in</Button>
               <div class="flex items-center mb-6">
                 <div class="border-b-[1px] flex-1"></div>
                 <span class="mx-2 flex-1 text-center">Or Sign in with</span>
@@ -61,4 +61,20 @@ import Label  from '@/components/ui/label/Label.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Icon } from '@iconify/vue/dist/iconify.js';
 
+
+async function login() {
+    try {
+      const url = `http://localhost:5051/api/Auth/login`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`${response.status}`);
+      
+    
+    }
+    catch (err) {
+      console.error("Failed to sign in:", err);
+    }
+    finally {
+      
+    }
+  }
 </script>
