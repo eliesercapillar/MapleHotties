@@ -13,6 +13,7 @@
               <div class="flex flex-col space-y-1.5">
                 <Label for="name">Email</Label>
                 <Input id="email" type="email" v-model="email"/>
+                <span class="text-sm" :class="hasUppercase ? 'text-green-500' : 'text-red-500'">Enter a valid email.</span>
               </div>
               <div class="flex flex-col space-y-1.5">
                 <Label for="framework">Password</Label>
@@ -22,6 +23,14 @@
                 <Label for="framework">Confim Password</Label>
                 <Input id="password" type="password" v-model="confirmPassword"/>
               </div>
+              <ul class="text-sm mt-2 text-left space-y-1">
+                <li :class="hasUppercase ? 'text-green-500' : 'text-red-500'">• At least one uppercase letter</li>
+                <li :class="hasLowercase ? 'text-green-500' : 'text-red-500'">• At least one lowercase letter</li>
+                <li :class="hasDigit ? 'text-green-500' : 'text-red-500'">• At least one number</li>
+                <li :class="hasSpecialChar ? 'text-green-500' : 'text-red-500'">• At least one special character</li>
+                <li :class="isLongEnough ? 'text-green-500' : 'text-red-500'">• Minimum 8 characters</li>
+                <li :class="doesPassMatch ? 'text-green-500' : 'text-red-500'">• Passwords match</li>
+              </ul>
             </div>
           </form>
           <Button @click="register" class="w-full mb-6">Create Account</Button>
@@ -49,15 +58,37 @@ import {
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
 import Button from "@/components/ui/button/Button.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import router from "@/router"
 
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 
+// Password validation checks
+const hasUppercase = computed(() => /[A-Z]/.test(password.value))
+const hasLowercase = computed(() => /[a-z]/.test(password.value))
+const hasDigit = computed(() => /\d/.test(password.value))
+const hasSpecialChar = computed(() => /[^a-zA-Z0-9]/.test(password.value))
+const isLongEnough = computed(() => password.value.length >= 8)
+const doesPassMatch = computed(() => password.value == confirmPassword.value)
+
+const isPasswordValid = computed(() =>
+  hasUppercase.value &&
+  hasLowercase.value &&
+  hasDigit.value &&
+  hasSpecialChar.value &&
+  isLongEnough.value
+)
+
 async function register() {
   try {
+    if (!isPasswordValid.value) {
+        error.value = 'Password does not meet the required criteria.'
+        return
+    }
+
+
     const url = `http://localhost:5051/api/Auth/register`;
     const payload = {
         method: 'POST',
