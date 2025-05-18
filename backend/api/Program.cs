@@ -77,35 +77,42 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!)),
             ValidateLifetime = true
         };
-    });
+    })
     //.AddGoogle("Google", options =>
     //{
     //    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
     //    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     //    options.SignInScheme = IdentityConstants.ExternalScheme;
     //})
-    //.AddOAuth("Discord", options =>
-    //{
-    //    options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
-    //    options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
-    //    options.CallbackPath = "/signin-discord";
-    //    options.AuthorizationEndpoint = "https://discord.com/api/oauth2/authorize";
-    //    options.TokenEndpoint = "https://discord.com/api/oauth2/token";
-    //    options.UserInformationEndpoint = "https://discord.com/api/users/@me";
-    //    options.SaveTokens = true;
-    //    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-    //    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
-    //    options.Scope.Add("identify");
-    //    options.Events = new OAuthEvents
-    //    {
-    //        OnCreatingTicket = async ctx =>
-    //        {
-    //            var userJson = await ctx.Backchannel.GetStringAsync(ctx.Options.UserInformationEndpoint);
-    //            var user = JsonDocument.Parse(userJson);
-    //            ctx.RunClaimActions(user.RootElement);
-    //        }
-    //    };
-    //});
+    .AddOAuth("Discord", options =>
+    {
+        options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
+        options.Scope.Add("identify");
+
+        options.CallbackPath = new PathString("/auth/signin/discord");
+
+        options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
+
+        options.TokenEndpoint = "https://discord.com/api/oauth2/token";
+        options.UserInformationEndpoint = "https://discord.com/api/users/@me";
+
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
+
+        options.AccessDeniedPath = new PathString("/auth/fail/discord");
+
+        options.SaveTokens = true;
+        options.Events = new OAuthEvents
+        {
+            OnCreatingTicket = async context =>
+            {
+                var userJson = await context.Backchannel.GetStringAsync(context.Options.UserInformationEndpoint);
+                var user = JsonDocument.Parse(userJson);
+                context.RunClaimActions(user.RootElement);
+            }
+        };
+    });
 
 // Expose scraper container
 builder.Services.AddHttpClient<ICharacterScraperClient, HttpCharacterScraperClient>(client =>
