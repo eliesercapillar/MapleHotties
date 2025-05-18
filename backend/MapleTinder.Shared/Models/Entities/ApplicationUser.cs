@@ -5,6 +5,6 @@ namespace MapleTinder.Shared.Models.Entities
     public class ApplicationUser : IdentityUser
     {
         // For OAuth logins (Google, Discord)
-        public string? OAuthID { get; set; }
+        public string? OAuthID { get; set; } // I no longer think this is necessary.
     }
 }

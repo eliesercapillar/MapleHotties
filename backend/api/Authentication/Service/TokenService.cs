@@ -18,7 +18,7 @@ namespace api.Authentication.Service
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]!));
         }
 
-        public string CreateToken(ApplicationUser user)
+        public string CreateToken(ApplicationUser user, IEnumerable<string> roles)
         {
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
 
@@ -27,6 +27,8 @@ namespace api.Authentication.Service
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

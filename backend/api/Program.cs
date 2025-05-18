@@ -89,7 +89,7 @@ builder.Services.AddAuthentication(options =>
         options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
         options.Scope.Add("identify");
 
-        options.CallbackPath = new PathString("/auth/signin/discord");
+        options.CallbackPath = new PathString("/auth/login/discord/success");
 
         options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
         options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
@@ -100,7 +100,7 @@ builder.Services.AddAuthentication(options =>
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
 
-        options.AccessDeniedPath = new PathString("/auth/fail/discord");
+        options.AccessDeniedPath = new PathString("/auth/login/discord/fail");
 
         options.SaveTokens = true;
         options.Events = new OAuthEvents

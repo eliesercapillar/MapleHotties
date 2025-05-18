@@ -31,7 +31,7 @@
                 <Button variant="outline" class="w-full mb-6">
                   <Icon icon="simple-icons:google"/>Google
                 </Button>
-                <Button variant="outline" class="w-full mb-6">
+                <Button @click="discordLogin"variant="outline" class="w-full mb-6">
                   <Icon icon="simple-icons:discord"/>Discord
                 </Button>
               </div>
@@ -67,31 +67,36 @@ const email = ref('');
 const password = ref('');
 
 async function login() {
-    try {
-      const url = `http://localhost:5051/api/Auth/login`;
-      const payload = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: email.value,
-          password: password.value
-        })
-      }
+  try {
+    const url = `http://localhost:5051/api/Auth/login`;
+    const payload = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
+    }
 
-      const response = await fetch(url, payload);
-      if (!response.ok) 
-      {
-        throw new Error(`${response.status}`);
-      }
-      
-      const data = await response.json();
-      localStorage.setItem('token', data.token);
-      router.push('/main')
+    const response = await fetch(url, payload);
+    if (!response.ok) 
+    {
+      throw new Error(`${response.status}`);
     }
-    catch (err) {
-      console.error("Failed to sign in:", err);
-    }
+    
+    const data = await response.json();
+    localStorage.setItem('token', data.token);
+    router.push('/main')
   }
+  catch (err) {
+    console.error("Failed to sign in:", err);
+  }
+}
+
+function discordLogin() {
+  window.location.href = 'http://localhost:5051/auth/login/discord';
+}
+
 </script>
