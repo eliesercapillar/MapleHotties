@@ -5,6 +5,7 @@ using api.Services;
 using MapleTinder.Shared.Data;
 using MapleTinder.Shared.Models.Entities;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Identity;
@@ -63,62 +64,90 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme =
     options.DefaultChallengeScheme =
     options.DefaultForbidScheme =
-    options.DefaultScheme =
-    options.DefaultSignInScheme =
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"],
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:Audience"],
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!)),
-            ValidateLifetime = true
+            ValidateLifetime = true,
+
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
         };
     })
     //.AddGoogle("Google", options =>
     //{
     //    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
     //    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-    //    options.SignInScheme = IdentityConstants.ExternalScheme;
+    //options.SignInScheme = IdentityConstants.ExternalScheme;
     //})
-    .AddOAuth("Discord", options =>
+    .AddDiscord(options =>
     {
-        options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
-        options.TokenEndpoint = "https://discord.com/api/oauth2/token";
-        options.UserInformationEndpoint = "https://discord.com/api/users/@me";
         options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
         options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
-        options.Scope.Add("identify");
-
-        options.CallbackPath = new PathString("/auth/login/discord/success");
-        options.AccessDeniedPath = new PathString("/auth/login/discord/fail");
-
-
 
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
         options.SaveTokens = true;
 
+        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
 
-        options.Events = new OAuthEvents
-        {
-            OnCreatingTicket = async context =>
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-
-                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                response.EnsureSuccessStatusCode();
-
-                using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-                context.RunClaimActions(document.RootElement);
-            }
-        };
+        options.Scope.Add("idenity");
     });
+    //.AddOAuth("Discord", options =>
+    //{
+    //    options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
+    //    options.TokenEndpoint = "https://discord.com/api/oauth2/token";
+    //    options.UserInformationEndpoint = "https://discord.com/api/users/@me";
+
+    //    options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
+    //    options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
+    //    options.Scope.Add("identify");
+
+    //    options.CallbackPath = new PathString("/auth/login/discord/success");
+    //    options.AccessDeniedPath = new PathString("/auth/login/discord/fail");
+
+
+
+    //    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+    //    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
+    //    options.SaveTokens = true;
+
+    //    options.CorrelationCookie.Path = "/";
+    //    options.CorrelationCookie.SameSite = SameSiteMode.None;
+    //    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+    //    options.SignInScheme = IdentityConstants.ExternalScheme;
+
+    //    options.Events = new OAuthEvents
+    //    {
+    //        OnCreatingTicket = async context =>
+    //        {
+    //            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+    //            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    //            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+
+    //            var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+    //            response.EnsureSuccessStatusCode();
+
+    //            var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+    //            context.RunClaimActions(document);
+    //        }
+    //    };
+    //});
+
+// Cookies
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.Path = "/";
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 // Expose scraper container
 builder.Services.AddHttpClient<ICharacterScraperClient, HttpCharacterScraperClient>(client =>
