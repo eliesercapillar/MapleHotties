@@ -58,7 +58,7 @@ namespace api.Authentication.Controllers
                 var createResult = await _userManager.CreateAsync(user, dto.Password);
                 if (!createResult.Succeeded) return StatusCode(500, createResult.Errors);
 
-                var roleResult = await _userManager.AddToRoleAsync(user, "-User");
+                var roleResult = await _userManager.AddToRoleAsync(user, "User");
                 if (!roleResult.Succeeded) return StatusCode(500, roleResult.Errors);
 
                 // TODO: Add confirmation email logic.
@@ -111,8 +111,7 @@ namespace api.Authentication.Controllers
         {
             // Get info returned by Discord
             var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-                return BadRequest("External login info not found.");
+            if (info == null) return BadRequest("External login info not found.");
 
             // Attempt to find user
             var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
@@ -145,7 +144,8 @@ namespace api.Authentication.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var jwt = _tokenService.CreateToken(user, roles);
 
-            // redirect back to your SPA with the token
+            // Redirect back to Vue with the token
+            // TODO: Refactor to use Authorization Code + PKCE
             return Redirect($"http://localhost:5173/oauth?token={jwt}");
         }
 

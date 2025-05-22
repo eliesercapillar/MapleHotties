@@ -100,46 +100,49 @@ builder.Services.AddAuthentication(options =>
 
         options.Scope.Add("idenity");
     });
-    //.AddOAuth("Discord", options =>
-    //{
-    //    options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
-    //    options.TokenEndpoint = "https://discord.com/api/oauth2/token";
-    //    options.UserInformationEndpoint = "https://discord.com/api/users/@me";
+//.AddOAuth("Discord", options =>
+//{
+//    options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
+//    options.TokenEndpoint = "https://discord.com/api/oauth2/token";
+//    options.UserInformationEndpoint = "https://discord.com/api/users/@me";
 
-    //    options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
-    //    options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
-    //    options.Scope.Add("identify");
+//    options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
+//    options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
+//    options.Scope.Add("identify");
 
-    //    options.CallbackPath = new PathString("/auth/login/discord/success");
-    //    options.AccessDeniedPath = new PathString("/auth/login/discord/fail");
+//    options.CallbackPath = new PathString("/auth/login/discord/success");
+//    options.AccessDeniedPath = new PathString("/auth/login/discord/fail");
 
 
 
-    //    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-    //    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
-    //    options.SaveTokens = true;
+//    options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+//    options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
+//    options.SaveTokens = true;
 
-    //    options.CorrelationCookie.Path = "/";
-    //    options.CorrelationCookie.SameSite = SameSiteMode.None;
-    //    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-    //    options.SignInScheme = IdentityConstants.ExternalScheme;
+//    options.CorrelationCookie.Path = "/";
+//    options.CorrelationCookie.SameSite = SameSiteMode.None;
+//    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+//    options.SignInScheme = IdentityConstants.ExternalScheme;
 
-    //    options.Events = new OAuthEvents
-    //    {
-    //        OnCreatingTicket = async context =>
-    //        {
-    //            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-    //            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    //            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+//    options.Events = new OAuthEvents
+//    {
+//        OnCreatingTicket = async context =>
+//        {
+//            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+//            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+//            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
 
-    //            var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-    //            response.EnsureSuccessStatusCode();
+//            var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+//            response.EnsureSuccessStatusCode();
 
-    //            var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
-    //            context.RunClaimActions(document);
-    //        }
-    //    };
-    //});
+//            var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+//            context.RunClaimActions(document);
+//        }
+//    };
+//});
+
+// Authorization
+builder.Services.AddAuthorization();
 
 // Cookies
 builder.Services.ConfigureExternalCookie(options =>
