@@ -68,7 +68,8 @@ const password = ref('');
 
 async function login() {
   try {
-    const url = `http://localhost:5051/api/Auth/login`;
+    const url = `https://localhost:7235/auth/login`;
+    //const url = `http://localhost:5051/auth/login`;
     const payload = {
       method: 'POST',
       headers: {
@@ -96,7 +97,8 @@ async function login() {
 }
 
 function discordLogin() {
-  window.location.href = 'http://localhost:5051/auth/login/discord';
+  //window.location.href = 'http://localhost:5051/auth/login/discord';
+  window.location.href = 'https://localhost:7235/auth/login/discord';
 }
 
 </script>

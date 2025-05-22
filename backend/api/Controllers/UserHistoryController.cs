@@ -85,8 +85,9 @@ namespace api.Controllers
             return CreatedAtAction("GetUserHistory", new { id = userHistory.Id }, userHistory);
         }
 
-        [HttpPost("history/batch")]
-        public async Task<IActionResult> BatchHistory([FromBody] List<SwipeDTO> swipes)
+        // POST: api/UserHistories/batch_save
+        [HttpPost("batch_save")]
+        public async Task<IActionResult> BatchSave([FromBody] List<SwipeDTO> swipes)
         {
             //var userId = GetCurrentUserId();
             int userId = -1; //TODO: Come back when logins are implemented.

@@ -162,17 +162,23 @@ const handleDragEnd = () => {
   if (isCentered && yThresholdHit) {
     const targetY = -window.innerHeight; // Move outside viewport
     
+    const swipeEvent = swipeStore.createSwipeEvent(card.value.id, "favourite", new Date().toISOString())
+
     animate(y, targetY, {
       duration: 0.15,
-      onComplete: () => swipeStore.removeCard(card.value.id),
+      onComplete: () => swipeStore.onSwipe(swipeEvent),
     });
   } 
   else if (xThresholdHit) {
     const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move outside viewport
 
+    const status = currentX > 0 ? "like" : "nope";
+
+    const swipeEvent = swipeStore.createSwipeEvent(card.value.id, status, new Date().toISOString())
+
     animate(x, targetX, {
       duration: 0.15,
-      onComplete: () => swipeStore.removeCard(card.value.id),
+      onComplete: () => swipeStore.onSwipe(swipeEvent),
     });
   }
 };

@@ -64,9 +64,12 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme =
     options.DefaultChallengeScheme =
     options.DefaultForbidScheme =
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultScheme =
     options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})  
+    .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -91,14 +94,22 @@ builder.Services.AddAuthentication(options =>
         options.ClientId = builder.Configuration["Authentication:Discord:ClientId"]!;
         options.ClientSecret = builder.Configuration["Authentication:Discord:ClientSecret"]!;
 
+        options.Scope.Add("identify");
+
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        //options.CallbackPath = new PathString("/auth/login/discord/success");
+        options.AccessDeniedPath = new PathString("/auth/login/discord/fail");
+
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username");
         options.SaveTokens = true;
+        
 
-        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-
-        options.Scope.Add("idenity");
+        //options.CorrelationCookie.Name = ".AspNetCore.Correlation.Discord";
+        //options.CorrelationCookie.SameSite = SameSiteMode.None;
+        //options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+        //options.CorrelationCookie.Domain = "localhost";
+        //options.CorrelationCookie.Path = "/auth/login/discord/success";
     });
 //.AddOAuth("Discord", options =>
 //{
@@ -145,11 +156,14 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // Cookies
-builder.Services.ConfigureExternalCookie(options =>
+builder.Services.ConfigureExternalCookie(opts =>
 {
-    options.Cookie.Path = "/";
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    opts.Cookie.Name = ".AspNetCore.External";
+    opts.Cookie.SameSite = SameSiteMode.None;           // REQUIRED for cross-site flows
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;   // HTTPS only
+    opts.Cookie.HttpOnly = true;
+    opts.Cookie.Domain = "localhost";                 // unify across ports
+    opts.Cookie.Path = "/";                         // so it’s sent on both /auth/login and /auth/login/success
 });
 
 // Expose scraper container
