@@ -7,11 +7,65 @@
         <Button>CogWheel</Button>
       </nav>
       <div class="bg-blue-300 flex flex-col items-start h-[calc(100vh-var(--navbar-h))]">
-        <div class="py-2 flex items-center justify-center">
-          <a href="#" class="ml-6">History</a>
-          <a href="#" class="ml-6">Favourites</a>
+        <div class="mx-6 py-2 flex items-center justify-center gap-4">
+          <Button variant="ghost"
+               :disabled="showingHistory"
+               @click="showingHistory = true">Recent History</Button>
+          <Button variant="ghost" 
+          :disabled="!showingHistory"
+          @click="showingHistory = false">Favourites</Button>
         </div>
-        <div class="bg-black-grey-radial h-full w-full"></div>
+        <div class="bg-black-grey-radial h-full w-full">
+          <div v-if="showingHistory" id="recent_history" class="mx-2 py-4 flex flex-col h-full">
+            <div class="grid grid-cols-2 gap-2 flex-grow">
+              <Card class="flex flex-col justify-center">
+                <CardHeader class="text-center">
+                  <CardTitle class="text-md">ROCKOGUY</CardTitle>
+                  <CardDescription>290 Adele</CardDescription>
+                </CardHeader>
+                <img src="/rockoguy.png">
+              </Card>
+              <Card class="flex flex-col justify-center">
+                <CardHeader class="text-center">
+                  <CardTitle class="text-md">ROCKOGUY</CardTitle>
+                  <CardDescription>290 Adele</CardDescription>
+                </CardHeader>
+                <img src="/rockoguy.png">
+              </Card>
+              <Card class="flex flex-col justify-center">
+                <CardHeader class="text-center">
+                  <CardTitle class="text-md">ROCKOGUY</CardTitle>
+                  <CardDescription>290 Adele</CardDescription>
+                </CardHeader>
+                <img src="/rockoguy.png">
+              </Card>
+              <Card class="flex flex-col justify-center">
+                <CardHeader class="text-center">
+                  <CardTitle class="text-md">ROCKOGUY</CardTitle>
+                  <CardDescription>290 Adele</CardDescription>
+                </CardHeader>
+                <img src="/rockoguy.png">
+              </Card>
+            </div>
+            <div class="mx-2 mt-4 flex-shrink-0 flex-grow-0">
+              <Button class="w-full">See More</Button>
+            </div>
+          </div>
+          <div v-if="!showingHistory" id="recent_history" class="mx-2 py-4 flex flex-col h-full">
+            <div class="grid grid-cols-2 gap-2 flex-grow">
+              <Card class="flex flex-col justify-center">
+                <CardHeader class="text-center">
+                  <CardTitle class="text-md">ROCKOGUY</CardTitle>
+                  <CardDescription>290 Adele</CardDescription>
+                </CardHeader>
+                <img src="/rockoguy.png">
+              </Card>
+            </div>
+            <div class="mx-2 mt-4 flex-shrink-0 flex-grow-0">
+              <Button class="w-full">See More</Button>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
     <div class="w-full h-screen bg-black-grey-radial">
@@ -47,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { onMounted, watch, ref } from "vue";
 import { motion } from "motion-v";
 import Button from "@/components/ui/button/Button.vue";
 import SkeletonCard from "@/components/SkeletonCard.vue";
@@ -56,12 +110,25 @@ import TinderButton from "@/components/TinderButton.vue";
 import Instructions from "@/components/Instructions.vue";
 import ButtonSVGs from "@/data/ButtonSVGs.json";
 import { useSwipeStore } from "@/stores/swipeStore";
+import { useHistoryStore } from "@/stores/historyStore";
 import router from "@/router"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+
+const showingHistory = ref(true);
 
 const swipeStore = useSwipeStore();
+const historyStore = useHistoryStore();
 
 onMounted(async () => {
   swipeStore.fetchCards();
+  historyStore.fetchHistory();
 })
 
 watch(() => swipeStore.cards.length, (len) => {
@@ -74,6 +141,5 @@ function logout() {
   localStorage.removeItem('token');
   router.push('/')
 }
-
 
 </script>
