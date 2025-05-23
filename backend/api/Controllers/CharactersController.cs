@@ -39,7 +39,7 @@ namespace api.Controllers
 
         // GET: api/Characters/random?userId=123
         [HttpGet("random")]
-        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters(int userId, int count = 10)
+        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters(string userId, int count = 10)
         {
             var seenCharacterIds = await _context.UserHistory
                 .Where(usc => usc.UserId == userId)

@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using MapleTinder.Shared.Data;
 using MapleTinder.Shared.Models.Entities;
 using api.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace api.Controllers
 {
@@ -87,10 +90,10 @@ namespace api.Controllers
 
         // POST: api/UserHistories/batch_save
         [HttpPost("batch_save")]
+        [Authorize]
         public async Task<IActionResult> BatchSave([FromBody] List<SwipeDTO> swipes)
         {
-            //var userId = GetCurrentUserId();
-            int userId = -1; //TODO: Come back when logins are implemented.
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var entities = swipes.Select(e => new UserHistory
             {
                 UserId = userId,

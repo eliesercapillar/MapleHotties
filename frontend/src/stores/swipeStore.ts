@@ -114,13 +114,20 @@ export const useSwipeStore = defineStore('swipe', () =>
     const batch = pending.value;
     pending.value = [] as SwipeEvent[];
 
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Not logged in.');
+
     try {
       const url = `https://localhost:7235/api/UserHistory/batch_save`;
       //const url = `http://localhost:5051/api/UserHistory/batch`;
 
+      // TODO: consider refactoring to a wrapper that adds the necessary headers?
       const response = await fetch(url, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(batch)
       })
     }

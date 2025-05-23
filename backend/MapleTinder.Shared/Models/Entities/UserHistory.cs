@@ -12,7 +12,7 @@ namespace MapleTinder.Shared.Models.Entities
     {
         public int Id { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; } = null!;
 
         [ForeignKey("Character")] public int CharacterId { get; set; }
 
