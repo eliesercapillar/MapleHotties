@@ -109,6 +109,37 @@ namespace api.Controllers
             return Ok();
         }
 
+        [HttpGet("recent")]
+        [Authorize]
+        public async Task<IActionResult> Recent([FromQuery] int quantity = 4)
+        {
+            if (quantity <= 0) return BadRequest("Query parameter 'quantity' must be greater than 0.");
+
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            if (userId == null) return Unauthorized();
+
+            var recent = await _context.UserHistory
+                .Where(uh => uh.UserId == userId)
+                .GroupBy(uh => uh.CharacterId)
+                .Select(g => new {
+                    CharacterId = g.Key,
+                    LastSeen = g.Max(uh => uh.SeenAt)
+                })
+                .OrderByDescending(g => g.LastSeen)
+                .Take(quantity)
+                .ToListAsync();
+
+            var characterIds = recent.Select(r => r.CharacterId).ToList();
+
+            // 2. (Optional) Load full Character objects; if you just want IDs,
+            //    skip this and return characterIds directly.
+            var characters = await _context.Characters
+                .Where(c => characterIds.Contains(c.Id))
+                .ToListAsync();
+
+            return Ok(characters);
+        }
 
         // DELETE: api/UserHistories/5
         [HttpDelete("{id}")]
