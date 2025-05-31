@@ -42,15 +42,7 @@
               :index="index"
             />
           </div>
-          <div id="buttons" class="absolute z-20 isolate w-[375px] bottom-[-2rem]">
-            <div class="flex justify-around items-center">
-              <TinderButton
-                v-for="(button, index) in ButtonSVGs.data"
-                :key="index"
-                :button="button"
-              />
-            </div>
-          </div>
+          <SwipeCardButtons/>
         </div>
         <Instructions class="absolute bottom-6" />
       </main>
@@ -66,11 +58,10 @@ import RecentHistory from "@/components/RecentHistory.vue";
 import RecentFavourites from "@/components/RecentFavourites.vue";
 import SkeletonCard from "@/components/SkeletonCard.vue";
 import SwipeCard from "@/components/SwipeCard.vue";
-import TinderButton from "@/components/TinderButton.vue";
 import Instructions from "@/components/Instructions.vue";
-import ButtonSVGs from "@/data/ButtonSVGs.json";
 import { useSwipeStore } from "@/stores/swipeStore";
 import router from "@/router"
+import SwipeCardButtons from "@/components/tinder/SwipeCardButtons.vue";
 
 const showingHistory = ref(true);
 

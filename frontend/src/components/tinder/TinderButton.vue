@@ -1,7 +1,7 @@
 <template>
   <motion.button
     class="relative flex items-center justify-center w-16 h-16 rounded-full overflow-hidden"
-    :style="{ background: isPressed ? props.button.pressedGradient : '#21262e' }"
+    :style="{ background: isPressed ? props.pressedGradient : '#21262e' }"
     :animate="{ scale: swipeStore.isDragging ? (isActive ? 1.25 : 0) : (isPressed ? 0.75 : (isHovering ? 1.2 : 1)) }"
     :transition="{ duration: 0.3, ease: 'easeInOut' }"
     @pointerenter="onPointerHover"
@@ -16,18 +16,18 @@
     <span class="absolute inset-0 flex items-center justify-center">
       <motion.svg
         xmlns="http://www.w3.org/2000/svg"
-        :viewBox="button.svg.viewBox"
-        :width="button.svg.width"
-        :height="button.svg.height"
+        :viewBox="svg.viewBox"
+        :width="svg.width"
+        :height="svg.height"
         :animate="{ scale: swipeStore.isDragging && isActive ? 7 : isPressed ? 0 : 1 }"
         :transition="{ duration: 0.1, ease: 'easeInOut' }"
       >
         <path
-          :fill="button.svg.fill"
-          :stroke="button.svg.stroke"
-          :fill-rule="button.svg.fillRule"
-          :clip-rule="button.svg.clipRule"
-          :d="button.svg.path"
+          :fill="svg.fill"
+          :stroke="svg.stroke"
+          :fill-rule="svg.fillRule"
+          :clip-rule="svg.clipRule"
+          :d="svg.path"
         />
       </motion.svg>
     </span>
@@ -40,15 +40,15 @@
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        :viewBox="button.svg.viewBox"
-        :width="button.svg.width"
-        :height="button.svg.height"
+        :viewBox="svg.viewBox"
+        :width="svg.width"
+        :height="svg.height"
       >
         <path
-          :fill="button.svg.fill"
-          :fill-rule="button.svg.fillRule"
-          :clip-rule="button.svg.clipRule"
-          :d="button.svg.path"
+          :fill="svg.fill"
+          :fill-rule="svg.fillRule"
+          :clip-rule="svg.clipRule"
+          :d="svg.path"
         />
       </svg>
     </motion.span>
@@ -61,7 +61,15 @@ import { ref, computed } from "vue";
 import { useSwipeStore } from "@/stores/swipeStore";
 
 const props = defineProps({
-  button: {
+  name: {
+    type: String,
+    required: true
+  }, 
+  pressedGradient: {
+    type: String,
+    required: true
+  },
+  svg: {
     type: Object,
     required: true,
   }
@@ -86,9 +94,9 @@ const onPointerUp = () => { isPressed.value = false; }
 const isActive = computed(() => {
   const swipeThreshold = 20;
 
-  return (props.button.name === "Nope" && swipeStore.xPos < -swipeThreshold) ||
-         (props.button.name === "Love" && swipeStore.xPos > swipeThreshold) ||
-         (props.button.name === "Favourite" && swipeStore.yPos < -swipeThreshold);
+  return (props.name === "Nope" && swipeStore.xPos < -swipeThreshold) ||
+         (props.name === "Love" && swipeStore.xPos > swipeThreshold) ||
+         (props.name === "Favourite" && swipeStore.yPos < -swipeThreshold);
 });
 
 </script>
