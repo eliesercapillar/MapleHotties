@@ -1,5 +1,6 @@
 <template>
   <div class="relative bg-background min-h-screen flex flex-row text-white">
+    <!-- TODO: Refactor to use ShadCN sidebar? -->
     <aside class="min-w-80 max-w-96 w-full border-r-[1px] border-[#21262e]">
       <nav class="flex items-center justify-evenly py-6 h-[--navbar-h]"
            style="background: linear-gradient(135deg, #f92999, #ff3f29)">
@@ -46,7 +47,31 @@
           <SwipeCardButtons/>
         </div>
         <Instructions class="absolute bottom-6" />
-        <button class="absolute bottom-6 right-6 scale-[1.5]" @click="info"><Icon icon="lucide:info"/></button>
+        <AlertDialog>
+          <AlertDialogTrigger as-child>
+            <button class="absolute bottom-6 right-6 scale-[1.5]" @click="info"><Icon icon="lucide:info"/></button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Rating outfits</AlertDialogTitle>
+              <AlertDialogDescription>
+                Cards displaying a character's outfit will appear one by one. 
+              </AlertDialogDescription>
+              <AlertDialogDescription>
+                Click the buttons underneath a card, swipe, or use the arrow keys to rate that character's outfit.
+              </AlertDialogDescription>
+              <AlertDialogDescription>
+                Swiping up will count as liking the character's outfit while also marking that character as a favourite— saving it for later review.
+              </AlertDialogDescription>
+              <AlertDialogDescription>
+                Check the <a class="text-blue-400" href="/leaderboard">leaderboard</a> to see the top rated characters by the community!
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>Got it!</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   </div>
@@ -64,6 +89,17 @@ import Instructions from "@/components/Instructions.vue";
 import { useSwipeStore } from "@/stores/swipeStore";
 import router from "@/router"
 import SwipeCardButtons from "@/components/tinder/SwipeCardButtons.vue";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const showingHistory = ref(true);
 
