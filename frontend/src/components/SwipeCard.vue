@@ -172,7 +172,7 @@ const handleDragEnd = () => {
   else if (xThresholdHit) {
     const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move outside viewport
 
-    const status = currentX > 0 ? "like" : "nope";
+    const status = currentX > 0 ? "love" : "nope";
 
     const swipeEvent = swipeStore.createSwipeEvent(card.value.id, status, new Date().toISOString())
 

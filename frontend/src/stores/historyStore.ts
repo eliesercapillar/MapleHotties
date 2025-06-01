@@ -1,15 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+interface ApiCharacter {
+    id: number
+    name: string
+    level: number
+    job: string
+    world: string
+    imageUrl: string
+  }
+
 interface HistoryCharacter {
-    character: {
-        id: number
-        name: string
-        level: number
-        job: string
-        world: string
-        imageUrl: string
-    }
+    character: ApiCharacter
     status: string
     seenAt: string
 }
@@ -44,11 +46,6 @@ export const useHistoryStore = defineStore('history', () =>
 
             cards.value = await response.json();
             console.log(cards.value);
-        //const pageSize = 10;
-        //const url = `https://localhost:7235/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
-        //const url = `http://localhost:5051/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
-        //const response = await fetch(url);
-        //if (!response.ok) throw new Error(`Failed to fetch history: ${response.status}`);
         }
         catch (err) {
         console.error("Failed to load more cards:", err);
@@ -58,7 +55,17 @@ export const useHistoryStore = defineStore('history', () =>
         }
     }
 
+    function appendRecentCard(character : ApiCharacter, status : string, seenAt: string) {
+        const card: HistoryCharacter = {
+            character,
+            status,
+            seenAt
+        }
+
+        cards.value = [card, ...cards.value.slice(0, 3)];
+    }
+
     return { isLoading, cards,
-            fetchHistory,
+            fetchHistory, appendRecentCard
     }
 })
