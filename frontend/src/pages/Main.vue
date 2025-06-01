@@ -8,6 +8,10 @@
       </nav>
       <div class="bg-blue-300 flex flex-col items-start h-[calc(100vh-var(--navbar-h))]">
         <div class="mx-6 py-2 flex items-center justify-center gap-4">
+          <div>
+            <button class="">Recent History</button>
+            <hr class="bg-[#ff4458]">
+          </div>
           <Button variant="ghost"
                :disabled="showingHistory"
                @click="showingHistory = true">Recent History</Button>
@@ -16,12 +20,9 @@
           @click="showingHistory = false">Favourites</Button>
         </div>
         <div class="bg-black-grey-radial h-full w-full">
-          <div class="mx-2 py-4 flex flex-col h-full">
+          <div class="mx-2 py-6 h-full">
             <RecentHistory v-if="showingHistory"/>
             <RecentFavourites v-else/>
-            <div class="mx-2 mt-4 flex-shrink-0 flex-grow-0">
-              <Button class="w-full">See More</Button>
-            </div>
           </div>
         </div>
       </div>
@@ -38,7 +39,7 @@
           />
           <div class="grid justify-center items-center">
             <SwipeCard v-for="(card, index) in swipeStore.cards"
-              :key="card.id"
+              :key="card.character.id"
               :index="index"
             />
           </div>

@@ -8,7 +8,7 @@ interface ApiCharacter {
     job: string
     world: string
     imageUrl: string
-  }
+}
 
 interface HistoryCharacter {
     character: ApiCharacter
@@ -29,7 +29,7 @@ export const useHistoryStore = defineStore('history', () =>
 
         isLoading.value = true;
         try {
-            const quantity = 4;
+            const quantity = 6;
             const url = `https://localhost:7235/api/UserHistory/recent?quantity=${quantity}`
 
             const response = await fetch(url, {

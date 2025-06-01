@@ -20,7 +20,7 @@
     <!-- TODO: Add remove width & height once upscaled pngs are implemented -->
     <img 
       id="character_sprite"
-      :src="card.spriteURL"
+      :src="card.character.imageUrl"
       alt="Player Character"
       class="absolute top-[50%] left-[50%] select-none"
       width="480" height="480"
@@ -31,19 +31,19 @@
          style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
     <div id="character_info" class="absolute bottom-[5%] ml-2 select-none text-white">
       <div id="character_name_and_level" class="flex items-center text-3xl">
-        <span class="font-extrabold">{{ card.info.name }}</span>
+        <span class="font-extrabold">{{ card.character.name }}</span>
         &nbsp;
-        <span class="font-normal">{{ card.info.level }}</span>
+        <span class="font-normal">{{ card.character.level }}</span>
       </div>
       <div id="character_world" class="flex items-center text-md">
         <Icon icon="lucide:globe"></Icon>
         &nbsp;
-        <span class="font-normal">{{ card.info.world }}</span>
+        <span class="font-normal">{{ card.character.world }}</span>
       </div>
       <div id="character_job" class="flex items-center text-md">
         <Icon icon="lucide:swords"></Icon>
         &nbsp;
-        <span class="font-normal">{{ card.info.job }}</span>
+        <span class="font-normal">{{ card.character.job }}</span>
       </div>
     </div>
     <div id="overlays">
@@ -162,7 +162,7 @@ const handleDragEnd = () => {
   if (isCentered && yThresholdHit) {
     const targetY = -window.innerHeight; // Move outside viewport
     
-    const swipeEvent = swipeStore.createSwipeEvent(card.value.id, "favourite", new Date().toISOString())
+    const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, "favourite", new Date().toISOString())
 
     animate(y, targetY, {
       duration: 0.15,
@@ -174,7 +174,7 @@ const handleDragEnd = () => {
 
     const status = currentX > 0 ? "love" : "nope";
 
-    const swipeEvent = swipeStore.createSwipeEvent(card.value.id, status, new Date().toISOString())
+    const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString())
 
     animate(x, targetX, {
       duration: 0.15,

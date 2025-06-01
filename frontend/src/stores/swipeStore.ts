@@ -14,17 +14,8 @@ interface ApiCharacter {
 
 interface CharacterCard 
 {
-  id: number;
+  character : ApiCharacter
   bgURL: string;
-  spriteURL: string;
-  info: CharacterInfo;
-}
-
-interface CharacterInfo {
-  name: string;
-  level: number;
-  job: string;
-  world: string;
 }
 
 interface SwipeEvent {
@@ -56,39 +47,36 @@ export const useSwipeStore = defineStore('swipe', () =>
         
         isLoading.value = true;
         try {
-        const pageSize = 10;
-        const url = `https://localhost:7235/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
-        //const url = `http://localhost:5051/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
-        
-        // Map API response into our CharacterCard shape
-        const data: ApiCharacter[] = await response.json()
-        const newCards: CharacterCard[] = data.map((char) => ({
-            id: char.id,
-            bgURL: getRandomBG(),
-            spriteURL: char.imageUrl,
-            info: {
-            name: char.name,
-            level: char.level,
-            job: char.job,
-            world: char.world,
-            }
-        }))
-        
-        cards.value.unshift(...newCards);
-        curPage.value++;
+            const pageSize = 10;
+            const url = `https://localhost:7235/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
+            //const url = `http://localhost:5051/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
+            
+            // Map API response into our CharacterCard shape
+            const data: ApiCharacter[] = await response.json()
+            const newCards: CharacterCard[] = data.map((char) => ({
+                character: char,
+                bgURL: getRandomBG()
+            }))
+            
+            cards.value.unshift(...newCards);
+            curPage.value++;
         }
         catch (err) {
-        console.error("Failed to load more cards:", err);
+            console.error("Failed to load more cards:", err);
         }
         finally {
-        isLoading.value = false;
+            isLoading.value = false;
         }
     }
 
     function removeCard(id : number) {
-        cards.value = cards.value.filter((card) => card.id !== id);
+        cards.value = cards.value.filter((card) => card.character.id !== id);
+    }
+
+    function findCard(id : number) : ApiCharacter {
+        return cards.value.find((card) => card.character.id === id)!.character
     }
 
     /* pending
@@ -106,8 +94,10 @@ export const useSwipeStore = defineStore('swipe', () =>
     })
 
     function onSwipe(event: SwipeEvent) {
+        const character = findCard(event.characterId)
         removeCard(event.characterId);
-        historyStore.appendRecentCard(cards.value.find((card) => card.id === event.characterId), event.status, event.seenAt)
+
+        historyStore.appendRecentCard(character, event.status, event.seenAt)
         pending.value.push(event);
         if (pending.value.length >= 10) flushAndSave();
     }
