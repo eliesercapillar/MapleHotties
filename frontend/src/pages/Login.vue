@@ -89,7 +89,7 @@ async function login() {
     
     const data = await response.json();
     localStorage.setItem('token', data.token);
-    router.push('/main')
+    router.push('/app')
   }
   catch (err) {
     console.error("Failed to sign in:", err);

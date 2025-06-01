@@ -1,6 +1,8 @@
 {
     "nope" : {
         "pressedGradient": "linear-gradient(135deg, #f92999, #ff3f29)",
+        "borderColour": "#ff3f29",
+        "overlayPath": "/swipecard_nope_overlay_24x24.svg",
         "svg": {
             "width": 24,
             "height": 24,
@@ -14,6 +16,8 @@
     },
     "favourite" : {
         "pressedGradient": "linear-gradient(135deg, #00dbff, #0048ff)",
+        "borderColour": "#0048ff",
+        "overlayPath": "/swipecard_fav_overlay_24x24.svg",
         "svg": {
             "width": 24,
             "height": 24,
@@ -27,6 +31,8 @@
     },
     "love" : {
         "pressedGradient": "linear-gradient(135deg, #e4f10a, #37bb4e)",
+        "borderColour": "#37bb4e",
+        "overlayPath": "/swipecard_like_overlay_24x24.svg",
         "svg": {
             "width": 24,
             "height": 24,

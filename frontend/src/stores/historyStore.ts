@@ -19,6 +19,7 @@ interface HistoryCharacter {
 export const useHistoryStore = defineStore('history', () => 
 {
     const cards = ref([] as HistoryCharacter[]);
+    const maxCards = 6;
     const isLoading = ref(false);
 
     async function fetchHistory() {
@@ -29,8 +30,7 @@ export const useHistoryStore = defineStore('history', () =>
 
         isLoading.value = true;
         try {
-            const quantity = 6;
-            const url = `https://localhost:7235/api/UserHistory/recent?quantity=${quantity}`
+            const url = `https://localhost:7235/api/UserHistory/recent?quantity=${maxCards}`
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -62,7 +62,7 @@ export const useHistoryStore = defineStore('history', () =>
             seenAt
         }
 
-        cards.value = [card, ...cards.value.slice(0, 3)];
+        cards.value = [card, ...cards.value.slice(0, maxCards - 1)];
     }
 
     return { isLoading, cards,

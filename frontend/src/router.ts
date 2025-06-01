@@ -9,7 +9,7 @@ import { isLoggedIn } from './utils/auth';
 
 const routes = [
   { path: '/', component: Home },
-  { path: '/main', component: Main },
+  { path: '/app', component: Main },
   { path: '/login', component: Login},
   { path: '/register', component: Register},
   // { path: '/about', component: About },
@@ -25,9 +25,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if ((to.path === '/login' || to.path === '/register') && isLoggedIn()) 
-    next('/main')
-  else 
-    next()
+    next('/app')
+  else if ((to.path === '/app') && !isLoggedIn())
+    next('/login')
+  else
+    next();
 })
 
 export default router;
