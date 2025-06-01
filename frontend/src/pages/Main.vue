@@ -4,10 +4,11 @@
     <aside class="min-w-80 max-w-96 w-full border-r-[1px] border-[#21262e]">
       <nav class="flex items-center justify-evenly py-6 h-[--navbar-h]"
            style="background: linear-gradient(135deg, #f92999, #ff3f29)">
-        <button class="rounded-full bg-[#21262e] p-3" @click="rate"><Icon icon="bxs:heart" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-[#21262e] p-3" @click="play"><Icon icon="icon-park-solid:game-handle" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-[#21262e] p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-[#21262e] p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
+           <!-- TODO: icon of current page should be set to #ff3f29 -->
+        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="rate"><Icon icon="bxs:heart" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="play"><Icon icon="icon-park-solid:game-handle" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
       </nav>
       <div class="bg-[#111418] h-[calc(100vh-var(--navbar-h))] flex flex-col items-start">
         <div class="mx-6 py-2 flex items-center justify-center gap-4 font-bold text-md">
@@ -47,31 +48,7 @@
           <SwipeCardButtons/>
         </div>
         <Instructions class="absolute bottom-6" />
-        <AlertDialog>
-          <AlertDialogTrigger as-child>
-            <button class="absolute bottom-6 right-6 scale-[1.5]" @click="info"><Icon icon="lucide:info"/></button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Rating outfits</AlertDialogTitle>
-              <AlertDialogDescription>
-                Cards displaying a character's outfit will appear one by one. 
-              </AlertDialogDescription>
-              <AlertDialogDescription>
-                Click the buttons underneath a card, swipe, or use the arrow keys to rate that character's outfit.
-              </AlertDialogDescription>
-              <AlertDialogDescription>
-                Swiping up will count as liking the character's outfit while also marking that character as a favourite— saving it for later review.
-              </AlertDialogDescription>
-              <AlertDialogDescription>
-                Check the <a class="text-blue-400" href="/leaderboard">leaderboard</a> to see the top rated characters by the community!
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction>Got it!</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <RateInfoModal/>
       </main>
     </div>
   </div>
@@ -89,17 +66,7 @@ import Instructions from "@/components/Instructions.vue";
 import { useSwipeStore } from "@/stores/swipeStore";
 import router from "@/router"
 import SwipeCardButtons from "@/components/tinder/SwipeCardButtons.vue";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import RateInfoModal from "@/components/RateInfoModal.vue";
 
 const showingHistory = ref(true);
 
