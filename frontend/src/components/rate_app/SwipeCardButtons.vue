@@ -22,5 +22,5 @@
 
 <script setup lang="ts">
 import ButtonSVGs from "@/data/ButtonSVGs.json";
-import TinderButton from "@/components/tinder/TinderButton.vue";
+import TinderButton from "@/components/rate_app/TinderButton.vue";
 </script>

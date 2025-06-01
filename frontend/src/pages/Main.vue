@@ -30,43 +30,19 @@
       </div>
     </aside>
     <div class="w-full h-screen bg-black-grey-radial">
-      <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-        <SkeletonCard v-if="swipeStore.cards.length == 0"/>
-        <div v-else class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
-          <motion.div id="button_anim_bar"
-            class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
-            style="bottom: -14px; left: 8px"
-            :animate="{ scale: swipeStore.isDragging ? 0.6 : 1 }"
-            :transition="{ duration: 0.3, ease: 'easeInOut' }"
-          />
-          <div class="grid justify-center items-center">
-            <SwipeCard v-for="(card, index) in swipeStore.cards"
-              :key="card.character.id"
-              :index="index"
-            />
-          </div>
-          <SwipeCardButtons/>
-        </div>
-        <Instructions class="absolute bottom-6" />
-        <RateInfoModal/>
-      </main>
+      <RateApp/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, watch, ref } from "vue";
-import { motion } from "motion-v";
+import RateApp from "./sub_pages/RateApp.vue";
 import { Icon } from "@iconify/vue/dist/iconify.js";
 import RecentHistory from "@/components/RecentHistory.vue";
 import RecentFavourites from "@/components/RecentFavourites.vue";
-import SkeletonCard from "@/components/SkeletonCard.vue";
-import SwipeCard from "@/components/SwipeCard.vue";
-import Instructions from "@/components/Instructions.vue";
 import { useSwipeStore } from "@/stores/swipeStore";
 import router from "@/router"
-import SwipeCardButtons from "@/components/tinder/SwipeCardButtons.vue";
-import RateInfoModal from "@/components/RateInfoModal.vue";
 
 const showingHistory = ref(true);
 
