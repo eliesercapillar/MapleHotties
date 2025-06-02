@@ -27,8 +27,7 @@
       style="transform: translate(-50%, -50%); "
       draggable="false"
     />
-    <div class="absolute bottom-[0%] h-[30%] w-full rounded-lg"
-         style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
+    <div class="absolute bottom-[0%] h-[30%] w-full rounded-lg bg-black-shadow-fade"/>
     <div id="character_info" class="absolute bottom-[5%] ml-2 select-none text-white">
       <div id="character_name_and_level" class="flex items-center text-3xl">
         <span class="font-extrabold">{{ card.character.name }}</span>
