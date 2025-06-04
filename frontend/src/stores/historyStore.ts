@@ -30,7 +30,8 @@ export const useHistoryStore = defineStore('history', () =>
 
         isLoading.value = true;
         try {
-            const url = `https://localhost:7235/api/UserHistory/recent?quantity=${maxCards}`
+            //const url = `https://localhost:7235/api/UserHistory/recent?quantity=${maxCards}`
+            const url = `https://localhost:7235/api/UserHistory/`
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -40,12 +41,7 @@ export const useHistoryStore = defineStore('history', () =>
             })
 
             if (!response.ok) throw new Error(`Failed to fetch history: ${response.status}`);
-
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-
             cards.value = await response.json();
-            console.log(cards.value);
         }
         catch (err) {
         console.error("Failed to load more cards:", err);
@@ -62,7 +58,8 @@ export const useHistoryStore = defineStore('history', () =>
             seenAt
         }
 
-        cards.value = [card, ...cards.value.slice(0, maxCards - 1)];
+        // cards.value = [card, ...cards.value.slice(0, maxCards - 1)];
+        cards.value.unshift(card);
     }
 
     return { isLoading, cards,

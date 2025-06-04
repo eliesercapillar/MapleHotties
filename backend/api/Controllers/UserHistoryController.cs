@@ -25,13 +25,6 @@ namespace api.Controllers
             _context = context;
         }
 
-        // GET: api/UserHistories
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserHistory>>> GetUserHistory()
-        {
-            return await _context.UserHistory.ToListAsync();
-        }
-
         // GET: api/UserHistories/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserHistory>> GetUserHistory(int id)
@@ -147,6 +140,47 @@ namespace api.Controllers
                 return Ok(result);
             }
             catch (Exception ex) 
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        // GET: api/UserHistories
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> All()
+        {
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                // Get the most recent UserHistory entries for this user
+                var recentHistory = await _context.UserHistory
+                    .Where(uh => uh.UserId == userId)
+                    .OrderByDescending(uh => uh.SeenAt)
+                    .ToListAsync();
+
+                // Extract the CharacterIds from the history entries
+                var characterIds = recentHistory.Select(uh => uh.CharacterId).ToList();
+
+                // Query the Characters table to get the character data
+                var characters = await _context.Characters
+                    .Where(c => characterIds.Contains(c.Id))
+                    .ToListAsync();
+
+                // Create the HistoryCharacterDTO list by joining the data
+                var result = recentHistory.Select(history => new HistoryCharacterDTO
+                {
+                    Character = characters.First(c => c.Id == history.CharacterId),
+                    Status = history.Status,
+                    SeenAt = history.SeenAt
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
                 return Problem(ex.Message);
             }

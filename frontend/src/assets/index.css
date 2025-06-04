@@ -29,7 +29,9 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --navbar-h: 90px;
+
+    --sidebar-nav-h: 90px;
+    --sidebar-options-h: 47px;
   }
   .dark {
     --background: 222.2 84% 4.9%;
