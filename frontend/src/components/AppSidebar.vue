@@ -8,8 +8,8 @@
         <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
         <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
       </nav>
-      <div class="bg-[#111418] h-[calc(100vh-var(--sidebar-nav-h))] flex flex-col items-start">
-        <div class="h-[--sidebar-options-h] mx-6 py-2 flex items-center justify-center gap-4 font-bold text-md">
+      <div class="bg-[#111418] flex flex-col items-start">
+        <div class="h-[--sidebar-options-h] ml-6 py-2 flex items-center justify-center gap-4 font-bold text-md">
           <div class="">
             <button class="px-2">History</button>
             <hr class="bg-[#ff4458] h-[3px] border-0 mt-1">
@@ -19,8 +19,8 @@
             <!-- <hr class="bg-[#ff4458] h-[3px] border-0 mt-1"> -->
           </div>
         </div>
-        <div class="h-full w-full">
-          <div class="ml-2 h-full">
+        <div class="w-full">
+          <div class="ml-2">
             <RecentHistory v-if="showingHistory"/>
             <RecentFavourites v-else/>
           </div>

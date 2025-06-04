@@ -6,9 +6,9 @@
         </div>
     </section>
     <!-- TODO: Add loading text when fetching -->
-    <section v-else id="recent_history" class="select-none h-screen">
+    <section v-else id="recent_history" class="select-none h-[calc(100vh-var(--sidebar-nav-h)-var(--sidebar-options-h))]">
         <RecycleScroller
-        class="h-full pt-4"
+        class="h-full"
         :items="cards"
         :item-size="248"
         :item-secondary-size="178"
@@ -26,7 +26,7 @@
                 <img :src="card.character.imageUrl" draggable="false">
                 <img 
                     id="status_overlay" 
-                    class="scale-[1.75] absolute right-0 top-0" 
+                    class="scale-[1.5] absolute right-2 top-2" 
                     :src="getOverlay(card.status)" 
                     draggable="false"
                 />
@@ -55,13 +55,7 @@ onMounted(async () => {
   historyStore.fetchHistory();
 })
 
-// RecycleScroller requires a top level 'id' property
-const cards = computed(() => 
-  historyStore.cards.map((card) => ({
-    ...card,
-    id: card.character.id // Add top-level id from character.id
-  }))
-)
+const cards = computed(() => historyStore.cards)
 
 const getBackgroundGradient = (status : string) => {
     return ButtonSVGs[status] ? ButtonSVGs[status].pressedGradient : "white";
