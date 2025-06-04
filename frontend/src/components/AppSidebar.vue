@@ -3,24 +3,32 @@
       <nav class="flex items-center justify-evenly py-6 h-[--sidebar-nav-h]"
            style="background: linear-gradient(135deg, #f92999, #ff3f29)">
            <!-- TODO: icon of current page should be set to #ff3f29 -->
-        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="rate"><Icon icon="bxs:heart" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="play"><Icon icon="icon-park-solid:game-handle" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-[#21262e] hover:text-[#ff3f29] p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="rate"><Icon icon="bxs:heart" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="play"><Icon icon="icon-park-solid:game-handle" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
       </nav>
       <div class="bg-[#111418] flex flex-col items-start">
         <div class="h-[--sidebar-options-h] ml-6 py-2 flex items-center justify-center gap-4 font-bold text-md">
           <div class="">
-            <button class="px-2">History</button>
-            <hr class="bg-[#ff4458] h-[3px] border-0 mt-1">
+            <button class="px-2 mb-[2px]" @click="showingHistory = true">History</button>
+            <hr 
+              aria-hidden="true" 
+              class="h-[3px] m-0 border-0 transition-all duration-300 ease-in-out bg-button_highlight"
+              :class="showingHistory ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'"
+            >
           </div>
           <div class="">
-            <button class="px-2">Favourites</button>
-            <!-- <hr class="bg-[#ff4458] h-[3px] border-0 mt-1"> -->
+            <button class="px-2 mb-[2px]" @click="showingHistory = false">Favourites</button>
+            <hr 
+              aria-hidden="true" 
+              class="h-[3px] m-0 border-0 transition-all duration-300 ease-in-out bg-button_highlight"
+              :class="!showingHistory ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'"
+            >
           </div>
         </div>
         <div class="w-full">
-          <div class="ml-2">
+          <div v-auto-animate class="ml-2">
             <RecentHistory v-if="showingHistory"/>
             <RecentFavourites v-else/>
           </div>
@@ -30,11 +38,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref } from "vue";
+import { ref } from "vue";
 import router from "@/router"
 import { Icon } from "@iconify/vue/dist/iconify.js";
 import RecentHistory from "@/components/RecentHistory.vue";
 import RecentFavourites from "@/components/RecentFavourites.vue";
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
 
 const showingHistory = ref(true);
 

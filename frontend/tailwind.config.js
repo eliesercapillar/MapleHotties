@@ -14,6 +14,10 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+			button_primary: 'hsl(var(--button-primary))',
+			button_highlight: 'hsl(var(--button-highlight))',
+
+
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

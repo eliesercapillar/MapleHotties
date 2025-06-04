@@ -32,6 +32,8 @@
 
     --sidebar-nav-h: 90px;
     --sidebar-options-h: 47px;
+    --button-primary: 72 100% 5.1%;
+    --button-highlight: 6 100% 58%;
   }
   .dark {
     --background: 222.2 84% 4.9%;

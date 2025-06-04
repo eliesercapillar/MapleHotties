@@ -42,13 +42,7 @@ export const useHistoryStore = defineStore('history', () =>
 
             if (!response.ok) throw new Error(`Failed to fetch history: ${response.status}`);
 
-            const data = await response.json();
-
-            cards.value = data.map((card) => ({
-                // Add use character ID as top level id for RecycleScroller component.
-                id: card.character.id,
-                ...card,
-              }))
+            cards.value = await response.json();
         }
         catch (err) {
             console.error("Failed to load more cards:", err);

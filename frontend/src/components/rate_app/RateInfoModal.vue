@@ -20,7 +20,7 @@
                 Check the <a class="text-blue-400" href="/leaderboard">leaderboard</a> to see the top rated characters by the community!
             </AlertDialogDescription>
             <AlertDialogFooter>
-                <AlertDialogAction class="bg-[#21262e] hover:bg-[#21262e] hover:text-[#ff3f29]">Okay!</AlertDialogAction>
+                <AlertDialogAction class="bg-[#21262e] hover:bg-[#21262e] hover:text-[#ff3f29] rounded-full">Okay!</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>

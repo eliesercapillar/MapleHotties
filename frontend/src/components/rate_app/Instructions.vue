@@ -1,13 +1,13 @@
 <template>
   <section
-    ref="wrapper"
+    v-auto-animate
     class="w-full text-[#444d5b] flex justify-center items-center gap-5"
   >
     <button
       class="h-[24px] bg-slate-300 px-3 rounded-xl text-center text-sm"
-      @click="toggleButton"
+      @click="showInstructions = !showInstructions"
     >
-      {{ buttonText }}
+      {{ showInstructions ? "Hide" : "Show" }}
     </button>
     <ul v-if="showInstructions" class="flex justify-center items-center gap-5">
       <!-- Left Arrow -->
@@ -126,18 +126,8 @@
 </template>
 
 <script setup lang="ts">
-import { useAutoAnimate } from "@formkit/auto-animate/vue";
-import { ref, computed } from "vue";
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
+import { ref } from "vue";
 
-const [wrapper] = useAutoAnimate();
 const showInstructions = ref(true);
-// const buttonText = computed(() => {showInstructions.value ? "Hide" : "Show"});
-const buttonText = ref("Hide");
-
-function toggleButton() {
-  showInstructions.value = !showInstructions.value;
-
-  buttonText.value = showInstructions.value ? "Hide" : "Show";
-}
-
 </script>
