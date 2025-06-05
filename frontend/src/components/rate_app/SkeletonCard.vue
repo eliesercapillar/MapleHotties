@@ -1,10 +1,10 @@
 <template>
-  <div id="skeleton_card">
+  <div id="skeleton_card" class="relative">
     <img
       id="card_background"
       src="/bgs/fairy_fountain.png"
       alt="SkeletonCard"
-      class="h-[667px] w-[375px] object-cover rounded-lg select-none"
+      class="relative h-card w-card object-cover rounded-lg select-none"
       draggable="false"
     />
     <Skeleton 
@@ -12,9 +12,7 @@
                h-[250px] w-[250px]
                bg-foreground"
         style="transform: translate(-50%, -50%);"/>
-    <div 
-        class="absolute bottom-[0%] h-[30%] w-full rounded-lg"
-        style="background-image: linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%);" />
+    <div id="black_gradient" class="absolute bottom-0 h-[30%] w-full rounded-lg bg-black-shadow-fade"/>
     <div class="absolute bottom-[5%] ml-2">
       <div class="flex items-center mb-1">
         <Skeleton class="h-[30px] w-[150px] bg-foreground"/>

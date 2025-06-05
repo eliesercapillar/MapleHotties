@@ -10,7 +10,7 @@
       </nav>
       <div class="bg-[#111418] flex flex-col items-start">
         <div class="h-[--sidebar-options-h] ml-6 py-2 flex items-center justify-center gap-4 font-bold text-md">
-          <div class="">
+          <div id="history_button">
             <button class="px-2 mb-[2px]" @click="showingHistory = true">History</button>
             <hr 
               aria-hidden="true" 
@@ -18,7 +18,7 @@
               :class="showingHistory ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'"
             >
           </div>
-          <div class="">
+          <div id="favourite_button">
             <button class="px-2 mb-[2px]" @click="showingHistory = false">Favourites</button>
             <hr 
               aria-hidden="true" 

@@ -1,5 +1,5 @@
 <template>
-    <section v-if="historyStore.cards.length == 0" class="h-full flex items-center justify-center">
+    <section v-if="historyStore.cards.length == 0" class="h-[calc(100vh-var(--sidebar-nav-h)-var(--sidebar-options-h))] flex items-center justify-center">
         <div class="flex flex-col items-center justify-center gap-10">
         <!-- TODO: make new svg for this component -->
             <img class="h-[256px] w-[256px]" src="/swipecard_fav_overlay_24x24.svg">

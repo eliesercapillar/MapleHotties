@@ -34,6 +34,8 @@
     --sidebar-options-h: 47px;
     --button-primary: 72 100% 5.1%;
     --button-highlight: 6 100% 58%;
+    --card-main-h: 667px;
+    --card-main-w: 375px;
   }
   .dark {
     --background: 222.2 84% 4.9%;
