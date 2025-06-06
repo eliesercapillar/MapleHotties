@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import Backgrounds from "@/data/Backgrounds.json";
 import { useHistoryStore } from './historyStore';
+import { useFavouritesStore } from './favouritesStore';
 
 interface ApiCharacter {
   id: number
@@ -31,6 +32,7 @@ function getRandomBG(): string {
 export const useSwipeStore = defineStore('swipe', () => 
 {
     const historyStore = useHistoryStore();
+    const favouritesStore = useFavouritesStore();
 
     /* cards
     *   The stack of cards. Should always be populated.
@@ -98,6 +100,7 @@ export const useSwipeStore = defineStore('swipe', () =>
         removeCard(event.characterId);
 
         historyStore.appendRecentCard(character, event.status, event.seenAt)
+        if (event.status == 'favourite') favouritesStore.appendRecentCard(character, event.seenAt);
         pending.value.push(event);
         if (pending.value.length >= 10) flushAndSave();
     }
