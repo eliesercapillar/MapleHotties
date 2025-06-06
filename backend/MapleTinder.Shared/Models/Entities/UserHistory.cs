@@ -12,11 +12,14 @@ namespace MapleTinder.Shared.Models.Entities
     {
         public int Id { get; set; }
 
-        public string UserId { get; set; } = null!;
+        public string UserId { get; set; } = null!; // FK from ApplicationUser
 
-        [ForeignKey("Character")] public int CharacterId { get; set; }
+        public int CharacterId { get; set; } // FK from Character
 
         public string Status { get; set; } = null!; // "Nope" | "Like" | "Favourite"
         public DateTime SeenAt { get; set; }
+
+        // Navigation Properties
+        public Character Character { get; set; } = null!;
     }
 }

@@ -25,62 +25,6 @@ namespace api.Controllers
             _context = context;
         }
 
-        // GET: api/UserHistories/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserHistory>> GetUserHistory(int id)
-        {
-            var userHistory = await _context.UserHistory.FindAsync(id);
-
-            if (userHistory == null)
-            {
-                return NotFound();
-            }
-
-            return userHistory;
-        }
-
-        // PUT: api/UserHistories/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUserHistory(int id, UserHistory userHistory)
-        {
-            if (id != userHistory.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(userHistory).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserHistoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/UserHistories
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<UserHistory>> PostUserHistory(UserHistory userHistory)
-        {
-            _context.UserHistory.Add(userHistory);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUserHistory", new { id = userHistory.Id }, userHistory);
-        }
-
         // POST: api/UserHistories/batch_save
         [HttpPost("batch_save")]
         [Authorize]
@@ -159,21 +103,14 @@ namespace api.Controllers
                 // Get the most recent UserHistory entries for this user
                 var recentHistory = await _context.UserHistory
                     .Where(uh => uh.UserId == userId)
+                    .Include(uh => uh.Character)
                     .OrderByDescending(uh => uh.SeenAt)
-                    .ToListAsync();
-
-                // Extract the CharacterIds from the history entries
-                var characterIds = recentHistory.Select(uh => uh.CharacterId).ToList();
-
-                // Query the Characters table to get the character data
-                var characters = await _context.Characters
-                    .Where(c => characterIds.Contains(c.Id))
                     .ToListAsync();
 
                 // Create the HistoryCharacterDTO list by joining the data
                 var result = recentHistory.Select(history => new HistoryCharacterDTO
                 {
-                    Character = characters.First(c => c.Id == history.CharacterId),
+                    Character = history.Character,
                     Status = history.Status,
                     SeenAt = history.SeenAt
                 }).ToList();
