@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
+    "@tanstack/vue-table": "^8.21.3",
     "@vueuse/components": "^13.3.0",
     "@vueuse/core": "^13.3.0",
     "@vueuse/motion": "^3.0.3",

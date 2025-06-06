@@ -45,10 +45,14 @@ import RecentHistory from "@/components/RecentHistory.vue";
 import RecentFavourites from "@/components/RecentFavourites.vue";
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 
+const emit = defineEmits(['clickRate','clickLeaderboard',])
+
 const showingHistory = ref(true);
 
-function rate() {
 
+
+function rate() {
+  emit("clickRate");
 }
 
 function play() {
@@ -61,7 +65,7 @@ function logout() {
 }
 
 function leaderboard() {
-  router.push('/leaderboard')
+  emit("clickLeaderboard");
 }
 
 </script>

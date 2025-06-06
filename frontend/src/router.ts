@@ -13,7 +13,6 @@ const routes = [
   { path: '/login', component: Login},
   { path: '/register', component: Register},
   // { path: '/about', component: About },
-  // { path: '/leaderboard', component: Leaderboard },
   // { path: '/contact', component: Contact },
   { path: '/:pathMatch(.*)*', component: NotFound },
 ];
