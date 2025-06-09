@@ -72,30 +72,22 @@ namespace api.Controllers
             return userFavourite;
         }
 
-
-        // POST: api/UserFavourites
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<UserFavourite>> PostUserFavourite(UserFavourite userFavourite)
+        // POST: api/UserFavourites/batch_save
+        [HttpPost("batch_save")]
+        [Authorize]
+        public async Task<IActionResult> BatchSave([FromBody] List<SwipeDTO> swipes)
         {
-            _context.UserFavourites.Add(userFavourite);
-            try
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var entities = swipes.Select(e => new UserFavourite
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (UserFavouriteExists(userFavourite.UserId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                UserId = userId,
+                CharacterId = e.CharacterId,
+                SeenAt = e.SeenAt
+            });
+            await _context.UserFavourites.AddRangeAsync(entities);
+            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUserFavourite", new { id = userFavourite.UserId }, userFavourite);
+            return Ok();
         }
 
         // DELETE: api/UserFavourites/5
