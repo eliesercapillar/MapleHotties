@@ -170,9 +170,8 @@ export const useSwipeStore = defineStore('swipe', () =>
         if (!pending.value.length || isFlushing.value) return;
 
         isFlushing.value = true;
-
         const batch = [...pending.value]; // Create a copy
-
+        
         const token = localStorage.getItem('token');
         if (!token) {
             console.error('Not logged in - cannot save swipes');
@@ -181,35 +180,88 @@ export const useSwipeStore = defineStore('swipe', () =>
         }
 
         try {
-            const historyUrl = `https://localhost:7235/api/UserHistory/batch_save`;
-            //const url = `http://localhost:5051/api/UserHistory/batch`;
-
-            const response = await apiFetch(historyUrl, {
-                method: 'POST',
-                body: JSON.stringify(batch)
-            })
-
-            if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status}`);
+            // Separate favourites from all swipes
+            const favourites = batch.filter(swipe => swipe.status === 'favourite');
+            
+            // Always save to UserHistory
+            const historySuccess = await saveToUserHistory(batch, token);
+            
+            // Save favourites to UserFavourites if any exist
+            let favouritesSuccess = true;
+            if (favourites.length > 0) {
+                favouritesSuccess = await saveToUserFavourites(favourites, token);
             }
 
-            // Only clear pending swipes if the request was successful
-            pending.value = pending.value.filter(swipe => 
-                !batch.some(batchSwipe => 
-                    batchSwipe.characterId === swipe.characterId && 
-                    batchSwipe.seenAt === swipe.seenAt
-                )
-            );
-
-            persistPendingSwipes(); // Update localStorage
-            console.log(`Successfully saved ${batch.length} swipe events`);
-        }
-        catch (err) {
+            // Only clear pending swipes if both operations succeeded
+            if (historySuccess && favouritesSuccess) {
+                pending.value = pending.value.filter(swipe => 
+                    !batch.some(batchSwipe => 
+                        batchSwipe.characterId === swipe.characterId && 
+                        batchSwipe.seenAt === swipe.seenAt
+                    )
+                );
+                
+                persistPendingSwipes(); // Update localStorage
+                console.log(`Successfully saved ${batch.length} swipe events (${favourites.length} favourites)`);
+            } else {
+                console.error('Partial save failure - keeping swipes in queue for retry');
+            }
+            
+        } catch (err) {
             console.error("Failed to save swipe events:", err);
-            // Pending swipes is NOT cleared on error bc they'll be retried later
-        }
-        finally {
+            // Don't clear pending swipes on error - they'll be retried later
+        } finally {
             isFlushing.value = false;
+        }
+    }
+
+    // Helper function to save to UserHistory
+    async function saveToUserHistory(batch: SwipeEvent[], token: string): Promise<boolean> {
+        try {
+            const url = `https://localhost:7235/api/UserHistory/batch_save`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(batch)
+            });
+
+            if (!response.ok) {
+                throw new Error(`UserHistory save failed: ${response.status}`);
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Failed to save to UserHistory:', error);
+            return false;
+        }
+    }
+
+    // Helper function to save to UserFavourites
+    async function saveToUserFavourites(favourites: SwipeEvent[], token: string): Promise<boolean> {
+        try {
+            const url = `https://localhost:7235/api/UserFavourites/batch_save`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(favourites)
+            });
+
+            if (!response.ok) {
+                throw new Error(`UserFavourites save failed: ${response.status}`);
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Failed to save to UserFavourites:', error);
+            return false;
         }
     }
 
