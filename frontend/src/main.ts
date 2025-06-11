@@ -39,7 +39,7 @@ router.beforeEach(async (to, from, next) => {
 
 // Save swipe history when app going to background.
 document.addEventListener('visibilitychange', () => {
-    if (document.hidden && swipeStore.pendingCount > 0) {
+    if (document.hidden) {
         console.log('App going to background: flushing swipes');
         swipeStore.flushAndSave();
     }
