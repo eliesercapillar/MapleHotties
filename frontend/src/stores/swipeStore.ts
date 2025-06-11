@@ -150,24 +150,19 @@ export const useSwipeStore = defineStore('swipe', () =>
         const character = findCard(event.characterId)
         removeCard(event.characterId);
 
-        // Update local stores immediately
         historyStore.appendRecentCard(character, event.status, event.seenAt)
         if (event.status == 'favourite') favouritesStore.appendRecentCard(character, event.seenAt);
 
-        // Add to pending batch
         pending.value.push(event);
 
-        // Flush if we've reached batch size
-        if (pending.value.length >= BATCH_SIZE) {
-            flushPending();
-        }
+        if (pending.value.length >= BATCH_SIZE) flushPending();
     }
 
     async function flushPending() {
         if (!pending.value.length || isFlushingPending.value) return;
 
-        const token = localStorage.getItem('token');
-        if (!token) {
+
+        if (!localStorage.getItem('token')) {
             console.error('Not logged in - cannot save swipes');
             return;
         }
@@ -193,15 +188,10 @@ export const useSwipeStore = defineStore('swipe', () =>
             if (!favouritesSuccess && favourites.length > 0) {
                 addToRetryQueue(favourites, 'favourites');
             }
-
-            if (historySuccess && favouritesSuccess) {
-                console.log(`Successfully flushed ${batchToFlush.length} swipe events`);
-            }
-
         } catch (err) {
-            console.error("Failed to flush swipe events:", err);
             // Add entire batch to retry queue
             addToRetryQueue(batchToFlush, 'history');
+            console.error("Failed to flush swipe events:", err);
         } finally {
             isFlushingPending.value = false;
         }
@@ -228,8 +218,7 @@ export const useSwipeStore = defineStore('swipe', () =>
     async function retryFailedSwipes() {
         if (!retry.value.length || isRetrying.value) return;
 
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!localStorage.getItem('token')) {
             console.error('Not logged in - cannot retry swipes');
             return;
         }
@@ -243,14 +232,16 @@ export const useSwipeStore = defineStore('swipe', () =>
                 
                 if (retryItem.type === 'history') {
                     success = await saveToUserHistory(retryItem.events);
-                } else if (retryItem.type === 'favourites') {
+                } 
+                else if (retryItem.type === 'favourites') {
                     success = await saveToUserFavourites(retryItem.events);
                 }
 
-                if (!success) {
-                    failedRetries.push(retryItem);
-                } else {
+                if (success) {
                     console.log(`Successfully retried ${retryItem.events.length} ${retryItem.type} events`);
+                } 
+                else {
+                    failedRetries.push(retryItem);
                 }
             }
 
@@ -281,8 +272,8 @@ export const useSwipeStore = defineStore('swipe', () =>
                 }
             }
         } catch (error) {
-            console.error('Failed to load retry swipes:', error);
             localStorage.removeItem(RETRY_SWIPES_KEY);
+            console.error('Failed to load retry swipes:', error);
         }
     }
 
@@ -290,7 +281,8 @@ export const useSwipeStore = defineStore('swipe', () =>
         try {
             if (retry.value.length > 0) {
                 localStorage.setItem(RETRY_SWIPES_KEY, JSON.stringify(retry.value));
-            } else {
+            } 
+            else {
                 localStorage.removeItem(RETRY_SWIPES_KEY);
             }
         } catch (error) {

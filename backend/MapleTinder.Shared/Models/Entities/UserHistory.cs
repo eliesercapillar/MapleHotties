@@ -10,8 +10,6 @@ namespace MapleTinder.Shared.Models.Entities
 {
     public class UserHistory
     {
-        public int Id { get; set; }
-
         public string UserId { get; set; } = null!; // FK from ApplicationUser
 
         public int CharacterId { get; set; } // FK from Character

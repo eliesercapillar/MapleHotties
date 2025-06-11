@@ -40,15 +40,16 @@ namespace MapleTinder.Shared.Data
 
             builder.Entity<UserHistory>(eb =>
             {
-                eb.HasIndex(uf => uf.UserId);
+                eb.HasKey(uh => new { uh.UserId, uh.CharacterId }); // Composite PK
+                eb.HasIndex(uh => uh.UserId);
                 eb.HasIndex(uh => new { uh.UserId, uh.SeenAt });
             });
 
             builder.Entity<UserFavourite>(eb =>
             {
-                eb.HasKey(uh => new { uh.UserId, uh.CharacterId }); // Composite PK
+                eb.HasKey(uf => new { uf.UserId, uf.CharacterId }); // Composite PK
                 eb.HasIndex(uf => uf.UserId);
-                eb.HasIndex(uh => new { uh.UserId, uh.SeenAt });
+                eb.HasIndex(uf => new { uf.UserId, uf.SeenAt });
             });
 
         }

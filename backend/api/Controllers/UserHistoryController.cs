@@ -122,26 +122,5 @@ namespace api.Controllers
                 return Problem(ex.Message);
             }
         }
-
-        // DELETE: api/UserHistories/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserHistory(int id)
-        {
-            var userHistory = await _context.UserHistory.FindAsync(id);
-            if (userHistory == null)
-            {
-                return NotFound();
-            }
-
-            _context.UserHistory.Remove(userHistory);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool UserHistoryExists(int id)
-        {
-            return _context.UserHistory.Any(e => e.Id == id);
-        }
     }
 }
