@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MapleTinder.Shared.Data;
 using MapleTinder.Shared.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace api.Controllers
 {
@@ -37,22 +40,67 @@ namespace api.Controllers
             return Ok(characters);
         }
 
-        // GET: api/Characters/random?userId=123
+        // GET: api/Characters/random?count=10
         [HttpGet("random")]
-        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters(string userId, int count = 10)
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters([FromQuery] int count = 10)
         {
-            var seenCharacterIds = await _context.UserHistory
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                var seenCharacterIds = await _context.UserHistory
                 .Where(usc => usc.UserId == userId)
                 .Select(usc => usc.CharacterId)
-                .ToListAsync();
+                .ToHashSetAsync();
 
-            var unseenCharacters = await _context.Characters
-                .Where(c => !seenCharacterIds.Contains(c.Id))
-                .OrderBy(c => Guid.NewGuid()) // TODO: Change to a more efficient random sampling method. 
-                .Take(count)
-                .ToListAsync();
+                var unseenIdsCount = await _context.Characters
+                    .Where(c => !seenCharacterIds.Contains(c.Id))
+                    .CountAsync();
 
-            return Ok(unseenCharacters);
+                var random = new Random();
+
+                // if we have a small number of unseen characters, just get them all
+                if (unseenIdsCount <= count * 2)
+                {
+                    var allUnseen = await _context.Characters
+                        .Where(c => !seenCharacterIds.Contains(c.Id))
+                        .ToListAsync();
+
+                    // Shuffle in memory and take what we need
+                    return Ok(allUnseen.OrderBy(x => random.Next()).Take(count));
+                }
+
+                var selectedCharacters = new List<Character>();
+                var usedIds = new HashSet<int>();
+
+                while (selectedCharacters.Count < count && usedIds.Count < unseenIdsCount)
+                {
+                    var id = random.Next(0, unseenIdsCount);
+
+                    if (usedIds.Add(id))
+                    {
+                        var character = await _context.Characters
+                            .Where(c => !seenCharacterIds.Contains(c.Id))
+                            .Skip(id)
+                            .FirstOrDefaultAsync();
+
+                        if (character != null)
+                        {
+                            selectedCharacters.Add(character);
+                            seenCharacterIds.Add(character.Id);
+                        }
+                    }
+                }
+
+                return Ok(selectedCharacters);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         // GET: api/Characters/5

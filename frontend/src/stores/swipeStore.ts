@@ -69,10 +69,8 @@ export const useSwipeStore = defineStore('swipe', () =>
         
         isLoading.value = true;
         try {
-            const pageSize = 10;
-            const url = `https://localhost:7235/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
-            //const url = `http://localhost:5051/api/Characters?page=${curPage.value}&pageSize=${pageSize}`;
-            const response = await fetch(url);
+            const url = `https://localhost:7235/api/Characters/random`;
+            const response = await apiFetch(url);
             if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
             
             // Map API response into our CharacterCard shape

@@ -20,7 +20,7 @@ swipeStore.initializeStore();
 
 // Save swipe history when closing application.
 window.addEventListener('beforeunload', (event) => {
-    // swipeStore.flushPending();
+    swipeStore.flushPending();
     
     // Optionally show a warning if there are pending swipes
     // if (swipeStore.pendingCount > 0) event.preventDefault();
@@ -29,7 +29,7 @@ window.addEventListener('beforeunload', (event) => {
 // Save swipe history when changing pages.
 router.beforeEach(async (to, from, next) => {
     try {
-        // await swipeStore.flushPending();
+        await swipeStore.flushPending();
         next();
     } catch (error) {
         console.error('Error flushing swipes during navigation:', error);
@@ -41,7 +41,7 @@ router.beforeEach(async (to, from, next) => {
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         console.log('App going to background: flushing swipes');
-        // swipeStore.flushPending();
+        swipeStore.flushPending();
     }
 });
 
