@@ -38,9 +38,18 @@ namespace MapleTinder.Shared.Data
                 }
             );
 
+            builder.Entity<Character>(eb =>
+            {
+                eb.Property(c => c.Name).HasMaxLength(25);
+                eb.Property(c => c.Job).HasMaxLength(25);
+                eb.Property(c => c.World).HasMaxLength(25);
+                eb.Property(c => c.ImageUrl).HasMaxLength(500);
+            });
+
             builder.Entity<UserHistory>(eb =>
             {
                 eb.HasKey(uh => new { uh.UserId, uh.CharacterId }); // Composite PK
+
                 eb.HasIndex(uh => uh.UserId);
                 eb.HasIndex(uh => new { uh.UserId, uh.SeenAt });
             });
@@ -48,10 +57,23 @@ namespace MapleTinder.Shared.Data
             builder.Entity<UserFavourite>(eb =>
             {
                 eb.HasKey(uf => new { uf.UserId, uf.CharacterId }); // Composite PK
+
                 eb.HasIndex(uf => uf.UserId);
                 eb.HasIndex(uf => new { uf.UserId, uf.SeenAt });
             });
 
+            builder.Entity<CharacterStats>(eb =>
+            {
+                eb.HasKey(cs => cs.CharacterId);
+
+                eb.HasOne(cs => cs.Character)
+                  .WithOne(c => c.CharacterStats)
+                  .HasForeignKey<CharacterStats>(cs => cs.CharacterId);
+
+                eb.HasIndex(cs => cs.TotalNopes);
+                eb.HasIndex(cs => cs.TotalLikes);
+                eb.HasIndex(cs => cs.TotalFavourites);
+            });
         }
     }
 }

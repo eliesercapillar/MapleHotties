@@ -302,6 +302,8 @@ export const useSwipeStore = defineStore('swipe', () =>
                 body: JSON.stringify(batch)
             });
 
+            console.log(`Successfully saved ${batch.length} entries to history.`)
+
             return response.ok;
         } catch (error) {
             console.error('Failed to save to UserHistory:', error);
@@ -318,6 +320,8 @@ export const useSwipeStore = defineStore('swipe', () =>
                 method: 'POST',
                 body: JSON.stringify(favourites)
             });
+
+            console.log(`Successfully saved ${favourites.length} entries to history.`)
 
             return response.ok;
         } catch (error) {
