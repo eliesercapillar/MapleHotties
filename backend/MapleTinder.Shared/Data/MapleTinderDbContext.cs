@@ -12,6 +12,7 @@ namespace MapleTinder.Shared.Data
         public MapleTinderDbContext(DbContextOptions<MapleTinderDbContext> options) : base(options) { }
 
         public DbSet<Character> Characters { get; set; }
+        public DbSet<CharacterStats> CharacterStats { get; set; }
 
         public DbSet<UserHistory> UserHistory { get; set; }
         public DbSet<UserFavourite> UserFavourites { get; set; }
@@ -70,9 +71,9 @@ namespace MapleTinder.Shared.Data
                   .WithOne(c => c.CharacterStats)
                   .HasForeignKey<CharacterStats>(cs => cs.CharacterId);
 
-                eb.HasIndex(cs => cs.TotalNopes);
-                eb.HasIndex(cs => cs.TotalLikes);
-                eb.HasIndex(cs => cs.TotalFavourites);
+                eb.HasIndex(cs => new { cs.TotalNopes, cs.CharacterId });
+                eb.HasIndex(cs => new { cs.TotalLikes, cs.CharacterId });
+                eb.HasIndex(cs => new { cs.TotalFavourites, cs.CharacterId });
             });
         }
     }
