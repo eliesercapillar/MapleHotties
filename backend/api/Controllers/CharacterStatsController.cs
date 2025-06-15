@@ -34,7 +34,7 @@ namespace api.Controllers
                 var list = await _context.CharacterStats
                 .Include(cs => cs.Character)
                 .OrderByDescending(cs => cs.TotalLikes)
-                .ThenBy(cs => cs.CharacterId)
+                .ThenBy(cs => cs.CharacterId) // Tiebreaker
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(cs => new LeaderboardCharacterLikeDTO
@@ -61,7 +61,7 @@ namespace api.Controllers
                 var list = await _context.CharacterStats
                 .Include(cs => cs.Character)
                 .OrderByDescending(cs => cs.TotalNopes)
-                .ThenBy(cs => cs.CharacterId)
+                .ThenBy(cs => cs.CharacterId) // Tiebreaker
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(cs => new LeaderboardCharacterNopeDTO
@@ -88,6 +88,24 @@ namespace api.Controllers
             if (characterStats == null) return NotFound();
 
             return Ok(characterStats);
+        }
+
+        // Helper method to get or create CharacterStats
+        public async Task<CharacterStats> GetOrCreateCharacterStatsAsync(int characterId)
+        {
+            var stats = await _context.CharacterStats.FindAsync(characterId);
+            if (stats == null)
+            {
+                stats = new CharacterStats
+                {
+                    CharacterId = characterId,
+                    TotalLikes = 0,
+                    TotalNopes = 0,
+                    TotalFavourites = 0
+                };
+                _context.CharacterStats.Add(stats);
+            }
+            return stats;
         }
     }
 }

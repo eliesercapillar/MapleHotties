@@ -3,6 +3,7 @@ import Home from '@/pages/Home.vue';
 import Main from '@/pages/Main.vue';
 import Login from '@/pages/Login.vue';
 import Register from './pages/Register.vue';
+import Leaderboard from './pages/Leaderboard.vue';
 // import Contact from '@/pages/Contact.vue';
 import NotFound from '@/pages/404.vue'
 import { isLoggedIn } from './utils/auth';
@@ -12,6 +13,7 @@ const routes = [
   { path: '/app', component: Main },
   { path: '/login', component: Login},
   { path: '/register', component: Register},
+  { path: '/leaderboard', component: Leaderboard},
   // { path: '/about', component: About },
   // { path: '/contact', component: Contact },
   { path: '/:pathMatch(.*)*', component: NotFound },
