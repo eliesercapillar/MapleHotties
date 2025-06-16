@@ -11,6 +11,7 @@ using api.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using api.Interfaces;
 
 namespace api.Controllers
 {
@@ -19,10 +20,12 @@ namespace api.Controllers
     public class UserHistoryController : ControllerBase
     {
         private readonly MapleTinderDbContext _context;
+        private readonly ICharacterStatsService _characterStatsService;
 
-        public UserHistoryController(MapleTinderDbContext context)
+        public UserHistoryController(MapleTinderDbContext context, ICharacterStatsService characterStatsService)
         {
             _context = context;
+            _characterStatsService = characterStatsService;
         }
 
         // POST: api/UserHistories/batch_save
@@ -39,10 +42,10 @@ namespace api.Controllers
                 SeenAt = e.SeenAt
             });
             await _context.UserHistory.AddRangeAsync(entities);
+            await _characterStatsService.UpdateCharacterStatsAsync(swipes);
+
             await _context.SaveChangesAsync();
 
-            // TODO: Create Likes Leaderboard Entity & Service.
-            //await _statsService.UpdateGlobalCounters(swipes);
             return Ok();
         }
 

@@ -218,6 +218,7 @@ builder.Services.AddCors(options =>
 
 // Other Services
 builder.Services.AddScoped<ITokenService, TokenService>(); // JWT Token Creation Service
+builder.Services.AddScoped<ICharacterStatsService, CharacterStatsService>(); // Character Stats Create/Update Service
 
 // ----------------------------------------------------------
 // App

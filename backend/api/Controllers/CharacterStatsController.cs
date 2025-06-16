@@ -89,23 +89,5 @@ namespace api.Controllers
 
             return Ok(characterStats);
         }
-
-        // Helper method to get or create CharacterStats
-        public async Task<CharacterStats> GetOrCreateCharacterStatsAsync(int characterId)
-        {
-            var stats = await _context.CharacterStats.FindAsync(characterId);
-            if (stats == null)
-            {
-                stats = new CharacterStats
-                {
-                    CharacterId = characterId,
-                    TotalLikes = 0,
-                    TotalNopes = 0,
-                    TotalFavourites = 0
-                };
-                _context.CharacterStats.Add(stats);
-            }
-            return stats;
-        }
     }
 }
