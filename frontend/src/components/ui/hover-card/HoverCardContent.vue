@@ -31,7 +31,7 @@ const forwardedProps = useForwardProps(delegatedProps)
            rounded-md border 
            bg-popover text-popover-foreground 
            shadow-md outline-none
-           
+
            data-[state=open]:animate-in 
            data-[state=closed]:animate-out 
            data-[state=closed]:fade-out-0 
@@ -50,13 +50,3 @@ const forwardedProps = useForwardProps(delegatedProps)
     </HoverCardContent>
   </HoverCardPortal>
 </template>
-
-<style scoped>
-.hover-card-content[data-state="open"].animate-in {
-  animation-duration: 70ms !important;
-}
-
-.hover-card-content[data-state="closed"].animate-out {
-  animation-duration: 0ms !important;
-}
-</style>
