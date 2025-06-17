@@ -15,21 +15,21 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="(entry, id) in testList" :key="id">
-            <TableCell class="font-medium">{{ entry.character.id }}</TableCell>
-            <TableCell>
-              <HoverCard>
-                <HoverCardTrigger class="text-blue-400">{{ entry.character.name }}</HoverCardTrigger>
-                <HoverCardContent class="h-64 w-64 p-0">
-                  <img class="h-64 w-64" :src="entry.character.imageUrl">
-                </HoverCardContent>
-              </HoverCard>
-            </TableCell>
-            <TableCell>{{ entry.character.level }}</TableCell>
-            <TableCell>{{ entry.character.job }}</TableCell>
-            <TableCell>{{ entry.character.world }}</TableCell>
-            <TableCell class="text-right">{{ entry.totalCount }}</TableCell>
-          </TableRow>
+          <HoverCard v-for="(entry, id) in leaderboardStore.likeCharacters" :key="id">
+            <HoverCardTrigger as-child>
+              <TableRow>
+                <TableCell class="font-medium">{{ entry.character.id }}</TableCell>
+                <TableCell>{{ entry.character.name }}</TableCell>
+                <TableCell>{{ entry.character.level }}</TableCell>
+                <TableCell>{{ entry.character.job }}</TableCell>
+                <TableCell>{{ entry.character.world }}</TableCell>
+                <TableCell class="text-right">{{ entry.totalCount }}</TableCell>
+              </TableRow>
+            </HoverCardTrigger>
+            <HoverCardContent class="h-64 w-64 p-0 overflow-hidden bg-like-gradient">
+              <img class="h-64 w-64" :src="entry.character.imageUrl" :alt="entry.character.name">
+            </HoverCardContent>
+          </HoverCard>
         </TableBody>
       </Table>
     </div>
