@@ -64,10 +64,15 @@ function showLastPage() {
 
 const invoices = [
   {
-    invoice: 'INV001',
-    paymentStatus: 'Paid',
-    totalAmount: '$250.00',
-    paymentMethod: 'Credit Card',
+    totalCount: '100',
+    character: {
+      id: 1,
+      name: "CHARACTER 1",
+      level: 300,
+      job: "Dual Blade",
+      world: "Kronos",
+      imageUrl: "https://i.mapleranks.com/u/HJPKNMCLGHPGJFODCAGJAKPKCDLCJBCAACIJKMBDGDCBGGDPLIMAJLEGNJKKMNLGDABBGLGNNKLJCIJHCGMKEPHAIKNAJKFHPJPDHPCDGBGLPGCCNCBJFEHGKHHCJOLJPDNKFNAKCPAFDICIKJMMGJCKIJPCLLNHEAILIKPGNALMAOIHEBFDPHHOAOGCBKMBMPFBPKMOFHNFAJLDNAKPOPCOJNLEGOLKHJDFMLDBJDBFFIKFIMJNFPJAMAIFOFLC.png",
+    }
   },
   {
     invoice: 'INV002',

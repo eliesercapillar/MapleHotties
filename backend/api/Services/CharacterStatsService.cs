@@ -41,13 +41,14 @@ namespace api.Services
 
                 switch (swipe.Status?.ToLower())
                 {
-                    case "like":
+                    case "love":
                         stats.TotalLikes++;
                         break;
                     case "nope":
                         stats.TotalNopes++;
                         break;
                     case "favourite":
+                        stats.TotalLikes++; // Favourites also count as liking
                         stats.TotalFavourites++;
                         break;
                 }
