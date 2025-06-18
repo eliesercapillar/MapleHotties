@@ -11,6 +11,7 @@ using api.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace api.Controllers
 {
@@ -27,10 +28,12 @@ namespace api.Controllers
 
         // GET: api/CharacterStats/top_liked?page=1&pageSize=10
         [HttpGet("top_liked")]
-        public async Task<IActionResult> TopLiked(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> TopLiked([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
+                var totalCount = await _context.CharacterStats.CountAsync();
+
                 var list = await _context.CharacterStats
                 .Include(cs => cs.Character)
                 .OrderByDescending(cs => cs.TotalLikes)
@@ -44,7 +47,15 @@ namespace api.Controllers
                 })
                 .ToListAsync();
 
-                return Ok(list);
+                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterLikeDTO>
+                {
+                    Data = list,
+                    TotalCount = totalCount,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                };
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -54,10 +65,12 @@ namespace api.Controllers
 
         // GET: api/CharacterStats/top_noped?page=1&pageSize=10
         [HttpGet("top_noped")]
-        public async Task<IActionResult> TopNoped(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> TopNoped([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
+                var totalCount = await _context.CharacterStats.CountAsync();
+
                 var list = await _context.CharacterStats
                 .Include(cs => cs.Character)
                 .OrderByDescending(cs => cs.TotalNopes)
@@ -71,7 +84,15 @@ namespace api.Controllers
                 })
                 .ToListAsync();
 
-                return Ok(list);
+                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterNopeDTO>
+                {
+                    Data = list,
+                    TotalCount = totalCount,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                };
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

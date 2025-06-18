@@ -12,27 +12,33 @@ interface ApiCharacter {
 
 interface LikeCharacter {
     character: ApiCharacter
-    totalCount: number
+    totalLikes: number
 }
 
 interface NopeCharacter {
     character: ApiCharacter
-    totalCount: number
+    totalNopes: number
 }
 
-interface FullCharacter {
-    character: ApiCharacter
-    totalLikeCount: number
-    totalNopeCount: number
-    totalFavouriteCount: number
+interface PaginatedResponse<T> {
+    data: T[]
+    totalCount: number
+    currentPage: number
+    pageSize: number
+    totalPages: number
 }
 
 export const useLeaderboardStore = defineStore('leaderboard', () => 
 {
     const likeCharacters = ref([] as LikeCharacter[]);
     const nopeCharacters = ref([] as NopeCharacter[]);
+    
+    const showLikes = ref(true);
     const currentPage = ref(1);
-    const maxCards = 6;
+    
+    const totalPages = ref(0);
+    const totalCount = ref(0);
+    const pageSize = ref(10);
     const isLoading = ref(false);
 
     async function fetchTopLiked() {
@@ -40,19 +46,25 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
 
         isLoading.value = true;
         try {
-            const pageSize = 10;
-            const url = `https://localhost:7235/api/CharacterStats/top_liked?page=${currentPage.value}&pageSize=${pageSize}`
+            const url = `https://localhost:7235/api/CharacterStats/top_liked?page=${currentPage.value}&pageSize=${pageSize.value}`;
 
             const response = await fetch(url, {
                 method: 'GET'
-            })
+            });
 
-            if (!response.ok) throw new Error(`Failed to fetch Top Liked page ${currentPage.value}: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch Top Liked page ${currentPage.value}: ${response.status}`);
+            }
 
-            likeCharacters.value = await response.json();
+            const data: PaginatedResponse<LikeCharacter> = await response.json();
+            
+            likeCharacters.value = data.data;
+            totalPages.value = data.totalPages;
+            totalCount.value = data.totalCount;
+            pageSize.value = data.pageSize;
         }
         catch (err) {
-            console.error("Failed to load more cards:", err);
+            console.error("Failed to load top liked characters:", err);
         }
         finally {
             isLoading.value = false;
@@ -64,29 +76,46 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
 
         isLoading.value = true;
         try {
-            const pageSize = 10;
-            const url = `https://localhost:7235/api/CharacterStats/top_noped?page=${currentPage}&pageSize=${pageSize}`
+            const url = `https://localhost:7235/api/CharacterStats/top_noped?page=${currentPage.value}&pageSize=${pageSize.value}`;
 
             const response = await fetch(url, {
                 method: 'GET'
-            })
+            });
 
-            if (!response.ok) throw new Error(`Failed to fetch Top Liked page ${currentPage}: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch Top Noped page ${currentPage.value}: ${response.status}`);
+            }
 
-            nopeCharacters.value = await response.json();
+            const data: PaginatedResponse<NopeCharacter> = await response.json();
+            
+            nopeCharacters.value = data.data;
+            totalPages.value = data.totalPages;
+            totalCount.value = data.totalCount;
+            pageSize.value = data.pageSize;
         }
         catch (err) {
-            console.error("Failed to load more cards:", err);
+            console.error("Failed to load top noped characters:", err);
         }
         finally {
             isLoading.value = false;
         }
     }
 
-    const nextPage = currentPage.value += 1;
+    function setPage(page: number) {
+        currentPage.value = page;
+    }
 
-    return { isLoading, currentPage,
-        likeCharacters, nopeCharacters,
-        fetchTopLiked, fetchTopNoped,
+    return { 
+        isLoading,
+        showLikes, 
+        currentPage,
+        totalPages,
+        totalCount,
+        pageSize,
+        likeCharacters, 
+        nopeCharacters,
+        fetchTopLiked, 
+        fetchTopNoped,
+        setPage
     }
 })
