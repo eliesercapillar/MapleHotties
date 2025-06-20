@@ -46,7 +46,7 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
 
         isLoading.value = true;
         try {
-            const url = `https://localhost:7235/api/CharacterStats/top_liked?page=${currentPage.value}&pageSize=${pageSize.value}`;
+            const url = `https://localhost:7235/api/CharacterStats/top_liked?page=${currentPage.value}&pageSize=3`;
 
             const response = await fetch(url, {
                 method: 'GET'

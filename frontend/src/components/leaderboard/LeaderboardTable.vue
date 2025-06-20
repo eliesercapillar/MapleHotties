@@ -16,6 +16,7 @@
         <TableHeader>
           <TableRow>
             <TableHead class="w-[100px]">Rank</TableHead>
+            <TableHead>Sprite</TableHead>
             <TableHead>IGN</TableHead>
             <TableHead>Level</TableHead>
             <TableHead>Job</TableHead>
@@ -26,26 +27,18 @@
         <TableBody>
           <!-- Likes table -->
           <template v-if="leaderboardStore.showLikes">
-            <HoverCard 
-              v-for="(entry, index) in likeCharacters" 
-              :key="`like-${entry.character.id}-${leaderboardStore.currentPage}`"
-            >
-              <HoverCardTrigger as-child>
-                <TableRow>
+                <TableRow v-for="(entry, index) in likeCharacters" 
+                :key="`like-${entry.character.id}-${leaderboardStore.currentPage}`">
                   <TableCell class="font-medium">
                     {{ ((leaderboardStore.currentPage - 1) * leaderboardStore.pageSize) + index + 1 }}
                   </TableCell>
+                  <TableCell><img class="h-24 w-24" :src="entry.character.imageUrl" :alt="entry.character.name"></TableCell>
                   <TableCell>{{ entry.character.name }}</TableCell>
                   <TableCell>{{ entry.character.level }}</TableCell>
                   <TableCell>{{ entry.character.job }}</TableCell>
                   <TableCell>{{ entry.character.world }}</TableCell>
                   <TableCell class="text-right">{{ entry.totalLikes }}</TableCell>
                 </TableRow>
-              </HoverCardTrigger>
-              <HoverCardContent class="h-64 w-64 p-0 overflow-hidden bg-like-gradient">
-                <img class="h-64 w-64" :src="entry.character.imageUrl" :alt="entry.character.name">
-              </HoverCardContent>
-            </HoverCard>
           </template>
 
           <!-- Nopes table -->
