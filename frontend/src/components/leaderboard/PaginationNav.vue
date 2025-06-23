@@ -1,5 +1,5 @@
 <template>
-    <div class="flex justify-center mt-6">
+    <div class="flex justify-center mt-4">
         <Pagination 
           :items-per-page="leaderboardStore.pageSize" 
           :total="leaderboardStore.totalCount" 
