@@ -1,7 +1,7 @@
 <template>
     <section class="w-[60rem]">
       <!-- Loading state -->
-      <div v-if="leaderboardStore.isLoading" class="h-[784.5px] py-8 text-center">
+      <div v-if="leaderboardStore.isLoading" class="h-[784.5px] text-center flex flex-col justify-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
         <p class="mt-4">Loading...</p>
       </div>

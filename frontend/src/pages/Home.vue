@@ -5,7 +5,7 @@
       <!-- Hero Section -->
       <section>
         <div
-          :class="`bg-[url(/hero_bg_temp.png)] bg-no-repeat bg-cover`"
+          :class="`bg-[url(/hero.png)] bg-cover`"
           class="h-[calc(100vh-4.5rem)] flex justify-center items-center"
         >
           <div class="grid gap-2">
