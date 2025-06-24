@@ -1,19 +1,14 @@
 {
     "data": [
       {
-        "name": "LinkedIn",
-        "link": "https://www.linkedin.com/in/eliesercapillar/",
-        "icon": "lucide:linkedin"
-      },
-      {
         "name": "GitHub",
         "link": "https://github.com/eliesercapillar",
         "icon": "lucide:github"
       },
       {
-        "name": "Email",
-        "link": "mailto:elieser.capillar@gmail.com",
-        "icon": "lucide:mail"
+        "name": "Discord",
+        "link": "https://discord.com/kingpjsalt",
+        "icon": "mingcute:discord-line"
       },
       {
         "name": "X",

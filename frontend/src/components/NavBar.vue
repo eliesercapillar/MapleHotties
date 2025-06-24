@@ -1,11 +1,12 @@
 <template>
-    <header class="z-50 py-6 bg-foreground sticky top-0">
-      <div class="mx-5">
-        <div class="flex justify-between items-center">
+    <header class="z-30 sticky top-0 w-full">
+      <div class="p-4"
+          :class="!isMenuOpen ? `bg-gradient-to-b from-black/80 to-transparent` : `bg-zinc-900`">
+        <div class="mx-5 flex justify-between items-center">
           <!-- Logo -->
           <div>
             <RouterLink to="/">
-              <Icon icon="lucide:aperture" class="size-5 text-white" />
+              <img src="/logos/mt_mushroom.png" class="w-10 h-10"/>
             </RouterLink>
           </div>
           <!-- Mobile Hamburger Button -->
@@ -36,7 +37,7 @@
           </nav>
         </div>
       </div>
-      <nav v-if="!isDesktopView && isMenuOpen" class="m-5 font-bold text-4xl flex flex-col justify-between h-screen">
+      <nav v-if="!isDesktopView && isMenuOpen" class="font-bold text-4xl flex flex-col justify-between h-screen bg-zinc-900">
         <ul class="flex flex-col gap-4">
           <li v-for="(page, index) in Pages.data" :key="page.name"
           class="text-muted-foreground hover:opacity-50"

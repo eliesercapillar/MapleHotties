@@ -1,81 +1,32 @@
 <template>
   <main>
     <div class="bg-background">
-      <NavBar :activeIndex="0" />
-      <!-- Hero Section -->
-      <section>
-        <div
-          :class="`bg-[url(/hero.png)] bg-cover`"
-          class="h-[calc(100vh-4.5rem)] flex justify-center items-center"
-        >
-          <div class="grid gap-2">
-            <h1 class="text-[#fff500] text-center text-9xl font-bold capitalize">
-              Make The Next Move
-            </h1>
-            <p class="text-center">It's better on the app.</p>
-            <div class="grid justify-center items-center gap-2">
-              <Button class="">Download now</Button>
-              <Button class="">Sign In</Button>
-            </div>
-          </div>
+      <div class="relative w-full h-screen bg-[url(/hero.png)] bg-cover bg-center bg-no-repeat">
+        <NavBar :activeIndex="-1" />
+        <!-- Gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
+
+        <!-- Hero content -->
+        <div id="hero" class="relative z-20 flex flex-col items-center justify-center text-white text-center h-[calc(100vh-4.5rem)] select-none">
+          <h1 class="text-9xl font-bold font">MapleHotties</h1>
+          <p class="text-xl my-4">The hottest players in Maplestory GMS.</p>
+          <Button class="bg-nope-gradient rounded-3xl text-lg p-5" @click="login">Sign in</Button>
         </div>
-      </section>
-      <footer>
-        <div class="mx-32 pt-8">
-          <div class="flex items-center justify-between border-b-2 border-foreground">
-            <Socials />
-            <div>
-              <div class="flex items-center justify-center">
-                <a href="#">
-                  <img
-                    alt="Download on the App Store"
-                    loading="lazy"
-                    width="120"
-                    height="40"
-                    decoding="async"
-                    data-nimg="1"
-                    style="color: transparent"
-                    src="https://bumble.com/bumble-brand-assets/bumble/l-assets/en/appstore-badge.svg"
-                  />
-                </a>
-                <a href="#">
-                  <img
-                    alt="Get it on Google Play"
-                    loading="lazy"
-                    width="151"
-                    height="40"
-                    decoding="async"
-                    data-nimg="1"
-                    style="color: transparent"
-                    src="https://bumble.com/_next/image/?url=%2Fbumble-brand-assets%2Fbumble%2Fl-assets%2Fen%2Fgoogle-play-badge.png&amp;w=320&amp;q=75"
-                  />
-                </a>
-              </div>
-              <p class="text-foreground text-[10px]">
-                Apple and the Apple logo are trademarks of Apple Inc.
-                <br />
-                Google Play is a trademark of Google LLC.
-              </p>
-            </div>
-          </div>
-          <div class="grid space-y-2 border-b-8 border-white">
-            <p class="text-center">It's better on the app.</p>
-            <div class="grid justify-center items-center space-y-2">
-              <Button class="">Download now</Button>
-              <Button class="">Sign In</Button>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div>
+      <Footer/>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
 import NavBar from "@/components/NavBar.vue";
+import Footer from "@/components/Footer.vue";
 import Socials from "@/components/Socials.vue";
 import Button from "@/components/ui/button/Button.vue";
-import { ref } from "vue";
+import router from "@/router";
 
-const heroBGPath = ref("/hero_bg_temp.png");
+function login() {
+  router.push("/login")
+}
+
 </script>
