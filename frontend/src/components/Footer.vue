@@ -20,7 +20,7 @@
         <p class="font-thin text-xs">© 2025 maplehotties.com | All rights reserved.</p>
         <div class="text-right">
           <p class="font-thin text-xs">Made with ❤️ by KPJS</p>
-          <p class="font-thin text-xs pt-1">Any suggestions? Join the <a href="@" class="text-blue-400">community discord!</a></p>
+          <p class="font-thin text-xs pt-1">Any suggestions? Join the <a href="@" class="text-blue-400">community Discord server!</a></p>
         </div>
       </div>
       <!-- <div class="flex items-center justify-between border-b-2 border-foreground">

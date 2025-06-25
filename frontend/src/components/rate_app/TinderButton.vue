@@ -93,10 +93,24 @@ const onPointerUp = () => { isPressed.value = false; }
 
 const isActive = computed(() => {
   const swipeThreshold = 20;
+  const xThreshold = 150; // Same as in SwipeCard.vue
+  
+  const currentX = swipeStore.xPos;
+  const currentY = swipeStore.yPos;
 
-  return (props.name === "Nope" && swipeStore.xPos < -swipeThreshold) ||
-         (props.name === "Love" && swipeStore.xPos > swipeThreshold) ||
-         (props.name === "Favourite" && swipeStore.yPos < -swipeThreshold);
+  const isCentered = Math.abs(currentX) < xThreshold;
+  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
+
+  // Favorite: centered AND swiping up AND upward movement is stronger than sideways
+  if (props.name === "Favourite") return isCentered && currentY < -swipeThreshold && isUpStronger;
+
+  // Nope: swiping left AND (not centered OR sideways movement is stronger than upward)
+  if (props.name === "Nope") return currentX < -swipeThreshold && (!isCentered || !isUpStronger);
+
+  // Love: swiping right AND (not centered OR sideways movement is stronger than upward)
+  if (props.name === "Love") return currentX > swipeThreshold && (!isCentered || !isUpStronger);
+
+  return false;
 });
 
 </script>

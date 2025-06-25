@@ -47,7 +47,7 @@
     </div>
     <div id="overlays">
       <!-- TODO: Add y checking logic -->
-      <motion.div id="fav_overlay" class="absolute bottom-[2%] right-[0%]" :style="{ opacity: favOpacity }">
+      <motion.div id="fav_overlay" class="absolute bottom-[2%] left-[50%]" :style="{ opacity: favOpacity, marginLeft: '-128px' }">
         <img
           class="h-[256px] w-[256px]"
           src="/swipecard_fav_overlay_24x24.svg"
@@ -106,39 +106,42 @@ const likeOpacity = useTransform([x, y], (values: number[]) => {
   const currentX = values[0];
   const currentY = values[1];
   const xThreshold = 150;
-  const yThreshold = 0;
+  const xMax = 300;
 
   const isCentered = Math.abs(currentX) < xThreshold;
-  const isSwipingUp = currentY < yThreshold;
+  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
+  const isSwipingUp = currentY < 0;
 
-  return isSwipingUp && isCentered ? 0 : mapRange(currentX, 0, 300);
+  // Only hide x-axis overlays if we're centered AND the upward movement is stronger than sideways
+  return isSwipingUp && isCentered && isUpStronger ? 0 : mapRange(currentX, 0, xMax);
 });
 
 const nopeOpacity = useTransform([x, y], (values: number[]) => {
   const currentX = values[0];
   const currentY = values[1];
   const xThreshold = 150;
-  const yThreshold = 0;
+  const xMax = 300;
 
   const isCentered = Math.abs(currentX) < xThreshold;
-  const isSwipingUp = currentY < yThreshold;
+  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
+  const isSwipingUp = currentY < 0;
 
-  return isSwipingUp && isCentered ? 0 : mapRange(currentX, 0, -300);
+  // Only hide x-axis overlays if we're centered AND the upward movement is stronger than sideways
+  return isSwipingUp && isCentered && isUpStronger ? 0 : mapRange(currentX, 0, -xMax);
 });
 
 const favOpacity = useTransform([x, y], (values: number[]) => {
   const currentX = values[0];
   const currentY = values[1];
   const xThreshold = 150;
-  const yThreshold = 0;
+  const yMax = 250; // Typically, there is less vertical real estate so i'll lower this slightly.
 
   const isCentered = Math.abs(currentX) < xThreshold;
-  const isSwipingUp = currentY < yThreshold;
+  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
+  const isSwipingUp = currentY < 0;
 
-  const targetOpacity = isCentered && isSwipingUp ? mapRange(currentY, 0, -300) : 0;
-
-  // return isCentered && isSwipingUp ? mapRange(currentY, 0, -300) : 0;
-  return targetOpacity;
+  // Show fav overlay when centered, swiping up, AND upward movement is stronger than sideways
+  return isCentered && isSwipingUp && isUpStronger ? mapRange(currentY, 0, -yMax) : 0;
 });
 
 
