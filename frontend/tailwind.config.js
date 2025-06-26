@@ -4,11 +4,16 @@ export default {
     content: ['./index.html', './src/**/*.{ts,js,vue}'],
   theme: {
   	extend: {
+		textColor: {
+			nope: 'hsl(var(--colour-nope-main))',
+			like: 'hsl(var(--colour-like-main))',
+			favourite: 'hsl(var(--colour-favourite-main))',
+		},
 		height: {
-			'card': 'var(--card-main-h)',
+			card: 'var(--card-main-h)',
 		},
 		width: {
-			'card': 'var(--card-main-w)',
+			card: 'var(--card-main-w)',
 		},
   		backgroundImage: {
   			'black-grey-radial': 'radial-gradient(circle, rgba(47,47,55,1) 0%, rgba(0,0,0,1) 100%)',
@@ -23,6 +28,9 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+			bg_primary: 'hsl(var(--colour-background-primary))',
+			bg_secondary: 'hsl(var(--colour-background-secondary))',
+
 			button_primary: 'hsl(var(--button-primary))',
 			button_highlight: 'hsl(var(--button-highlight))',
 

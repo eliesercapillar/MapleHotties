@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue/dist/iconify.js";
 import {
   motion,
@@ -96,6 +96,58 @@ const isActive = computed(() => props.index === cards.value.length - 1)
 const x = useMotionValue(0);
 const y = useMotionValue(0);
 const rotate = useTransform(x, [-300, 300], [-30, 30]);
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (!isActive.value) return;
+  
+  // Prevent default behavior for arrow keys
+  if (['ArrowLeft', 'ArrowRight', 'ArrowUp'].includes(event.key)) {
+    event.preventDefault();
+  }
+
+  let targetPos = 0;
+  let status;
+
+  switch (event.key) {
+    case 'ArrowLeft':
+      targetPos = -window.innerWidth;
+      status = 'nope';
+      break;
+    case 'ArrowRight':
+      targetPos = window.innerWidth;
+      status = 'love';
+      break;
+    case 'ArrowUp':
+      targetPos = -window.innerHeight;
+      status = 'favourite';
+      break;
+    default:
+      return;
+  }
+
+  // Create swipe event
+  const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString());
+
+  if (status === 'favourite') {
+    animate(y, targetPos, {
+      duration: 0.15,
+      onComplete: () => swipeStore.onSwipe(swipeEvent),
+    });
+  } else {
+    animate(x, targetPos, {
+      duration: 0.15,
+      onComplete: () => swipeStore.onSwipe(swipeEvent),
+    });
+  }
+};
 
 function mapRange(value: number, inMin: number, inMax: number, outMin = 0, outMax = 1) {
   const ratio = (value - inMin) / (inMax - inMin);

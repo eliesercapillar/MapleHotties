@@ -1,17 +1,18 @@
 <template>
   <section
     v-auto-animate
-    class="w-full text-[#444d5b] flex justify-center items-center gap-5"
+    class="w-full flex justify-center items-center gap-5"
   >
     <button
-      class="h-[24px] bg-slate-300 px-3 rounded-xl text-center text-sm"
+      class="h-[24px] bg-nope-gradient px-3 rounded-xl 
+      text-center text-sm font-medium text-white"
       @click="showInstructions = !showInstructions"
     >
       {{ showInstructions ? "Hide" : "Show" }}
     </button>
     <ul v-if="showInstructions" class="flex justify-center items-center gap-5">
       <!-- Left Arrow -->
-      <li class="flex justify-center items-center gap-1">
+      <li class="flex justify-center items-center gap-1 text-nope">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           focusable="false"
@@ -40,7 +41,7 @@
         <span class="select-none">Nope</span>
       </li>
       <!-- Up Arrow -->
-      <li class="flex justify-center items-center gap-1">
+      <li class="flex justify-center items-center gap-1 text-favourite">
         <svg
           width="24px"
           height="24px"
@@ -68,7 +69,7 @@
         <span class="select-none">Favourite</span>
       </li>
       <!-- Right Arrow -->
-      <li class="flex justify-center items-center gap-1">
+      <li class="flex justify-center items-center gap-1 text-like">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24px"
@@ -97,7 +98,7 @@
         <span class="select-none">Like</span>
       </li>
       <!-- Spacebar -->
-      <li class="flex justify-center items-center gap-1">
+      <!-- <li class="flex justify-center items-center gap-1">
         <svg
           width="74"
           height="24"
@@ -120,7 +121,7 @@
           />
         </svg>
         <span class="select-none">Outfit Information</span>
-      </li>
+      </li> -->
     </ul>
   </section>
 </template>
