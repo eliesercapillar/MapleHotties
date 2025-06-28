@@ -9,7 +9,7 @@
     <!-- TODO: Add loading text when fetching -->
     <section v-else id="recent_favourites" class="select-none h-[calc(100vh-var(--sidebar-nav-h)-var(--sidebar-options-h))]">
         <RecycleScroller
-            class="h-full"
+            class="h-full scroller"
             :items="cards"
             :item-size="248"
             :item-secondary-size="178"
@@ -42,3 +42,9 @@ const cards = computed(() =>
 )
 
 </script>
+
+<style lang="css">
+  .scroller {
+    scrollbar-color: #6e7072 #111418;
+  }
+</style>
