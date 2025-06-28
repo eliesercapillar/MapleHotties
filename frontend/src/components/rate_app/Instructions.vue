@@ -3,13 +3,13 @@
     v-auto-animate
     class="w-full flex justify-center items-center gap-5"
   >
-    <button
-      class="h-[24px] bg-nope-gradient px-3 rounded-xl 
+    <Button
+      class="bg-nope-gradient rounded-xl
       text-center text-sm font-medium text-white"
       @click="showInstructions = !showInstructions"
     >
       {{ showInstructions ? "Hide" : "Show" }}
-    </button>
+    </Button>
     <ul v-if="showInstructions" class="flex justify-center items-center gap-5">
       <!-- Left Arrow -->
       <li class="flex justify-center items-center gap-1 text-nope">
@@ -129,6 +129,7 @@
 <script setup lang="ts">
 import { vAutoAnimate } from "@formkit/auto-animate/vue";
 import { ref } from "vue";
+import Button from "@/components/ui/button/Button.vue";
 
 const showInstructions = ref(true);
 </script>

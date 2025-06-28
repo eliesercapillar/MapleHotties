@@ -3,10 +3,10 @@
       <nav class="flex items-center justify-evenly py-6 h-[--sidebar-nav-h]"
            style="background: linear-gradient(135deg, #f92999, #ff3f29)">
            <!-- TODO: icon of current page should be set to #ff3f29 -->
-        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="rate"><Icon icon="bxs:heart" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="play"><Icon icon="icon-park-solid:game-handle" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
-        <button class="rounded-full bg-button_primary hover:text-button_highlight p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-like hover:scale-105 p-3" @click="rate"><Icon icon="bxs:heart" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-nope hover:scale-105 p-3" @click="play"><Icon icon="icon-park-solid:game-handle" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-favourite hover:scale-105 p-3" @click="leaderboard"><Icon icon="icon-park-solid:five-star-badge" class="scale-[1.25]"/></button>
+        <button class="rounded-full bg-button_primary hover:text-button_highlight hover:scale-105 p-3" @click="logout"><Icon icon="line-md:log-out" class="scale-[1.25]"/></button>
       </nav>
       <div class="bg-[#111418] flex flex-col items-start">
         <div class="h-[--sidebar-options-h] ml-6 py-2 flex items-center justify-center gap-4 font-bold text-md">
