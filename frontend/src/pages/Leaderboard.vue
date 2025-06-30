@@ -1,23 +1,12 @@
 <template>
   <main class="w-full h-screen bg-black-grey-radial text-white flex flex-col items-center justify-center">
-    <h1 class="font-medium text-4xl text-center py-4">The Hottest Characters of the week!</h1>
+    <h1 class="font-medium text-4xl text-center py-4">The Top {{ leaderboardStore.showLikes ? "Hotties" : "Notties" }} of Maplestory GMS</h1>
     
-    <div class="flex gap-4 mb-6">
-      <Button 
-        @click="toggleView(true)"
-        :class="[]"
-      >
-        Most Liked
-      </button>
-      <Button 
-        @click="toggleView(false)"
-        :class="[]"
-      >
-        Most Noped
-      </button>
+    <div class="flex gap-4 ">
+      <LeaderboardTable/>
+      <LeaderboardOptions/>
     </div>
 
-    <LeaderboardTable/>
   </main>
 </template>
   
@@ -25,6 +14,7 @@
 import { useLeaderboardStore } from "@/stores/leaderboardStore";
 import Button from "@/components/ui/button/Button.vue";
 import LeaderboardTable from "@/components/leaderboard/LeaderboardTable.vue";
+import LeaderboardOptions from "@/components/leaderboard/LeaderboardOptions.vue";
 
 const leaderboardStore = useLeaderboardStore();
 
