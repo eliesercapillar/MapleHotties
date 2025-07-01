@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import router from "@/router";
-import AppSidebar from '@/components/AppSidebar.vue'
+import AppSidebar from '@/components/rate_app/AppSidebar.vue'
 import RateApp from "./sub_pages/RateApp.vue";
 // import Leaderboard from "./Leaderboard.vue";
 
