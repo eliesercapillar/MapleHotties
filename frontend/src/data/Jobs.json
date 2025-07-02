@@ -1,0 +1,217 @@
+{
+    "warriors" : [
+        {
+            "className": "Hero",
+            "value": "hero"
+        },
+        {
+            "className": "Paladin",
+            "value": "pally"
+        },
+        {
+            "className": "Dark Knight",
+            "value": "dk"
+        },
+        {
+            "className": "Dawn Warrior",
+            "value": "dw"
+        },
+        {
+            "className": "Mihile",
+            "value": "mihile"
+        },
+        {
+            "className": "Blaster",
+            "value": "blaster"
+        },
+        {
+            "className": "Demon Slayer",
+            "value": "ds"
+        },
+        {
+            "className": "Demon Avenger",
+            "value": "da"
+        },
+        {
+            "className": "Aran",
+            "value": "aran"
+        },
+        {
+            "className": "Kaiser",
+            "value": "kaiser"
+        },
+        {
+            "className": "Adele",
+            "value": "adele"
+        },
+        {
+            "className": "Zero",
+            "value": "zero"
+        },
+        {
+            "className": "Hayato",
+            "value": "hayato"
+        }
+    ],
+    "magicians" : [
+        {
+            "className": "Fire Poison Archmage",
+            "value": "fp"
+        },
+        {
+            "className": "Ice Lightning Archmage",
+            "value": "il"
+        },
+        {
+            "className": "Bishop",
+            "value": "bishop"
+        },
+        {
+            "className": "Blaze Wizard",
+            "value": "bw"
+        },
+        {
+            "className": "Battle Mage",
+            "value": "bam"
+        },
+        {
+            "className": "Evan",
+            "value": "evan"
+        },
+        {
+            "className": "Luminous",
+            "value": "lumi"
+        },
+        {
+            "className": "Illium",
+            "value": "illium"
+        },
+        {
+            "className": "Lara",
+            "value": "lara"
+        },
+        {
+            "className": "Kinesis",
+            "value": "kinesis"
+        },
+        {
+            "className": "Kanna",
+            "value": "kanna"
+        },
+        {
+            "className": "Lynn",
+            "value": "lynn"
+        },
+        {
+            "className": "Sia Astelle",
+            "value": "sia"
+        }
+    ],
+    "archers" : [
+        {
+            "className": "Bowmaster",
+            "value": "bm"
+        },
+        {
+            "className": "Marksman",
+            "value": "mm"
+        },
+        {
+            "className": "Pathfinder",
+            "value": "pf"
+        },
+        {
+            "className": "Wind Archer",
+            "value": "wa"
+        },
+        {
+            "className": "Wild Hunter",
+            "value": "wh"
+        },
+        {
+            "className": "Mercedes",
+            "value": "merc"
+        },
+        {
+            "className": "Kain",
+            "value": "kain"
+        }
+    ],
+    "thiefs" : [
+        {
+            "className": "Night Lord",
+            "value": "nl"
+        },
+        {
+            "className": "Shadower",
+            "value": "shad"
+        },
+        {
+            "className": "Dual Blade",
+            "value": "db"
+        },
+        {
+            "className": "Night Walker",
+            "value": "nw"
+        },
+        {
+            "className": "Xenon",
+            "value": "xenon"
+        },
+        {
+            "className": "phantom",
+            "value": "phantom"
+        },
+        {
+            "className": "Cadena",
+            "value": "cadena"
+        },
+        {
+            "className": "Khali",
+            "value": "khali"
+        },
+        {
+            "className": "Hoyoung",
+            "value": "hoyoung"
+        }
+    ],
+    "pirates" : [
+        {
+            "className": "Buccaneer",
+            "value": "bucc"
+        },
+        {
+            "className": "Corsair",
+            "value": "corsair"
+        },
+        {
+            "className": "Cannoneer",
+            "value": "cannon"
+        },
+        {
+            "className": "Thunder Breaker",
+            "value": "tb"
+        },
+        {
+            "className": "Mechanic",
+            "value": "mech"
+        },
+        {
+            "className": "Shade",
+            "value": "shade"
+        },
+        {
+            "className": "Angelic Buster",
+            "value": "ab"
+        },
+        {
+            "className": "Ark",
+            "value": "ark"
+        },
+        {
+            "className": "Mo Xuan",
+            "value": "mx"
+        }
+    ]
+}
+
