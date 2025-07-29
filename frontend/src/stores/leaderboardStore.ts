@@ -9,7 +9,7 @@ interface SearchSettings {
     worldType: string
 }
 
-interface ApiCharacter {
+interface Character {
     id: number
     name: string
     level: number
@@ -18,14 +18,9 @@ interface ApiCharacter {
     imageUrl: string
 }
 
-interface LikeCharacter {
-    character: ApiCharacter
-    totalLikes: number
-}
-
-interface NopeCharacter {
-    character: ApiCharacter
-    totalNopes: number
+interface LeaderboardCharacterDTO {
+    character: Character
+    count: number
 }
 
 interface PaginatedResponse<T> {
@@ -36,105 +31,64 @@ interface PaginatedResponse<T> {
     totalPages: number
 }
 
+const defaultSearchSettings: SearchSettings = {
+    characterName: "",
+    rankingType: "hotties",
+    timeType: "all",
+    classType: "all",
+    worldType: "all",
+}
+
 export const useLeaderboardStore = defineStore('leaderboard', () => 
 {
-    const likeCharacters = ref([] as LikeCharacter[]);
-    const nopeCharacters = ref([] as NopeCharacter[]);
-    
-    const showLikes = ref(true);
+    const characters = ref([] as LeaderboardCharacterDTO[])
+    const searchSettings = ref<SearchSettings>({...defaultSearchSettings});
+
     const currentPage = ref(1);
-    
     const totalPages = ref(0);
     const totalCount = ref(0);
     const pageSize = ref(10);
+
     const isLoading = ref(false);
 
-    async function fetchTopLiked() {
-        if (isLoading.value) return;
-
-        isLoading.value = true;
-        try {
-            const url = `https://localhost:7235/api/CharacterStats/top_liked?page=${currentPage.value}&pageSize=5`;
-
-            const response = await fetch(url, {
-                method: 'GET'
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch Top Liked page ${currentPage.value}: ${response.status}`);
-            }
-
-            const data: PaginatedResponse<LikeCharacter> = await response.json();
-            
-            likeCharacters.value = data.data;
-            totalPages.value = data.totalPages;
-            totalCount.value = data.totalCount;
-            pageSize.value = data.pageSize;
-        }
-        catch (err) {
-            console.error("Failed to load top liked characters:", err);
-        }
-        finally {
-            isLoading.value = false;
-        }
+    function updateSearchParameters(params: Partial<SearchSettings>)
+    {
+        Object.assign(searchSettings.value, {
+            ...defaultSearchSettings,
+            ...params
+        })
     }
 
-    async function fetchTopNoped() {
+    async function fetchSearch() {
         if (isLoading.value) return;
 
         isLoading.value = true;
         try {
-            const url = `https://localhost:7235/api/CharacterStats/top_noped?page=${currentPage.value}&pageSize=${pageSize.value}`;
+            const searchParams = new URLSearchParams({
+                page: currentPage.value.toString(),
+                pageSize: pageSize.value.toString(),
+                ...searchSettings.value
+            });
+            
+            const url = `https://localhost:7235/api/CharacterStats/search?${searchParams}`;
 
             const response = await fetch(url, {
                 method: 'GET'
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to fetch Top Noped page ${currentPage.value}: ${response.status}`);
+                throw new Error(`Failed to search: ${response.status}`);
             }
 
-            const data: PaginatedResponse<NopeCharacter> = await response.json();
+            const data: PaginatedResponse<LeaderboardCharacterDTO> = await response.json();
             
-            nopeCharacters.value = data.data;
+            characters.value = data.data;
             totalPages.value = data.totalPages;
             totalCount.value = data.totalCount;
             pageSize.value = data.pageSize;
         }
         catch (err) {
-            console.error("Failed to load top noped characters:", err);
-        }
-        finally {
-            isLoading.value = false;
-        }
-    }
-
-    async function fetchSearch(params: SearchSettings) {
-        if (isLoading.value) return;
-
-        isLoading.value = true;
-        try {
-            const url = `https://localhost:7235/api/CharacterStats/search?page=${currentPage.value}&pageSize=${pageSize.value}
-            // &characterName=${params.characterName}&rankingType=${params.rankingType}&timeType=${params.timeType}
-            // &classType=${params.classType}&worldType=${params.worldType}`;
-
-            const response = await fetch(url, {
-                method: 'GET'
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch Top Noped page ${currentPage.value}: ${response.status}`);
-            }
-
-            const data: PaginatedResponse<NopeCharacter> = await response.json();
-            
-            nopeCharacters.value = data.data;
-            totalPages.value = data.totalPages;
-            totalCount.value = data.totalCount;
-            pageSize.value = data.pageSize;
-        }
-        catch (err) {
-            console.error("Failed to load top noped characters:", err);
+            console.error("Failed to load searched characters:", err);
         }
         finally {
             isLoading.value = false;
@@ -147,15 +101,10 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
 
     return { 
         isLoading,
-        showLikes, 
-        currentPage,
-        totalPages,
-        totalCount,
-        pageSize,
-        likeCharacters, 
-        nopeCharacters,
-        fetchTopLiked, 
-        fetchTopNoped,
+        currentPage, totalPages, totalCount, pageSize,
+        characters,
+        updateSearchParameters,
+        fetchSearch,
         setPage
     }
 })

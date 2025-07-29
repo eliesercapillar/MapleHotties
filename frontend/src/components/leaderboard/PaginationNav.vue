@@ -94,15 +94,7 @@ const paginationItems = computed((): PaginationItemType[] => {
 
 async function onPageChange(page: number) {
   leaderboardStore.setPage(page);
-  await fetchCurrentPage();
-}
-
-async function fetchCurrentPage() {
-  if (leaderboardStore.showLikes) {
-    await leaderboardStore.fetchTopLiked();
-  } else {
-    await leaderboardStore.fetchTopNoped();
-  }
+  await leaderboardStore.fetchSearch();
 }
 
 </script>
