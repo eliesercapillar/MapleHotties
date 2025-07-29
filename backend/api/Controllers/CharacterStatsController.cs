@@ -100,6 +100,46 @@ namespace api.Controllers
             }
         }
 
+        // GET: api/CharacterStats/search?page=1&pageSize=10
+        [HttpGet("search")]
+
+        public async Task<IActionResult> Search([FromQuery] string characterName = "", [FromQuery] string rankingType = "hotties",
+            [FromQuery] string classType = "all", [FromQuery] string timeType = "all", [FromQuery] string worldType ="all",
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var totalCount = await _context.CharacterStats.CountAsync();
+
+                var list = await _context.CharacterStats
+                .Include(cs => cs.Character)
+                .OrderByDescending(cs => cs.TotalNopes)
+                .ThenBy(cs => cs.CharacterId) // Tiebreaker
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(cs => new LeaderboardCharacterNopeDTO
+                {
+                    Character = cs.Character,
+                    TotalNopes = cs.TotalNopes
+                })
+                .ToListAsync();
+
+                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterNopeDTO>
+                {
+                    Data = list,
+                    TotalCount = totalCount,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
         // GET: api/CharacterStats/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCharacterStats(int id)

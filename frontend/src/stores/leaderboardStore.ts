@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+interface SearchSettings {
+    characterName: string
+    rankingType: string
+    timeType: string
+    classType: string
+    worldType: string
+}
+
 interface ApiCharacter {
     id: number
     name: string
@@ -77,6 +85,38 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
         isLoading.value = true;
         try {
             const url = `https://localhost:7235/api/CharacterStats/top_noped?page=${currentPage.value}&pageSize=${pageSize.value}`;
+
+            const response = await fetch(url, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch Top Noped page ${currentPage.value}: ${response.status}`);
+            }
+
+            const data: PaginatedResponse<NopeCharacter> = await response.json();
+            
+            nopeCharacters.value = data.data;
+            totalPages.value = data.totalPages;
+            totalCount.value = data.totalCount;
+            pageSize.value = data.pageSize;
+        }
+        catch (err) {
+            console.error("Failed to load top noped characters:", err);
+        }
+        finally {
+            isLoading.value = false;
+        }
+    }
+
+    async function fetchSearch(params: SearchSettings) {
+        if (isLoading.value) return;
+
+        isLoading.value = true;
+        try {
+            const url = `https://localhost:7235/api/CharacterStats/search?page=${currentPage.value}&pageSize=${pageSize.value}
+            // &characterName=${params.characterName}&rankingType=${params.rankingType}&timeType=${params.timeType}
+            // &classType=${params.classType}&worldType=${params.worldType}`;
 
             const response = await fetch(url, {
                 method: 'GET'

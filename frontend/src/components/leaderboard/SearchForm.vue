@@ -46,9 +46,9 @@
           </div>
         </FormField>
         <FormField name="classType" v-slot="{ componentField }">
-          <div class="w-full p-2 text-black">
+          <div class="w-full p-2 text-black flex flex-col gap-2">
             <span class="font-bold text-md text-white">Class:</span>
-            <Select class="mt-2" v-bind="componentField">
+            <Select v-bind="componentField">
               <SelectTrigger class="w-full">
                 <SelectValue placeholder="Specify a class?" />
               </SelectTrigger>
@@ -83,9 +83,9 @@
           </div>
         </FormField>
         <FormField name="worldType" v-slot="{ componentField }">
-          <div class="w-full p-2 text-black">
+          <div class="w-full p-2 text-black flex flex-col gap-2">
             <span class="font-bold text-md text-white">World:</span>
-            <Select class="mt-2" v-bind="componentField">
+            <Select v-bind="componentField">
               <SelectTrigger class="w-full">
                 <SelectValue placeholder="Specify a world?" />
               </SelectTrigger>
