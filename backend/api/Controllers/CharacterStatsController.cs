@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Linq.Expressions;
 
 namespace api.Controllers
 {
@@ -26,9 +27,7 @@ namespace api.Controllers
             _context = context;
         }
 
-        // GET: api/CharacterStats/top_liked?page=1&pageSize=10
-        [HttpGet("top_liked")]
-        public async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> TopLiked([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        private async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> GetTopCharacters(int page, int pageSize, Expression<Func<CharacterStats, int>> orderBySelector)
         {
             try
             {
@@ -37,18 +36,20 @@ namespace api.Controllers
 
                 var totalCount = await _context.CharacterStats.CountAsync();
 
+                var compiledSelector = orderBySelector.Compile();
+
                 var list = await _context.CharacterStats
-                .Include(cs => cs.Character)
-                .OrderByDescending(cs => cs.TotalLikes)
-                .ThenBy(cs => cs.CharacterId) // Tiebreaker
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(cs => new LeaderboardCharacterDTO
-                {
-                    Character = cs.Character,
-                    Count = cs.TotalLikes
-                })
-                .ToListAsync();
+                    .Include(cs => cs.Character)
+                    .OrderByDescending(orderBySelector)
+                    .ThenBy(cs => cs.CharacterId) // Tiebreaker
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(cs => new LeaderboardCharacterDTO
+                    {
+                        Character = cs.Character,
+                        Count = compiledSelector(cs)
+                    })
+                    .ToListAsync();
 
                 var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>
                 {
@@ -66,44 +67,18 @@ namespace api.Controllers
             }
         }
 
+        // GET: api/CharacterStats/top_liked?page=1&pageSize=10
+        [HttpGet("top_liked")]
+        public async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> TopLiked([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            return await GetTopCharacters(page, pageSize, cs => cs.TotalLikes);
+        }
+
         // GET: api/CharacterStats/top_noped?page=1&pageSize=10
         [HttpGet("top_noped")]
         public async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> TopNoped([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            try
-            {
-                if (page <= 0 || pageSize <= 0)
-                    return BadRequest("Page and PageSize must be greater than zero.");
-
-                var totalCount = await _context.CharacterStats.CountAsync();
-
-                var list = await _context.CharacterStats
-                .Include(cs => cs.Character)
-                .OrderByDescending(cs => cs.TotalNopes)
-                .ThenBy(cs => cs.CharacterId) // Tiebreaker
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(cs => new LeaderboardCharacterDTO
-                {
-                    Character = cs.Character,
-                    Count = cs.TotalNopes
-                })
-                .ToListAsync();
-
-                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>
-                {
-                    Data = list,
-                    TotalCount = totalCount,
-                    CurrentPage = page,
-                    PageSize = pageSize
-                };
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return Problem(ex.Message);
-            }
+            return await GetTopCharacters(page, pageSize, cs => cs.TotalNopes);
         }
 
         // GET: api/CharacterStats/search?page=1&pageSize=10
