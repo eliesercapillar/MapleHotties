@@ -28,10 +28,13 @@ namespace api.Controllers
 
         // GET: api/CharacterStats/top_liked?page=1&pageSize=10
         [HttpGet("top_liked")]
-        public async Task<IActionResult> TopLiked([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> TopLiked([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
+                if (page <= 0 || pageSize <= 0)
+                    return BadRequest("Page and PageSize must be greater than zero.");
+
                 var totalCount = await _context.CharacterStats.CountAsync();
 
                 var list = await _context.CharacterStats
@@ -40,14 +43,14 @@ namespace api.Controllers
                 .ThenBy(cs => cs.CharacterId) // Tiebreaker
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(cs => new LeaderboardCharacterLikeDTO
+                .Select(cs => new LeaderboardCharacterDTO
                 {
                     Character = cs.Character,
-                    TotalLikes = cs.TotalLikes
+                    Count = cs.TotalLikes
                 })
                 .ToListAsync();
 
-                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterLikeDTO>
+                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>
                 {
                     Data = list,
                     TotalCount = totalCount,
@@ -65,10 +68,13 @@ namespace api.Controllers
 
         // GET: api/CharacterStats/top_noped?page=1&pageSize=10
         [HttpGet("top_noped")]
-        public async Task<IActionResult> TopNoped([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> TopNoped([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
+                if (page <= 0 || pageSize <= 0)
+                    return BadRequest("Page and PageSize must be greater than zero.");
+
                 var totalCount = await _context.CharacterStats.CountAsync();
 
                 var list = await _context.CharacterStats
@@ -77,14 +83,14 @@ namespace api.Controllers
                 .ThenBy(cs => cs.CharacterId) // Tiebreaker
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(cs => new LeaderboardCharacterNopeDTO
+                .Select(cs => new LeaderboardCharacterDTO
                 {
                     Character = cs.Character,
-                    TotalNopes = cs.TotalNopes
+                    Count = cs.TotalNopes
                 })
                 .ToListAsync();
 
-                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterNopeDTO>
+                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>
                 {
                     Data = list,
                     TotalCount = totalCount,
@@ -103,28 +109,76 @@ namespace api.Controllers
         // GET: api/CharacterStats/search?page=1&pageSize=10
         [HttpGet("search")]
 
-        public async Task<IActionResult> Search([FromQuery] string characterName = "", [FromQuery] string rankingType = "hotties",
-            [FromQuery] string classType = "all", [FromQuery] string timeType = "all", [FromQuery] string worldType ="all",
-            [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> Search([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+            [FromQuery] string characterName = "", [FromQuery] string rankingType = "hotties",
+            [FromQuery] string classType = "all", [FromQuery] string timeType = "all", [FromQuery] string worldType ="all")
         {
             try
             {
-                var totalCount = await _context.CharacterStats.CountAsync();
+                IQueryable<CharacterStats> query =  _context.CharacterStats.Include(cs => cs.Character);
 
-                var list = await _context.CharacterStats
-                .Include(cs => cs.Character)
-                .OrderByDescending(cs => cs.TotalNopes)
+                // Filter by character name
+                if (!string.IsNullOrEmpty(characterName))
+                {
+                    query = query.Where(cs => cs.Character.Name.Contains(characterName));
+                }
+
+                // Filter by world type
+                if (!string.IsNullOrEmpty(worldType) && worldType.ToLower() != "all")
+                {
+                    query = query.Where(cs => cs.Character.World.Equals(worldType, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // Filter by class type
+                if (!string.IsNullOrEmpty(classType) && classType.ToLower() != "all")
+                {
+                    query = query.Where(cs => cs.Character.Job.Equals(classType, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // Order by time and ranking types
+                IOrderedQueryable<CharacterStats> orderedQuery = (rankingType.ToLower(), timeType.ToLower()) switch
+                {
+                    ("hotties", "weekly") => query.OrderByDescending(cs => cs.WeeklyLikes),
+                    ("hotties", "monthly") => query.OrderByDescending(cs => cs.MonthlyLikes),
+                    ("hotties", _) => query.OrderByDescending(cs => cs.TotalLikes), 
+
+                    ("notties", "weekly") => query.OrderByDescending(cs => cs.WeeklyNopes),
+                    ("notties", "monthly") => query.OrderByDescending(cs => cs.MonthlyNopes),
+                    ("notties", _) => query.OrderByDescending(cs => cs.TotalNopes),
+
+                    ("favourites", "weekly") => query.OrderByDescending(cs => cs.WeeklyFavourites),
+                    ("favourites", "monthly") => query.OrderByDescending(cs => cs.MonthlyFavourites),
+                    ("favourites", _) => query.OrderByDescending(cs => cs.TotalFavourites),
+
+                    _ => query.OrderByDescending(cs => cs.TotalLikes) // Default 
+                };
+
+                var totalCount = await query.CountAsync();
+
+                var list = await orderedQuery
                 .ThenBy(cs => cs.CharacterId) // Tiebreaker
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(cs => new LeaderboardCharacterNopeDTO
+                .Select(cs => new LeaderboardCharacterDTO
                 {
                     Character = cs.Character,
-                    TotalNopes = cs.TotalNopes
+                    
+                    // A bit hacky.
+                    // TODO: If new columns are added in the future, refactor this instead of hard coding all cases.
+                    Count = rankingType.ToLower() == "hotties" && timeType.ToLower() == "weekly" ? cs.WeeklyLikes :
+                            rankingType.ToLower() == "hotties" && timeType.ToLower() == "monthly" ? cs.MonthlyLikes :
+                            rankingType.ToLower() == "hotties" ? cs.TotalLikes :
+                            rankingType.ToLower() == "notties" && timeType.ToLower() == "weekly" ? cs.WeeklyNopes :
+                            rankingType.ToLower() == "notties" && timeType.ToLower() == "monthly" ? cs.MonthlyNopes :
+                            rankingType.ToLower() == "notties" ? cs.TotalNopes :
+                            rankingType.ToLower() == "favourites" && timeType.ToLower() == "weekly" ? cs.WeeklyFavourites :
+                            rankingType.ToLower() == "favourites" && timeType.ToLower() == "monthly" ? cs.MonthlyFavourites :
+                            rankingType.ToLower() == "favourites" ? cs.TotalFavourites :
+                            cs.TotalLikes, // default
                 })
                 .ToListAsync();
 
-                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterNopeDTO>
+                var result = new PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>
                 {
                     Data = list,
                     TotalCount = totalCount,
@@ -149,6 +203,28 @@ namespace api.Controllers
             if (characterStats == null) return NotFound();
 
             return Ok(characterStats);
+        }
+
+        // Instance or static, it cant translate to SQL. 
+        // If I want to use this method, I'll need to filter for specific cols in memory, after getting rows from db.
+        private int GetStatValue(CharacterStats cs, string rankingType, string timeType)
+        {
+            return (rankingType.ToLower(), timeType.ToLower()) switch
+            {
+                ("hotties", "weekly") => cs.WeeklyLikes,
+                ("hotties", "monthly") => cs.MonthlyLikes,
+                ("hotties", _) => cs.TotalLikes,
+
+                ("notties", "weekly") => cs.WeeklyNopes,
+                ("notties", "monthly") => cs.MonthlyNopes,
+                ("notties", _) => cs.TotalNopes,
+
+                ("favourites", "weekly") => cs.WeeklyFavourites,
+                ("favourites", "monthly") => cs.MonthlyFavourites,
+                ("favourites", _) => cs.TotalFavourites,
+
+                _ => cs.TotalLikes
+            };
         }
     }
 }

@@ -111,8 +111,10 @@ namespace api.NUnitTests.Controller_Tests
         [Test]
         [TestCase(0, 10)]
         [TestCase(-1, 10)]
-        [TestCase(1, 0)]
-        [TestCase(1, -5)]
+        [TestCase(10, 0)]
+        [TestCase(10, -1)]
+        [TestCase(-1, -1)]
+        [TestCase(0, 0)]
         public async Task GetMapleCharacters_TestInvalidPagination_ReturnsBadRequest(int page, int pageSize)
         {
             // Arrange
@@ -125,6 +127,9 @@ namespace api.NUnitTests.Controller_Tests
             // Assert
             var actionResult = result.Result;
             actionResult.Should().BeOfType<BadRequestObjectResult>();
+
+            var okResult = actionResult as BadRequestObjectResult;
+            okResult.Should().NotBeNull();
         }
 
         [Test]
