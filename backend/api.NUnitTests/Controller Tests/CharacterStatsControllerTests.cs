@@ -255,6 +255,52 @@ namespace api.NUnitTests.Controller_Tests
             okResult.Should().NotBeNull();
         }
 
+        [Test]
+        public async Task Search_TestFilterByCharacterNameWithDefaults_ReturnsCorrectCharacter()
+        {
+            // Arrange
+            using var context = GetFakedContext();
+
+            var character1 = CreateTestCharacter(id: 1, name: "Xaera", level: 285, job: "Xenon", world: "Kronos");
+            var character2 = CreateTestCharacter(id: 2, name: "ROCKOGUY", level: 290, job: "Adele", world: "Kronos");
+            var character3 = CreateTestCharacter(id: 3, name: "DWlGHT", level: 289, job: "Dual Blade", world: "Kronos");
+
+            context.Characters.AddRange(character1, character2, character3);
+
+            var stats1 = CreateTestCharacterStats(id: character1.Id, character: character1, weeklyLikes: 10, totalLikes: 1000);
+            var stats2 = CreateTestCharacterStats(id: character2.Id, character: character2, weeklyLikes: 0, totalLikes: 0);
+            var stats3 = CreateTestCharacterStats(id: character3.Id, character: character3, weeklyLikes: 50, totalLikes: 50);
+
+            context.CharacterStats.AddRange(stats1, stats2, stats3);
+
+            await context.SaveChangesAsync();
+
+            var controller = new CharacterStatsController(context);
+
+            // Act
+            var result = await controller.Search(characterName: "Xaera");
+
+            // Assert
+            var actionResult = result.Result;
+            actionResult.Should().BeOfType<OkObjectResult>();
+
+            var okResult = actionResult as OkObjectResult;
+            okResult.Should().NotBeNull();
+
+            var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
+            returnedCharacters.Should().NotBeNull();
+            returnedCharacters.TotalCount.Should().Be(1);
+            returnedCharacters.CurrentPage.Should().Be(1);
+            returnedCharacters.PageSize.Should().Be(10);
+            returnedCharacters.TotalPages.Should().Be(1);
+
+            var characterList = returnedCharacters.Data.ToList();
+            characterList.Count.Should().Be(1);
+            characterList[0].Character.Id.Should().Be(1);
+            characterList[0].Count.Should().Be(1000);
+            characterList[0].Character.Name.Should().Be("Xaera");
+        }
+
         #endregion Tests
     }
 }

@@ -83,8 +83,7 @@ namespace api.Controllers
 
         // GET: api/CharacterStats/search?page=1&pageSize=10
         [HttpGet("search")]
-
-        public async Task<IActionResult> Search([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+        public async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> Search([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
             [FromQuery] string characterName = "", [FromQuery] string rankingType = "hotties",
             [FromQuery] string classType = "all", [FromQuery] string timeType = "all", [FromQuery] string worldType ="all")
         {
