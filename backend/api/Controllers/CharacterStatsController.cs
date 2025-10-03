@@ -89,6 +89,9 @@ namespace api.Controllers
         {
             try
             {
+                if (page <= 0 || pageSize <= 0)
+                    return BadRequest("Page and PageSize must be greater than zero.");
+
                 IQueryable<CharacterStats> query =  _context.CharacterStats.Include(cs => cs.Character);
 
                 // Filter by character name
