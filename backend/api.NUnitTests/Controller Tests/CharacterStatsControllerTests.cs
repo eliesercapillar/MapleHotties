@@ -557,9 +557,177 @@ namespace api.NUnitTests.Controller_Tests
         }
 
         [Test]
-        public async Task Search_NoMatchingResults_ReturnsEmptyList()
+        public async Task Search_TestFilterByClassAndWorldType_ReturnsOnlyCharactersWithMatchingClassAndWorld()
         {
-            // Search for something that doesn't exist
+            // Arrange
+            using var context = GetFakedContext();
+
+            var character1 = CreateTestCharacter(id: 1, name: "Xaera", level: 285, job: "Xenon", world: "Kronos");
+            var character2 = CreateTestCharacter(id: 2, name: "ROCKOGUY", level: 290, job: "Xenon", world: "Hyperion");
+            var character3 = CreateTestCharacter(id: 3, name: "DWlGHT", level: 289, job: "Xenon", world: "Reboot");
+            var character4 = CreateTestCharacter(id: 4, name: "Vinsaint", level: 285, job: "Xenon", world: "Reboot");
+            var character5 = CreateTestCharacter(id: 5, name: "Ciao", level: 282, job: "Xenon", world: "Scania");
+            var character6 = CreateTestCharacter(id: 6, name: "Ereklo", level: 295, job: "Xenon", world: "Bera");
+            var character7 = CreateTestCharacter(id: 7, name: "Game", level: 293, job: "Xenon", world: "Scania");
+
+            context.Characters.AddRange(character1, character2, character3, character4, character5, character6, character7);
+
+            var stats1 = CreateTestCharacterStats(id: character1.Id, character: character1, weeklyLikes: 10, totalLikes: 1000);
+            var stats2 = CreateTestCharacterStats(id: character2.Id, character: character2, weeklyLikes: 0, totalLikes: 0);
+            var stats3 = CreateTestCharacterStats(id: character3.Id, character: character3, weeklyLikes: 50, totalLikes: 50);
+            var stats4 = CreateTestCharacterStats(id: character4.Id, character: character4, weeklyLikes: 42, totalLikes: 69);
+            var stats5 = CreateTestCharacterStats(id: character5.Id, character: character5, weeklyLikes: 300, totalLikes: 300);
+            var stats6 = CreateTestCharacterStats(id: character6.Id, character: character6, weeklyLikes: 1, totalLikes: 2);
+            var stats7 = CreateTestCharacterStats(id: character7.Id, character: character7, weeklyLikes: 0, totalLikes: 1);
+
+
+            context.CharacterStats.AddRange(stats1, stats2, stats3, stats4, stats5, stats6, stats7);
+
+            await context.SaveChangesAsync();
+
+            var controller = new CharacterStatsController(context);
+
+            // Act
+            var result = await controller.Search(classType: "Xenon", worldType: "Reboot");
+
+            // Assert
+            var actionResult = result.Result;
+            actionResult.Should().BeOfType<OkObjectResult>();
+
+            var okResult = actionResult as OkObjectResult;
+            okResult.Should().NotBeNull();
+
+            var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
+            returnedCharacters.Should().NotBeNull();
+            returnedCharacters.TotalCount.Should().Be(2);
+            returnedCharacters.CurrentPage.Should().Be(1);
+            returnedCharacters.PageSize.Should().Be(10);
+            returnedCharacters.TotalPages.Should().Be(1);
+
+            var characterList = returnedCharacters.Data.ToList();
+            characterList.Count.Should().Be(2);
+            characterList[0].Character.Id.Should().Be(4);
+            characterList[0].Count.Should().Be(69);
+            characterList[0].Character.Name.Should().Be("Vinsaint");
+            characterList[1].Character.Id.Should().Be(3);
+            characterList[1].Count.Should().Be(50);
+            characterList[1].Character.Name.Should().Be("DWlGHT");
+        }
+
+        [Test]
+        public async Task Search_TestAllFilters_ReturnsCorrectResults()
+        {
+            // Arrange
+            using var context = GetFakedContext();
+
+            var character1 = CreateTestCharacter(id: 1, name: "Xaera", level: 285, job: "Adele", world: "Kronos");
+            var character2 = CreateTestCharacter(id: 2, name: "ROCKOGUY", level: 290, job: "Adele", world: "Hyperion");
+            var character3 = CreateTestCharacter(id: 3, name: "DWlGHT", level: 289, job: "Dual Blade", world: "Hyperion");
+            var character4 = CreateTestCharacter(id: 4, name: "Vinsaint", level: 285, job: "Shadower", world: "Hyperion");
+
+            context.Characters.AddRange(character1, character2, character3, character4);
+
+            var stats1 = CreateTestCharacterStats(
+                id: character1.Id, character: character1,
+                weeklyLikes: 10, monthlyLikes: 100, totalLikes: 1000,
+                weeklyNopes: 0, monthlyNopes: 0, totalNopes: 0,
+                weeklyFavourites: 1, monthlyFavourites: 10, totalFavourites: 100);
+
+            var stats2 = CreateTestCharacterStats(
+                id: character2.Id, character: character2,
+                weeklyLikes: 0, monthlyLikes: 0, totalLikes: 0,
+                weeklyNopes: 20, monthlyNopes: 200, totalNopes: 2000,
+                weeklyFavourites: 0, monthlyFavourites: 0, totalFavourites: 0);
+
+            var stats3 = CreateTestCharacterStats(
+                id: character3.Id, character: character3,
+                weeklyLikes: 30, monthlyLikes: 300, totalLikes: 3000,
+                weeklyNopes: 15, monthlyNopes: 150, totalNopes: 1500,
+                weeklyFavourites: 1, monthlyFavourites: 2, totalFavourites: 3);
+
+            var stats4 = CreateTestCharacterStats(
+                id: character4.Id, character: character4,
+                weeklyLikes: 40, monthlyLikes: 400, totalLikes: 4000,
+                weeklyNopes: 2, monthlyNopes: 4, totalNopes: 8,
+                weeklyFavourites: 16, monthlyFavourites: 32, totalFavourites: 64);
+
+
+            context.CharacterStats.AddRange(stats1, stats2, stats3, stats4);
+
+            await context.SaveChangesAsync();
+
+            var controller = new CharacterStatsController(context);
+
+            // Act
+            var result = await controller.Search(rankingType: "nottieS", classType: "aDele", timeType: "weekly", worldType: "hypeRion");
+
+            // Assert
+            var actionResult = result.Result;
+            actionResult.Should().BeOfType<OkObjectResult>();
+
+            var okResult = actionResult as OkObjectResult;
+            okResult.Should().NotBeNull();
+
+            var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
+            returnedCharacters.Should().NotBeNull();
+            returnedCharacters.TotalCount.Should().Be(1);
+            returnedCharacters.CurrentPage.Should().Be(1);
+            returnedCharacters.PageSize.Should().Be(10);
+            returnedCharacters.TotalPages.Should().Be(1);
+
+            var characterList = returnedCharacters.Data.ToList();
+            characterList.Count.Should().Be(1);
+            characterList[0].Character.Id.Should().Be(2);
+            characterList[0].Count.Should().Be(20);
+            characterList[0].Character.Name.Should().Be("ROCKOGUY");
+            characterList[0].Character.Job.Should().Be("Adele");
+            characterList[0].Character.World.Should().Be("Hyperion");
+        }
+
+        [Test]
+        [TestCase("NoName", "all", "all")]
+        [TestCase("", "NoClass", "all")]
+        [TestCase("", "all", "NoWorld")]
+        public async Task Search_NoMatchingResults_ReturnsEmptyList(string characterName, string classType, string worldType)
+        {
+            // Arrange
+            using var context = GetFakedContext();
+
+            var character1 = CreateTestCharacter(id: 1, name: "Xaera", level: 285, job: "Xenon", world: "Kronos");
+            var character2 = CreateTestCharacter(id: 2, name: "ROCKOGUY", level: 290, job: "Adele", world: "Bera");
+            var character3 = CreateTestCharacter(id: 3, name: "DWlGHT", level: 289, job: "Dual Blade", world: "Scania");
+
+            context.Characters.AddRange(character1, character2, character3);
+
+            var stats1 = CreateTestCharacterStats(id: character1.Id, character: character1, weeklyLikes: 10, totalLikes: 1000);
+            var stats2 = CreateTestCharacterStats(id: character2.Id, character: character2, weeklyLikes: 0, totalLikes: 0);
+            var stats3 = CreateTestCharacterStats(id: character3.Id, character: character3, weeklyLikes: 50, totalLikes: 50);
+
+            context.CharacterStats.AddRange(stats1, stats2, stats3);
+
+            await context.SaveChangesAsync();
+
+            var controller = new CharacterStatsController(context);
+
+            // Act
+            var result = await controller.Search(characterName: characterName, classType: classType, worldType: worldType);
+
+            // Assert
+            var actionResult = result.Result;
+            actionResult.Should().BeOfType<OkObjectResult>();
+
+            var okResult = actionResult as OkObjectResult;
+            okResult.Should().NotBeNull();
+
+            var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
+            returnedCharacters.Should().NotBeNull();
+            returnedCharacters.TotalCount.Should().Be(0);
+            returnedCharacters.CurrentPage.Should().Be(1);
+            returnedCharacters.PageSize.Should().Be(10);
+            returnedCharacters.TotalPages.Should().Be(0);
+
+            var characterList = returnedCharacters.Data.ToList();
+            characterList.Count.Should().Be(0);
         }
 
 
