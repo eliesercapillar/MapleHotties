@@ -128,8 +128,8 @@ namespace api.NUnitTests.Controller_Tests
             var actionResult = result.Result;
             actionResult.Should().BeOfType<BadRequestObjectResult>();
 
-            var okResult = actionResult as BadRequestObjectResult;
-            okResult.Should().NotBeNull();
+            var badRequestResult = actionResult as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
         }
 
         [Test]
@@ -146,6 +146,9 @@ namespace api.NUnitTests.Controller_Tests
             // Assert
             var actionResult = result.Result;
             actionResult.Should().BeOfType<UnauthorizedResult>();
+
+            var unauthorizedResult = actionResult as UnauthorizedResult;
+            unauthorizedResult.Should().NotBeNull();
         }
 
         [Test]
