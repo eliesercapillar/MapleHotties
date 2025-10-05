@@ -31,9 +31,12 @@ namespace api.Controllers
         // POST: api/UserHistories/batch_save
         [HttpPost("batch_save")]
         [Authorize]
-        public async Task<IActionResult> BatchSave([FromBody] List<SwipeDTO> swipes)
+        public async Task<ActionResult> BatchSave([FromBody] List<SwipeDTO> swipes)
         {
-            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var userId = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null) return Unauthorized();
+
             var entities = swipes.Select(e => new UserHistory
             {
                 UserId = userId,
@@ -51,7 +54,7 @@ namespace api.Controllers
 
         [HttpGet("recent")]
         [Authorize]
-        public async Task<IActionResult> Recent([FromQuery] int quantity = 4)
+        public async Task<ActionResult<IEnumerable<HistoryCharacterDTO>>> Recent([FromQuery] int quantity = 4)
         {
             if (quantity <= 0) return BadRequest("Query parameter 'quantity' must be greater than 0.");
             
@@ -61,22 +64,18 @@ namespace api.Controllers
 
             try
             {
-                // Get the most recent UserHistory entries for this user
                 var recentHistory = await _context.UserHistory
                     .Where(uh => uh.UserId == userId)
                     .OrderByDescending(uh => uh.SeenAt)
                     .Take(quantity)
                     .ToListAsync();
 
-                // Extract the CharacterIds from the history entries
                 var characterIds = recentHistory.Select(uh => uh.CharacterId).ToList();
 
-                // Query the Characters table to get the character data
                 var characters = await _context.Characters
                     .Where(c => characterIds.Contains(c.Id))
                     .ToListAsync();
 
-                // Create the HistoryCharacterDTO list by joining the data
                 var result = recentHistory.Select(history => new HistoryCharacterDTO
                 {
                     Character = characters.First(c => c.Id == history.CharacterId),
@@ -95,7 +94,7 @@ namespace api.Controllers
         // GET: api/UserHistories
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> All()
+        public async Task<ActionResult<IEnumerable<HistoryCharacterDTO>>> All()
         {
             var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 

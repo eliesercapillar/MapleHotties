@@ -28,7 +28,7 @@ namespace api.NUnitTests.Controller_Tests
             return new MapleTinderDbContext(options);
         }
 
-        private void AuthorizeUser(CharactersController controller, string userId = "test-user-123")
+        private void AuthorizeUser(ControllerBase controller, string userId = "test-user-123")
         {
             var claims = new List<Claim>
             {
@@ -149,7 +149,7 @@ namespace api.NUnitTests.Controller_Tests
         }
 
         [Test]
-        public async Task GetRandomCharacters_AuthorizedUser_ReturnsUnseenCharacters()
+        public async Task GetRandomCharacters_TestAuthorizedUser_ReturnsUnseenCharacters()
         {
             // Arrange
             using var context = GetFakedContext();
