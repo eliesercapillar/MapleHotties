@@ -131,7 +131,7 @@ namespace api.NUnitTests.Controller_Tests
         }
 
         [Test]
-        public async Task BatchSave_TestAuthorizedUser_SavesHistoryAndUpdatesStats()
+        public async Task BatchSave_TestAuthorizedUser_SavesHistory()
         {
             // Arrange
             using var context = GetFakedContext();
