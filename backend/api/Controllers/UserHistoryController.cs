@@ -58,7 +58,7 @@ namespace api.Controllers
         {
             if (quantity <= 0) return BadRequest("Query parameter 'quantity' must be greater than 0.");
             
-            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var userId = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null) return Unauthorized();
 
@@ -96,20 +96,18 @@ namespace api.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<HistoryCharacterDTO>>> All()
         {
-            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)! ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var userId = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null) return Unauthorized();
 
             try
             {
-                // Get the most recent UserHistory entries for this user
                 var recentHistory = await _context.UserHistory
                     .Where(uh => uh.UserId == userId)
                     .Include(uh => uh.Character)
                     .OrderByDescending(uh => uh.SeenAt)
                     .ToListAsync();
 
-                // Create the HistoryCharacterDTO list by joining the data
                 var result = recentHistory.Select(history => new HistoryCharacterDTO
                 {
                     Character = history.Character,
