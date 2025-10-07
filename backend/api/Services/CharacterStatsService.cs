@@ -24,10 +24,11 @@ namespace api.Services
                 .Where(cs => characterIds.Contains(cs.CharacterId))
                 .ToListAsync();
 
+            var statsCache = existingStats.ToDictionary(s => s.CharacterId);
+
             foreach (var swipe in swipes)
             {
-                var stats = existingStats.FirstOrDefault(s => s.CharacterId == swipe.CharacterId);
-                if (stats == null)
+                if (!statsCache.TryGetValue(swipe.CharacterId, out var stats))
                 {
                     stats = new CharacterStats
                     {
@@ -37,6 +38,7 @@ namespace api.Services
                         TotalFavourites = 0
                     };
                     _context.CharacterStats.Add(stats);
+                    statsCache[swipe.CharacterId] = stats;
                 }
 
                 switch (swipe.Status?.ToLower())
