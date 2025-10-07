@@ -43,12 +43,10 @@ namespace api.Authentication.Controllers
 
         // POST: auth/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
+        public async Task<ActionResult> Register([FromBody] RegisterDTO dto)
         {
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
                 var user = new ApplicationUser
                 {
                     UserName = dto.Email,
@@ -73,10 +71,8 @@ namespace api.Authentication.Controllers
 
         // POST: auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO dto)
+        public async Task<ActionResult> Login([FromBody] LoginDTO dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var user = await _userManager.FindByEmailAsync(dto.Email);
             if (user == null) return BadRequest("Email not found or incorrect password.");
 
@@ -85,7 +81,10 @@ namespace api.Authentication.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.CreateToken(user, roles);
-            return Ok(new { token });
+            return Ok(new LoginSuccessDTO
+            {
+                Token = token,
+            });
         }
 
         #endregion Local Auth
@@ -98,7 +97,7 @@ namespace api.Authentication.Controllers
 
         // GET: auth/login/discord
         [HttpGet("login/discord")]
-        public IActionResult SignInDiscord()
+        public ActionResult SignInDiscord()
         {
             // 302 redirect to Discord
             var props = _signInManager.ConfigureExternalAuthenticationProperties(DiscordScheme, DiscordRedirectURI);
@@ -107,7 +106,7 @@ namespace api.Authentication.Controllers
 
         // GET: auth/login/discord/success
         [HttpGet("login/discord/success")]
-        public async Task<IActionResult> DiscordLoginSuccess()
+        public async Task<ActionResult> DiscordLoginSuccess()
         {
             // Get info returned by Discord
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -152,7 +151,7 @@ namespace api.Authentication.Controllers
 
         // GET: auth/login/discord/fail
         [HttpGet("login/discord/fail")]
-        public IActionResult DiscordLoginFail()
+        public ActionResult DiscordLoginFail()
         {
             return Redirect($"http://localhost:5173/login/failed?oauthService=Discord");
         }
