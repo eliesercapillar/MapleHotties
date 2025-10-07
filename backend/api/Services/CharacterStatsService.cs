@@ -41,18 +41,20 @@ namespace api.Services
 
                 switch (swipe.Status?.ToLower())
                 {
-                    case "love":
+                    case "liked":
                         stats.TotalLikes++;
                         break;
-                    case "nope":
+                    case "noped":
                         stats.TotalNopes++;
                         break;
-                    case "favourite":
+                    case "favourited":
                         stats.TotalLikes++; // Favourites also count as liking
                         stats.TotalFavourites++;
                         break;
                 }
             }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
