@@ -2,39 +2,30 @@
 <img height="300" width="300" src="https://raw.githubusercontent.com/eliesercapillar/MapleTinder/refs/heads/main/frontend/public/logos/mt_mushroom.png" alt="MapleHotties Logo" align="center">
 </p><br>
 
-# MapleHotties 🍁
+# MapleHotties
 
-An end-to-end, full-stack web application where [MapleStory](https://www.nexon.com/maplestory/) players can vote on the hottest characters of the week, creating an engaging and fun community experience for fans of silly _mushroom game_.
+An end-to-end, full-stack web application where [MapleStory](https://www.nexon.com/maplestory/) players can vote on the hottest/nottest characters of the week.
 
-[maplehotties.com](YOUR_DEPLOYED_URL_HERE) | [API Documentation](./docs/API.md) | [Architecture](./docs/ARCHITECTURE.md)
+<!-- [maplehotties.com](YOUR_DEPLOYED_URL_HERE) | [API Swagger Specification](./docs/API.md) | [Architecture](./docs/ARCHITECTURE.md) -->
 
-# Screenshots
+<!-- # Screenshots
 
 ![Home Page](./docs/images/homepage.png)
 ![Voting Interface](./docs/images/voting.png)
-![Leaderboard](./docs/images/leaderboard.png)
+![Leaderboard](./docs/images/leaderboard.png) -->
 
-# 🎯 Project Overview
+## Project Overview
 
-MapleTinder brings the fun of ranking and voting to the MapleStory community. Players can browse character profiles, cast their votes, and see which characters reign supreme each week. The project demonstrates full-stack development capabilities with a focus on user engagement, real-time updates, and clean UI/UX design.
+MapleTinder is a web app where Maplestory players can vote on the outfits of other Maplestory characters, ranking them as hot, or not. Players can mark characters as favourites to save their outfits for later reference. On top of this, there is also a leaderboard where players can see how the community has rated everyone's outfits.
 
-**Key Goals:**
-- Create an engaging voting experience for the MapleStory community
-- Implement fair voting mechanics with anti-manipulation measures
-- Build a responsive, modern interface that works across devices
-- Demonstrate proficiency in full-stack web development
+### Features
 
-## ✨ Features
+- **Character Voting System** - Browse and vote on MapleStory characters and their outfits with through a Tinder-inspired, swiping interface.
+- **Weekly, Monthly, and All Time Leaderboards** - Real-time character outfit rankings that reset weekly and monthly.
+- **Vote History** - Track your voting history and favorite characters.
+<!-- - **Admin Dashboard** - Manage characters, moderate content, and view analytics -->
 
-- **Character Voting System** - Browse and vote on MapleStory characters with an intuitive swipe-like interface
-- **Weekly Leaderboards** - Real-time rankings that reset weekly to keep content fresh
-- **Character Profiles** - Detailed character information including stats, classes, and descriptions
-- **Vote History** - Track your voting patterns and favorite characters
-- **Responsive Design** - Seamless experience across desktop, tablet, and mobile devices
-- **Anti-Manipulation** - IP-based rate limiting and vote validation to ensure fair results
-- **Admin Dashboard** - Manage characters, moderate content, and view analytics
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - Framework: **Vue 3**
@@ -54,34 +45,12 @@ MapleTinder brings the fun of ranking and voting to the MapleStory community. Pl
 - Containerization: Docker & Docker Compose
 - CI/CD: GitHub Actions -->
 
-## 🏗️ Architecture
+<!-- ## Software Architecture
+![MapleHotties Architecture Diagram](/docs/architecture_v1.png) -->
 
-MapleTinder follows a three-tier architecture pattern:
+<!-- ## API Documentation
 
-```
-┌─────────────────┐      ┌─────────────────┐
-│                 │      │                 │      │                 │
-│  React Frontend │─────▶│  Express API    │─────▶│   PostgreSQL    │
-│                 │      │                 │      │                 │
-└─────────────────┘      └─────────────────┘
-┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│                 │      │                 │      │                 │
-│  React Frontend │─────▶│  Express API    │─────▶│   PostgreSQL    │
-│                 │      │                 │      │                 │
-└─────────────────┘      └─────────────────┘      └─────────────────┘
-                                 │
-                                 ▼
-                         ┌─────────────────┐
-                         │  Redis Cache    │
-                         │  (Optional)     │
-                         └─────────────────┘
-```
-
-See [Architecture Documentation](./docs/ARCHITECTURE.md) for detailed system design.
-
-## 📚 API Documentation
-
-For detailed API documentation, see [API.md](./docs/API.md).
+For detailed API documentation, check out the [Swagger Spec](./backend/docs/api.yaml).
 
 ### Quick Reference
 
@@ -92,9 +61,9 @@ For detailed API documentation, see [API.md](./docs/API.md).
 | POST | `/api/votes` | Submit a vote |
 | GET | `/api/leaderboard` | Get weekly rankings |
 | POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | User login |
+| POST | `/api/auth/login` | User login | -->
 
-## 🎨 Design Decisions
+<!-- ## Design Decisions
 
 ### Voting Mechanism
 The voting system uses a combination of session tracking and IP-based rate limiting to prevent manipulation while keeping the barrier to entry low for casual users.
@@ -103,9 +72,9 @@ The voting system uses a combination of session tracking and IP-based rate limit
 Leaderboards reset every Monday at midnight UTC, keeping the competition fresh and encouraging repeat engagement.
 
 ### Character Data
-Character information is manually curated for quality control, with admin tools for easy updates and additions.
+Character information is manually curated for quality control, with admin tools for easy updates and additions. -->
 
-## 🔮 Future Enhancements
+<!-- ## Future Plans
 
 - [ ] User authentication system with profiles and vote history
 - [ ] Social sharing features (share favorite characters)
@@ -114,20 +83,19 @@ Character information is manually curated for quality control, with admin tools 
 - [ ] Admin analytics dashboard with voting trends
 - [ ] WebSocket integration for real-time leaderboard updates
 - [ ] Mobile app version (React Native)
-- [ ] Community character submissions with moderation
+- [ ] Community character submissions with moderation -->
 
-## 📧 Contact
+## Contact
 
 Elieser Capillar - [GitHub](https://github.com/eliesercapillar) - [LinkedIn](https://www.linkedin.com/in/eliesercapillar/)
 
 Project Link: [https://github.com/eliesercapillar/MapleTinder](https://github.com/eliesercapillar/MapleTinder)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - MapleStory character designs and assets are property of Nexon
-- Inspiration from Tinder's swipe interface
-- MapleStory community for feedback and support
+- I took heavy inspiration from Tinder's swipe interface
 
 ---
 
-⭐️ If you found this project interesting, please consider giving it a star!
+⭐️ *If you found this project interesting, please consider giving it a star!* ⭐️
