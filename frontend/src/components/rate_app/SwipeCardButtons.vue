@@ -3,18 +3,18 @@
         <div class="flex justify-around items-center">
             <TinderButton
             name="Nope"
-            :pressedGradient="ButtonSVGs.nope.pressedGradient"
-            :svg="ButtonSVGs.nope.svg"
+            :pressedGradient="ButtonSVGs.noped.pressedGradient"
+            :svg="ButtonSVGs.noped.svg"
             />
             <TinderButton
             name="Favourite"
-            :pressedGradient="ButtonSVGs.favourite.pressedGradient"
-            :svg="ButtonSVGs.favourite.svg"
+            :pressedGradient="ButtonSVGs.favourited.pressedGradient"
+            :svg="ButtonSVGs.favourited.svg"
             />
             <TinderButton
             name="Love"
-            :pressedGradient="ButtonSVGs.love.pressedGradient"
-            :svg="ButtonSVGs.love.svg"
+            :pressedGradient="ButtonSVGs.liked.pressedGradient"
+            :svg="ButtonSVGs.liked.svg"
             />
         </div>
     </div>

@@ -216,7 +216,7 @@ const handleDragEnd = () => {
   if (isCentered && yThresholdHit) {
     const targetY = -window.innerHeight; // Move outside viewport
     
-    const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, "favourite", new Date().toISOString())
+    const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, "favourited", new Date().toISOString())
 
     animate(y, targetY, {
       duration: 0.15,
@@ -226,7 +226,7 @@ const handleDragEnd = () => {
   else if (xThresholdHit) {
     const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move outside viewport
 
-    const status = currentX > 0 ? "love" : "nope";
+    const status = currentX > 0 ? "liked" : "noped";
 
     const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString())
 

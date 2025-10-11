@@ -24,7 +24,7 @@ interface CharacterCard
 
 interface SwipeEvent {
   characterId: number;
-  status: 'nope' | 'love' | 'favourite';
+  status: 'liked' | 'noped' | 'favourited';
   seenAt: string;
 }
 
@@ -138,7 +138,7 @@ export const useSwipeStore = defineStore('swipe', () =>
     const pending = ref([] as SwipeEvent[]);
     const isFlushingPending = ref(false);
 
-    const createSwipeEvent = (characterId: number, status: 'nope' | 'love' | 'favourite', seenAt: string): SwipeEvent => ({
+    const createSwipeEvent = (characterId: number, status: 'liked' | 'noped' | 'favourited', seenAt: string): SwipeEvent => ({
         characterId,
         status,
         seenAt
@@ -149,7 +149,7 @@ export const useSwipeStore = defineStore('swipe', () =>
         removeCard(event.characterId);
 
         historyStore.appendRecentCard(character, event.status, event.seenAt)
-        if (event.status == 'favourite') favouritesStore.appendRecentCard(character, event.seenAt);
+        if (event.status == 'favourited') favouritesStore.appendRecentCard(character, event.seenAt);
 
         pending.value.push(event);
 
@@ -170,7 +170,7 @@ export const useSwipeStore = defineStore('swipe', () =>
         pending.value = []; // Clear pending immediately
 
         try {
-            const favourites = batchToFlush.filter(swipe => swipe.status === 'favourite');
+            const favourites = batchToFlush.filter(swipe => swipe.status === 'favourited');
             
             // Attempt to save to UserHistory
             const historySuccess = await saveToUserHistory(batchToFlush);
