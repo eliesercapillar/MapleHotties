@@ -13,19 +13,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useLeaderboardStore } from "@/stores/leaderboardStore";
 import { Icon } from "@iconify/vue/dist/iconify.js";
 import SearchForm from "./SearchForm.vue";
 
-const showStats = ref(false);
-
-const leaderboardStore = useLeaderboardStore();
-
-async function toggleView(likes: boolean) {
-  leaderboardStore.showLikes = likes;
-  leaderboardStore.setPage(1); // Reset to first page when switching views
-  
-  if (likes) await leaderboardStore.fetchTopLiked();
-  else       await leaderboardStore.fetchTopNoped();
-}
 </script>

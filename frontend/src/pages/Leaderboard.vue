@@ -2,8 +2,9 @@
   <div class="relative bg-background min-h-screen flex flex-row text-white">
     <LeaderboardSidebar/>
     <main class="w-full h-screen bg-black-grey-radial text-white flex flex-col items-center justify-center">
-      <h1 class="font-medium text-4xl text-center py-4">The Top {{ leaderboardStore.showLikes ? "Hotties" : "Notties" }} of Maplestory GMS</h1>
-      
+      <h1 v-if="isCurrentTimeRange('all')" class="font-medium text-4xl text-center py-4">The All Time {{ leaderboardStore.getRankingType() }} of Maplestory GMS</h1>
+      <h1 v-else-if="isCurrentTimeRange('monthly')" class="font-medium text-4xl text-center py-4">The {{ getCurrentMonth() }} {{ leaderboardStore.getRankingType() }} of Maplestory GMS</h1>
+      <h1 v-else-if="isCurrentTimeRange('weekly')" class="font-medium text-4xl text-center py-4">The Weekly {{ leaderboardStore.getRankingType() }} of Maplestory GMS</h1>
       <div class="flex gap-4 ">
         <LeaderboardTable/>
       </div>
@@ -20,12 +21,15 @@ import LeaderboardSidebar from "@/components/leaderboard/LeaderboardSidebar.vue"
 
 const leaderboardStore = useLeaderboardStore();
 
-async function toggleView(likes: boolean) {
-  leaderboardStore.showLikes = likes;
-  leaderboardStore.setPage(1); // Reset to first page when switching views
-  
-  if (likes) await leaderboardStore.fetchTopLiked();
-  else       await leaderboardStore.fetchTopNoped();
+function isCurrentTimeRange(type : string) : boolean
+{
+  return leaderboardStore.searchSettings.timeType == type;
+} 
+
+function getCurrentMonth() : string
+{
+  return "October"
 }
+
 
 </script>
