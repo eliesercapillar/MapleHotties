@@ -179,6 +179,23 @@ namespace api.Controllers
                     query = query.Where(cs => cs.Character.Job.ToLower() == ClassShorthandToFull(classType.ToLower()).ToLower());
                 }
 
+                query = (rankingType.ToLower(), timeType.ToLower()) switch
+                {
+                    ("hotties", "weekly") => query.Where(cs => cs.WeeklyLikes > 0),
+                    ("hotties", "monthly") => query.Where(cs => cs.MonthlyLikes > 0),
+                    ("hotties", _) => query.Where(cs => cs.TotalLikes > 0),
+
+                    ("notties", "weekly") => query.Where(cs => cs.WeeklyNopes > 0),
+                    ("notties", "monthly") => query.Where(cs => cs.MonthlyNopes > 0),
+                    ("notties", _) => query.Where(cs => cs.TotalNopes > 0),
+
+                    ("favourites", "weekly") => query.Where(cs => cs.WeeklyFavourites > 0),
+                    ("favourites", "monthly") => query.Where(cs => cs.MonthlyFavourites > 0),
+                    ("favourites", _) => query.Where(cs => cs.TotalFavourites > 0),
+
+                    _ => query.Where(cs => cs.TotalLikes > 0)
+                };
+
                 IOrderedQueryable<CharacterStats> orderedQuery = (rankingType.ToLower(), timeType.ToLower()) switch
                 {
                     ("hotties", "weekly") => query.OrderByDescending(cs => cs.WeeklyLikes),

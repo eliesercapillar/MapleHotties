@@ -45,6 +45,11 @@ namespace MapleTinder.Shared.Data
                 eb.Property(c => c.Job).HasMaxLength(25);
                 eb.Property(c => c.World).HasMaxLength(25);
                 eb.Property(c => c.ImageUrl).HasMaxLength(500);
+
+                // For search filtering
+                eb.HasIndex(c => c.Name);
+                eb.HasIndex(c => c.World);
+                eb.HasIndex(c => c.Job);
             });
 
             builder.Entity<UserHistory>(eb =>
@@ -70,6 +75,14 @@ namespace MapleTinder.Shared.Data
                 eb.HasOne(cs => cs.Character)
                   .WithOne(c => c.CharacterStats)
                   .HasForeignKey<CharacterStats>(cs => cs.CharacterId);
+
+                eb.HasIndex(cs => new { cs.WeeklyLikes, cs.CharacterId });
+                eb.HasIndex(cs => new { cs.WeeklyNopes, cs.CharacterId });
+                eb.HasIndex(cs => new { cs.WeeklyFavourites, cs.CharacterId });
+
+                eb.HasIndex(cs => new { cs.MonthlyLikes, cs.CharacterId });
+                eb.HasIndex(cs => new { cs.MonthlyNopes, cs.CharacterId });
+                eb.HasIndex(cs => new { cs.MonthlyFavourites, cs.CharacterId });
 
                 eb.HasIndex(cs => new { cs.TotalNopes, cs.CharacterId });
                 eb.HasIndex(cs => new { cs.TotalLikes, cs.CharacterId });
