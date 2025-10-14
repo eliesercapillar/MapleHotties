@@ -44,13 +44,23 @@ namespace api.Services
                 switch (swipe.Status?.ToLower())
                 {
                     case "liked":
+                        stats.WeeklyLikes++;
+                        stats.MonthlyLikes++;
                         stats.TotalLikes++;
                         break;
                     case "noped":
+                        stats.WeeklyNopes++;
+                        stats.MonthlyNopes++;
                         stats.TotalNopes++;
                         break;
                     case "favourited":
-                        stats.TotalLikes++; // Favourites also count as liking
+                        // Favourites also count as liking
+                        stats.WeeklyLikes++;
+                        stats.MonthlyLikes++;
+                        stats.TotalLikes++;
+
+                        stats.WeeklyFavourites++;
+                        stats.MonthlyFavourites++;
                         stats.TotalFavourites++;
                         break;
                 }

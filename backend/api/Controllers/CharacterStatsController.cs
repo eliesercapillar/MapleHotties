@@ -94,25 +94,21 @@ namespace api.Controllers
 
                 IQueryable<CharacterStats> query =  _context.CharacterStats.Include(cs => cs.Character);
 
-                // Filter by character name
                 if (!string.IsNullOrEmpty(characterName))
                 {
                     query = query.Where(cs => cs.Character.Name.Contains(characterName));
                 }
 
-                // Filter by world type
                 if (!string.IsNullOrEmpty(worldType) && worldType.ToLower() != "all")
                 {
-                    query = query.Where(cs => cs.Character.World.Equals(worldType, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(cs => cs.Character.World.ToLower() == worldType.ToLower());
                 }
 
-                // Filter by class type
                 if (!string.IsNullOrEmpty(classType) && classType.ToLower() != "all")
                 {
-                    query = query.Where(cs => cs.Character.Job.Equals(classType, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(cs => cs.Character.Job.ToLower() == classType.ToLower());
                 }
 
-                // Order by time and ranking types
                 IOrderedQueryable<CharacterStats> orderedQuery = (rankingType.ToLower(), timeType.ToLower()) switch
                 {
                     ("hotties", "weekly") => query.OrderByDescending(cs => cs.WeeklyLikes),
@@ -151,7 +147,7 @@ namespace api.Controllers
                             rankingType.ToLower() == "favourites" && timeType.ToLower() == "weekly" ? cs.WeeklyFavourites :
                             rankingType.ToLower() == "favourites" && timeType.ToLower() == "monthly" ? cs.MonthlyFavourites :
                             rankingType.ToLower() == "favourites" ? cs.TotalFavourites :
-                            cs.TotalLikes, // default
+                            cs.TotalLikes, // Default
                 })
                 .ToListAsync();
 
