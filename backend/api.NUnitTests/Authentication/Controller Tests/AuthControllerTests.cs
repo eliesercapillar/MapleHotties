@@ -31,12 +31,12 @@ namespace api.NUnitTests.Authentication.Controller_Tests
         {
             var userStore = A.Fake<IUserStore<ApplicationUser>>();
             _fakedUserManager = A.Fake<UserManager<ApplicationUser>>(x => x.WithArgumentsForConstructor(() =>
-                new UserManager<ApplicationUser>(userStore, null, null, null, null, null, null, null, null)));
+                new UserManager<ApplicationUser>(userStore, null!, null!, null!, null!, null!, null!, null!, null!)));
 
             var contextAccessor = A.Fake<IHttpContextAccessor>();
             var claimsFactory = A.Fake<IUserClaimsPrincipalFactory<ApplicationUser>>();
             _fakedSignInManager = A.Fake<SignInManager<ApplicationUser>>(x => x.WithArgumentsForConstructor(() =>
-                new SignInManager<ApplicationUser>(_fakedUserManager, contextAccessor, claimsFactory, null, null, null, null)));
+                new SignInManager<ApplicationUser>(_fakedUserManager, contextAccessor, claimsFactory, null!, null!, null!, null!)));
 
             _fakedTokenService = A.Fake<ITokenService>();
 

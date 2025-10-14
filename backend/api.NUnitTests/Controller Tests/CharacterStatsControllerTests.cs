@@ -344,13 +344,13 @@ namespace api.NUnitTests.Controller_Tests
 
             var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
             returnedCharacters.Should().NotBeNull();
-            returnedCharacters.TotalCount.Should().Be(7);
+            returnedCharacters.TotalCount.Should().Be(3);
             returnedCharacters.CurrentPage.Should().Be(1);
             returnedCharacters.PageSize.Should().Be(10);
             returnedCharacters.TotalPages.Should().Be(1);
 
             var characterList = returnedCharacters.Data.ToList();
-            characterList.Count.Should().Be(7);
+            characterList.Count.Should().Be(3);
             characterList[0].Character.Id.Should().Be(4);
             characterList[0].Count.Should().Be(3);
             characterList[0].Character.Name.Should().Be("Vinsaint");
@@ -360,11 +360,6 @@ namespace api.NUnitTests.Controller_Tests
             characterList[2].Character.Id.Should().Be(1);
             characterList[2].Count.Should().Be(1);
             characterList[2].Character.Name.Should().Be("Xaera");
-
-            for (int i = 3; i < characterList.Count; i++)
-            {
-                characterList[i].Count.Should().Be(0);
-            }
         }
 
         [Test]
@@ -410,19 +405,16 @@ namespace api.NUnitTests.Controller_Tests
 
             var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
             returnedCharacters.Should().NotBeNull();
-            returnedCharacters.TotalCount.Should().Be(2);
+            returnedCharacters.TotalCount.Should().Be(1);
             returnedCharacters.CurrentPage.Should().Be(1);
             returnedCharacters.PageSize.Should().Be(10);
             returnedCharacters.TotalPages.Should().Be(1);
 
             var characterList = returnedCharacters.Data.ToList();
-            characterList.Count.Should().Be(2);
+            characterList.Count.Should().Be(1);
             characterList[0].Character.Id.Should().Be(6);
             characterList[0].Count.Should().Be(2);
             characterList[0].Character.Name.Should().Be("Ereklo");
-            characterList[1].Character.Id.Should().Be(2);
-            characterList[1].Count.Should().Be(0);
-            characterList[1].Character.Name.Should().Be("ROCKOGUY");
         }
 
         [Test]
@@ -468,13 +460,13 @@ namespace api.NUnitTests.Controller_Tests
 
             var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
             returnedCharacters.Should().NotBeNull();
-            returnedCharacters.TotalCount.Should().Be(7);
+            returnedCharacters.TotalCount.Should().Be(5);
             returnedCharacters.CurrentPage.Should().Be(1);
             returnedCharacters.PageSize.Should().Be(10);
             returnedCharacters.TotalPages.Should().Be(1);
 
             var characterList = returnedCharacters.Data.ToList();
-            characterList.Count.Should().Be(7);
+            characterList.Count.Should().Be(5);
             characterList[0].Character.Id.Should().Be(1);
             characterList[0].Count.Should().Be(6);
             characterList[0].Character.Name.Should().Be("Xaera");
@@ -490,12 +482,6 @@ namespace api.NUnitTests.Controller_Tests
             characterList[4].Character.Id.Should().Be(6);
             characterList[4].Count.Should().Be(2);
             characterList[4].Character.Name.Should().Be("Ereklo");
-            characterList[5].Character.Id.Should().Be(2);
-            characterList[5].Count.Should().Be(0);
-            characterList[5].Character.Name.Should().Be("ROCKOGUY"); // Tiebreaker, Lower ID
-            characterList[6].Character.Id.Should().Be(7);
-            characterList[6].Count.Should().Be(0);
-            characterList[6].Character.Name.Should().Be("Game");     // Tiebreaker, Lower ID
         }
 
         [Test]
@@ -612,6 +598,58 @@ namespace api.NUnitTests.Controller_Tests
             characterList[1].Character.Id.Should().Be(3);
             characterList[1].Count.Should().Be(50);
             characterList[1].Character.Name.Should().Be("DWlGHT");
+        }
+
+        [Test]
+        public async Task Search_TestFilterOutZeroEntries_ReturnsEmptyList()
+        {
+            // Arrange
+            using var context = GetFakedContext();
+
+            var character1 = CreateTestCharacter(id: 1, name: "Xaera", level: 285, job: "Xenon", world: "Kronos");
+            var character2 = CreateTestCharacter(id: 2, name: "ROCKOGUY", level: 290, job: "Adele", world: "Kronos");
+            var character3 = CreateTestCharacter(id: 3, name: "DWlGHT", level: 289, job: "Dual Blade", world: "Kronos");
+            var character4 = CreateTestCharacter(id: 4, name: "Vinsaint", level: 285, job: "Shadower", world: "Kronos");
+            var character5 = CreateTestCharacter(id: 5, name: "Ciao", level: 282, job: "Dawn Warrior", world: "Kronos");
+            var character6 = CreateTestCharacter(id: 6, name: "Ereklo", level: 295, job: "Adele", world: "Bera");
+            var character7 = CreateTestCharacter(id: 7, name: "Game", level: 293, job: "Bow Master", world: "Scania");
+
+            context.Characters.AddRange(character1, character2, character3, character4, character5, character6, character7);
+
+            var stats1 = CreateTestCharacterStats(id: character1.Id, character: character1);
+            var stats2 = CreateTestCharacterStats(id: character2.Id, character: character2);
+            var stats3 = CreateTestCharacterStats(id: character3.Id, character: character3);
+            var stats4 = CreateTestCharacterStats(id: character4.Id, character: character4);
+            var stats5 = CreateTestCharacterStats(id: character5.Id, character: character5);
+            var stats6 = CreateTestCharacterStats(id: character6.Id, character: character6);
+            var stats7 = CreateTestCharacterStats(id: character7.Id, character: character7);
+
+
+            context.CharacterStats.AddRange(stats1, stats2, stats3, stats4, stats5, stats6, stats7);
+
+            await context.SaveChangesAsync();
+
+            var controller = new CharacterStatsController(context);
+
+            // Act
+            var result = await controller.Search(rankingType: "likes");
+
+            // Assert
+            var actionResult = result.Result;
+            actionResult.Should().BeOfType<OkObjectResult>();
+
+            var okResult = actionResult as OkObjectResult;
+            okResult.Should().NotBeNull();
+
+            var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
+            returnedCharacters.Should().NotBeNull();
+            returnedCharacters.TotalCount.Should().Be(0);
+            returnedCharacters.CurrentPage.Should().Be(1);
+            returnedCharacters.PageSize.Should().Be(10);
+            returnedCharacters.TotalPages.Should().Be(0);
+
+            var characterList = returnedCharacters.Data.ToList();
+            characterList.Count.Should().Be(0);
         }
 
         [Test]
