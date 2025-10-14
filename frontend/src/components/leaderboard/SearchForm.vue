@@ -57,6 +57,9 @@
                   <SelectLabel>OTHER</SelectLabel>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="noblesse">Noblesse</SelectItem>
+                  <SelectItem value="citizen">Citizen</SelectItem>
+                  <SelectItem value="legend">Legend</SelectItem>
                 </SelectGroup>
                 <SelectGroup>
                   <SelectLabel>WARRIOR</SelectLabel>

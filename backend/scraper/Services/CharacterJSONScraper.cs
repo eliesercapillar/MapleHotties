@@ -397,13 +397,18 @@ namespace scraper.Services
                     return "Lara";
                 case 220:
                     return "Hoyoung";
+                // Jianghu
+                case 225:
+                    return "Lynn";
+                case 226:
+                    return "Mo Xuan";
                 // Other
                 case 210:
                     return "Zero";
                 case 214:
                     return "Kinesis";
-                case 225:
-                    return "Lynn";
+                case 227:
+                    return "Sia Astelle";
             }
             return "???";
         }

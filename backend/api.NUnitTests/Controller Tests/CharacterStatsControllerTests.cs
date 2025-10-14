@@ -685,6 +685,78 @@ namespace api.NUnitTests.Controller_Tests
         }
 
         [Test]
+        [TestCase("dw", "Dawn Warrior")]
+        [TestCase("nl", "Night Lord")]
+        [TestCase("db", "Dual Blade")]
+        [TestCase("bm", "Bowmaster")]
+        [TestCase("mm", "Marksman")]
+        [TestCase("da", "Demon Avenger")]
+        [TestCase("ds", "Demon Slayer")]
+        [TestCase("fp", "Fire Poison Archmage")]
+        [TestCase("il", "Ice Lightning Archmage")]
+        [TestCase("bish", "Bishop")]
+        [TestCase("bam", "Battle Mage")]
+        [TestCase("bw", "Blaze Wizard")]
+        [TestCase("wa", "Wind Archer")]
+        [TestCase("wh", "Wild Hunter")]
+        [TestCase("merc", "Mercedes")]
+        [TestCase("shad", "Shadower")]
+        [TestCase("phantom", "Phantom")]
+        [TestCase("cad", "Cadena")]
+        [TestCase("khali", "Khali")]
+        [TestCase("hy", "Hoyoung")]
+        [TestCase("bucc", "Buccaneer")]
+        [TestCase("sair", "Corsair")]
+        [TestCase("cann", "Cannon Master")]
+        [TestCase("tb", "Thunder Breaker")]
+        [TestCase("mech", "Mechanic")]
+        [TestCase("shade", "Shade")]
+        [TestCase("ab", "Angelic Buster")]
+        [TestCase("ark", "Ark")]
+        public async Task Search_TestClassTypeShorthandMapping_ReturnsOnlyMatchingClass(string shorthand, string fullClassName)
+        {
+            // Arrange
+            using var context = GetFakedContext();
+
+            var matchingChar = CreateTestCharacter(id: 1, name: $"{fullClassName}CLASSGUY", job: fullClassName, world: "Hyperion");
+            var rockoguy = CreateTestCharacter(id: 2, name: "ROCKOGUY", job: "Adele", world: "Kronos");
+
+            context.Characters.AddRange(matchingChar, rockoguy);
+
+            var stats1 = CreateTestCharacterStats(id: matchingChar.Id, character: matchingChar, totalLikes: 999);
+            var stats2 = CreateTestCharacterStats(id: rockoguy.Id, character: rockoguy, totalLikes: 123);
+
+            context.CharacterStats.AddRange(stats1, stats2);
+            await context.SaveChangesAsync();
+
+            var controller = new CharacterStatsController(context);
+
+            // Act
+            var result = await controller.Search(classType: shorthand);
+
+            // Assert
+            var actionResult = result.Result;
+            actionResult.Should().BeOfType<OkObjectResult>();
+
+            var okResult = actionResult as OkObjectResult;
+            okResult.Should().NotBeNull();
+
+            var returnedCharacters = okResult.Value.Should().BeAssignableTo<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>().Subject;
+            returnedCharacters.Should().NotBeNull();
+            returnedCharacters.TotalCount.Should().Be(1);
+            returnedCharacters.CurrentPage.Should().Be(1);
+            returnedCharacters.PageSize.Should().Be(10);
+            returnedCharacters.TotalPages.Should().Be(1);
+
+            var characterList = returnedCharacters.Data.ToList();
+            characterList.Count.Should().Be(1);
+            characterList[0].Character.Id.Should().Be(1);
+            characterList[0].Character.Job.Should().Be(fullClassName);
+            characterList[0].Character.Name.Should().Be($"{fullClassName}CLASSGUY");
+            characterList[0].Count.Should().Be(999);
+        }
+
+        [Test]
         [TestCase("NoName", "all", "all")]
         [TestCase("", "NoClass", "all")]
         [TestCase("", "all", "NoWorld")]

@@ -64,7 +64,7 @@
         },
         {
             "className": "Bishop",
-            "value": "bishop"
+            "value": "bish"
         },
         {
             "className": "Blaze Wizard",
@@ -164,7 +164,7 @@
         },
         {
             "className": "Cadena",
-            "value": "cadena"
+            "value": "cad"
         },
         {
             "className": "Khali",
@@ -172,7 +172,7 @@
         },
         {
             "className": "Hoyoung",
-            "value": "hoyoung"
+            "value": "hy"
         }
     ],
     "pirates" : [
@@ -182,11 +182,11 @@
         },
         {
             "className": "Corsair",
-            "value": "corsair"
+            "value": "sair"
         },
         {
-            "className": "Cannoneer",
-            "value": "cannon"
+            "className": "Cannon Master",
+            "value": "cann"
         },
         {
             "className": "Thunder Breaker",

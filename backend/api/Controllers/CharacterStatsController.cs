@@ -27,6 +27,76 @@ namespace api.Controllers
             _context = context;
         }
 
+        private string ClassShorthandToFull(string shorthand)
+        {
+            var classMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                // Beginners
+                { "beginner", "Beginner" },
+                { "noblesse", "Noblesse" },
+                { "citizen", "Citizen" },
+                { "legend", "Legend" },
+                // Warriors
+                { "hero", "Hero" },
+                { "pally", "Paladin" },
+                { "dk", "Dark Knight" },
+                { "dw", "Dawn Warrior" },
+                { "mihile", "Mihile" },
+                { "blaster", "Blaster" },
+                { "ds", "Demon Slayer" },
+                { "da", "Demon Avenger" },
+                { "aran", "Aran" },
+                { "kaiser", "Kaiser" },
+                { "adele", "Adele" },
+                { "zero", "Zero" },
+                { "hayato", "Hayato" },
+                // Magicians
+                { "fp", "Fire Poison Archmage" },
+                { "il", "Ice Lightning Archmage" },
+                { "bish", "Bishop" },
+                { "bw", "Blaze Wizard" },
+                { "bam", "Battle Mage" },
+                { "evan", "Evan" },
+                { "lumi", "Luminous" },
+                { "illium", "Illium" },
+                { "lara", "Lara" },
+                { "kinesis", "Kinesis" },
+                { "kanna", "Kanna" },
+                { "lynn", "Lynn" },
+                { "sia", "Sia Astelle" },
+                // Archers
+                { "bm", "Bowmaster" },
+                { "mm", "Marksman" },
+                { "pf", "Pathfinder" },
+                { "wa", "Wind Archer" },
+                { "wh", "Wild Hunter" },
+                { "merc", "Mercedes" },
+                { "kain", "Kain" },
+                // Thiefs
+                { "nl", "Night Lord" },
+                { "shad", "Shadower" },
+                { "db", "Dual Blade" },
+                { "nw", "Night Walker" },
+                { "xenon", "Xenon" },
+                { "phantom", "Phantom" },
+                { "cad", "Cadena" },
+                { "khali", "Khali" },
+                { "hy", "Hoyoung" },
+                // Pirates
+                { "bucc", "Buccaneer" },
+                { "sair", "Corsair" },
+                { "cann", "Cannon Master" },
+                { "tb", "Thunder Breaker" },
+                { "mech", "Mechanic" },
+                { "shade", "Shade" },
+                { "ab", "Angelic Buster" },
+                { "ark", "Ark" },
+                { "mx", "Mo Xuan" },
+            };
+
+            return classMap.TryGetValue(shorthand, out var fullName) ? fullName : shorthand;
+        }
+
         private async Task<ActionResult<PaginatedLeaderboardWithMetaDTO<LeaderboardCharacterDTO>>> GetTopCharacters(int page, int pageSize, Expression<Func<CharacterStats, int>> orderBySelector)
         {
             try
@@ -106,7 +176,7 @@ namespace api.Controllers
 
                 if (!string.IsNullOrEmpty(classType) && classType.ToLower() != "all")
                 {
-                    query = query.Where(cs => cs.Character.Job.ToLower() == classType.ToLower());
+                    query = query.Where(cs => cs.Character.Job.ToLower() == ClassShorthandToFull(classType.ToLower()).ToLower());
                 }
 
                 IOrderedQueryable<CharacterStats> orderedQuery = (rankingType.ToLower(), timeType.ToLower()) switch
