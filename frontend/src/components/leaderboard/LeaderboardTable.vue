@@ -10,7 +10,7 @@
       <div v-else class="h-[784.5px]  rounded-lg">
         <Table class="select-none table-fixed p-4">
           <TableCaption>
-            {{ leaderboardStore.getRankingType() }} - 
+            {{ leaderboardStore.getTimeType() }} {{ leaderboardStore.getRankingType() }} - 
             Page {{ leaderboardStore.currentPage }} of {{ leaderboardStore.totalPages }}
             ({{ leaderboardStore.totalCount }} total)
           </TableCaption>

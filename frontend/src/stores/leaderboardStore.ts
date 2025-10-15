@@ -58,11 +58,15 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
             ...params
         })
 
+        setPage(1);
+        setPageSize(5);
+
         // TODO: Make function async? That would mean SearchForm.vue's onSubmit would need to be async too?
         fetchSearch();
     }
 
-    async function fetchSearch() {
+    async function fetchSearch() 
+    {
         if (isLoading.value) return;
 
         isLoading.value = true;
@@ -98,8 +102,14 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
         }
     }
 
-    function setPage(page: number) {
+    function setPage(page: number) 
+    {
         currentPage.value = page;
+    }
+    
+    function setPageSize(size: number)
+    {
+        pageSize.value = size;
     }
 
     function getRankingType() : string
@@ -112,6 +122,17 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
         }
         return labels[searchSettings.value.rankingType] || "Hotties"
     }
+
+    function getTimeType() : string
+    {
+        const labels = 
+        { 
+            weekly: "Weekly", 
+            monthly: "Monthly", 
+            all: "All Time" 
+        }
+        return labels[searchSettings.value.timeType] || "All Time"
+    }
     
     return { 
         isLoading,
@@ -119,7 +140,7 @@ export const useLeaderboardStore = defineStore('leaderboard', () =>
         characters, searchSettings,
         updateSearchParameters,
         fetchSearch,
-        setPage,
-        getRankingType,
+        setPage, setPageSize,
+        getRankingType, getTimeType
     }
 })

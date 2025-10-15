@@ -183,13 +183,13 @@ const form = useForm({
 })
 
 const onSubmit = form.handleSubmit(
-(values) => {
-  leaderboardStore.updateSearchParameters(values);
-}, 
-(errors) => {
-  // TODO: flag? -> change to error msg
-  console.log('Errors', errors);
-})
-
+  (values) => {
+    leaderboardStore.updateSearchParameters(values);
+  }, 
+  (errors) => {
+    // TODO: flag? -> change to error msg
+    console.log('Errors', errors);
+  }
+)
 
 </script>

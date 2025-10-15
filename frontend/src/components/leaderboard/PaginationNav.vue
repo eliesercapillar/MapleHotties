@@ -38,7 +38,6 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-// Define types for pagination items
 interface PaginationPageItem {
   type: 'page';
   value: number;
@@ -52,7 +51,7 @@ type PaginationItemType = PaginationPageItem | PaginationEllipsisItem;
 
 const leaderboardStore = useLeaderboardStore();
 
-// Generate pagination items for display
+// The buttons at the bottom denoting the number of pages.
 const paginationItems = computed((): PaginationItemType[] => {
   const items: PaginationItemType[] = [];
   const current = leaderboardStore.currentPage;
