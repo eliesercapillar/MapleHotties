@@ -17,7 +17,7 @@
             key-field="id"
             v-slot="{ item: card }"
         >
-            <CharacterSummaryCard :card="card" status="favourite"/>
+            <CharacterSummaryCard :card="card" status="favourited"/>
         </RecycleScroller>
     </section>
 </template>

@@ -119,15 +119,15 @@ const handleKeyDown = (event: KeyboardEvent) => {
   switch (event.key) {
     case 'ArrowLeft':
       targetPos = -window.innerWidth;
-      status = 'nope';
+      status = 'noped';
       break;
     case 'ArrowRight':
       targetPos = window.innerWidth;
-      status = 'love';
+      status = 'liked';
       break;
     case 'ArrowUp':
       targetPos = -window.innerHeight;
-      status = 'favourite';
+      status = 'favourited';
       break;
     default:
       return;
@@ -136,7 +136,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   // Create swipe event
   const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString());
 
-  if (status === 'favourite') {
+  if (status === 'favourited') {
     animate(y, targetPos, {
       duration: 0.15,
       onComplete: () => swipeStore.onSwipe(swipeEvent),
