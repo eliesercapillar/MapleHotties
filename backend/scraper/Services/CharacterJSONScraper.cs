@@ -234,25 +234,22 @@ namespace scraper.Services
 
         private async Task<string> GetNewCookieHeaderAsync()
         {
-            using var playwright = await Playwright.CreateAsync();
-            var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = true
-            });
+            using var client = new HttpClient();
 
-            var context = await browser.NewContextAsync();
-            var page = await browser.NewPageAsync();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgents[Random.Shared.Next(userAgents.Length)]);
+            client.DefaultRequestHeaders.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
 
-            await page.GotoAsync("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
+            var response = await client.GetAsync("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
+            response.EnsureSuccessStatusCode();
 
-            // Wait for cookies to set
-            await page.Locator("#maplestory").WaitForAsync();
+            // Extract cookies from Set-Cookie header
+            var cookies = response.Headers.TryGetValues("Set-Cookie", out var cookieValues)
+                ? cookieValues
+                : Enumerable.Empty<string>();
 
-            var cookies = await context.CookiesAsync();
+            // Convert to cookie header string
+            var cookieHeader = string.Join("; ", cookies.Select(c => c.Split(';')[0]));
 
-            var cookieHeader = string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
-
-            await browser.CloseAsync();
             return cookieHeader;
         }
 
