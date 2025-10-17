@@ -1,24 +1,23 @@
-﻿FROM mcr.microsoft.com/playwright:v1.51.0-noble
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-# Install .NET SDK
-RUN apt-get update && apt-get install -y wget apt-transport-https software-properties-common && \
-    wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    apt-get update && apt-get install -y dotnet-sdk-8.0 && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# 👇 Copy both scraper and shared project folders into the build context
+# Copy project files
 COPY ./scraper/ ./scraper/
 COPY ./MapleTinder.Shared/ ./MapleTinder.Shared/
 
-WORKDIR /app/scraper
-
+# Restore dependencies
+WORKDIR /src/scraper
 RUN dotnet restore
-RUN dotnet publish -c Release -o /app/publish
 
-WORKDIR /app/publish
+# Build and publish
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+
+# Use the lightweight ASP.NET runtime image for final container
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+
+# Run the scraper
 ENTRYPOINT ["dotnet", "scraper.dll"]
 
 

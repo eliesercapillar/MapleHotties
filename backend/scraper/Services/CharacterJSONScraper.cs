@@ -2,13 +2,9 @@
 using MapleTinder.Shared.Models.Entities;
 using scraper.DTOs;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Collections.Concurrent;
-using System;
-using Microsoft.Playwright;
-using System.Net;
 
 namespace scraper.Services
 {
@@ -20,7 +16,7 @@ namespace scraper.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly HttpClient _http;
 
-        private string[] userAgents =
+        private static readonly string[] _userAgents =
         [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
@@ -35,7 +31,7 @@ namespace scraper.Services
             "Mozilla/5.0 (X11; Linux i686; rv:124.0) Gecko/20100101 Firefox/124.0",
         ];
 
-        private string[] acceptLanguages =
+        private static readonly string[] _acceptLanguages =
         [
             "en-CA,en-US;q=0.9,en;q=0.8",
             "en-CA,en-US;q=0.7,en;q=0.3",
@@ -48,13 +44,10 @@ namespace scraper.Services
             _http = new HttpClient();
         }
 
-        #region Scraping
+        #region Scraping 
 
-        //TODO: Fix ScrapeCharacterAsync to queue requests until 403 has passed.
-        public async Task<Character> ScrapeCharacterAsync(string characterName)
+        public async Task<Character?> ScrapeCharacterAsync(string characterName)
         {
-            Console.WriteLine("Starting ScrapeCHARACTER");
-
             try
             {
                 var url = $"https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=legendary&reboot_index=1&page_index=1&character_name={characterName}";
@@ -62,366 +55,260 @@ namespace scraper.Services
                 var response = await _http.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
-                    var reason = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Request failed with status {response.StatusCode}: {reason}");
+                    Console.WriteLine($"Request failed with status {response.StatusCode}");
+                    return null;
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                if (string.IsNullOrWhiteSpace(json))
+                var parsed = ParseResponse(json)?.FirstOrDefault();
+                if (parsed == null)
                 {
-                    throw new Exception("Empty response received from Nexon API.");
+                    Console.WriteLine($"Character '{characterName}' not found.");
                 }
 
-                var data = JsonSerializer.Deserialize<RankingsApiResponse>(json, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (data?.Ranks == null || data.Ranks.Count == 0)
-                {
-                    throw new Exception($"Character '{characterName}' not found in rankings.");
-                }
-
-                var entry = data.Ranks.First();
-
-                return new Character
-                {
-                    Name = entry.CharacterName!,
-                    Level = entry.Level,
-                    Job = GetJobFromId(entry.JobID, entry.JobDetail),
-                    World = entry.WorldName!,
-                    ScrapedAt = DateTime.UtcNow,
-                    ImageUrl = entry.CharacterImgURL!
-                };
+                return parsed;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error scraping character '{characterName}': {ex.Message}");
-                return null!;
+                return null;
             }
         }
 
         public async Task<IEnumerable<Character>> ScrapeAllCharactersAsync(int maxPages = 50000, int concurrency = 50)
         {
-            Console.WriteLine($"Starting Scrape ALL Characters: {maxPages} pages with {concurrency} workers.");
+            Console.WriteLine($"Starting scrape of {maxPages} pages with concurrency {concurrency}.");
 
             var characters = new ConcurrentBag<Character>();
             var failedPages = new ConcurrentBag<int>();
-            int savedCharacters = 0;
+            var cookie = await GetNewCookieHeaderAsync();
 
-            var semaphore = new SemaphoreSlim(concurrency);
+            using var semaphore = new SemaphoreSlim(concurrency);
             var tasks = new List<Task>();
 
-            string currentCookie = await GetNewCookieHeaderAsync();
-            var cts = new CancellationTokenSource();
-
-            for (int i = 0; i < maxPages; i++)
+            for (int pageIndex = 0; pageIndex < maxPages; pageIndex++)
             {
-                if (cts.Token.IsCancellationRequested)
-                {
-                    savedCharacters += characters.Count();
-                    await SaveCharactersToDatabase(characters);
-                    characters.Clear();
-
-                    Console.WriteLine("Cancellation requested. Pausing scraping for 5 minutes to wait out 403");
-                    await Task.Delay(TimeSpan.FromMinutes(5));
-
-                    Console.WriteLine($"Continuing scraping. Currently at page {i}1");
-                    currentCookie = await GetNewCookieHeaderAsync();
-
-                    cts = new CancellationTokenSource();
-                }
-
-                if (i > 0 && i % 100 == 0) currentCookie = await GetNewCookieHeaderAsync();
-
                 await semaphore.WaitAsync();
-
-                // Closure
-                int currentIndex = i;
-                string cookie = currentCookie;
+                var currentPage = pageIndex;
 
                 tasks.Add(Task.Run(async () =>
                 {
                     try
                     {
-                        if (cts.Token.IsCancellationRequested)
-                        {
-                            Console.WriteLine($"Task for page {currentIndex}1 canceled before starting.");
-                            return;
-                        }
-
-                        var request = GetAndConfigureNewHttpRequestMessage(currentIndex, cookie);
-                        var response = await _http.SendAsync(request);
-
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                            {
-                                Console.WriteLine($"403 Forbidden hit on page {currentIndex}1. Cancelling all tasks.");
-                                cts.Cancel();
-                            }
-
-                            var body = await response.Content.ReadAsStringAsync();
-                            Console.WriteLine($"Request for page {currentIndex}1 failed with status {response.StatusCode}:\n{body}");
-
-                            failedPages.Add(currentIndex);
-                            return;
-                        }
-
-                        var json = await response.Content.ReadAsStringAsync();
-                        if (string.IsNullOrWhiteSpace(json))
-                        {
-                            Console.WriteLine("Empty response received from Nexon API.");
-                            failedPages.Add(currentIndex);
-                            return;
-                        }
-
-                        var data = JsonSerializer.Deserialize<RankingsApiResponse>(json, new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        });
-
-                        if (data?.Ranks == null || data.Ranks.Count == 0)
-                        {
-                            Console.WriteLine($"Rankings at page {currentIndex}1 returned 0 characters.");
-                            failedPages.Add(currentIndex);
-                            return;
-                        }
-
-                        foreach (var entry in data.Ranks)
-                        {
-                            characters.Add(new Character
-                            {
-                                Name = entry.CharacterName!,
-                                Level = entry.Level,
-                                Job = GetJobFromId(entry.JobID, entry.JobDetail),
-                                World = entry.WorldName!,
-                                ScrapedAt = DateTime.UtcNow,
-                                ImageUrl = entry.CharacterImgURL!
-                            });
-                        }
-
-                        Console.WriteLine($"Finished scraping page {currentIndex}1. Currently tracking {characters.Count} characters.");
-                        await Task.Delay(Random.Shared.Next(500, 1500));
+                        await ProcessPageAsync(currentPage, cookie, characters, failedPages);
                     }
-                    catch (Exception ex)
+                    finally
                     {
-                        Console.WriteLine($"Error while scraping:\n{ex.Message}");
-                        failedPages.Add(currentIndex);
-                    }
-                    finally 
-                    { 
                         semaphore.Release();
                     }
                 }));
             }
 
-            //if (failedPages.Any())
-            //{
-            //    Console.WriteLine($"Retrying {failedPages.Count} failed pages...");
-            //    await RetryScrape(failedPages);
-            //}
-
             await Task.WhenAll(tasks);
 
-            Console.WriteLine($"Finished scraping. Total characters collected: {characters.Count}. Total pages failed: {failedPages.Count}");
+            Console.WriteLine($"Finished scraping. Total characters: {characters.Count}, failed pages: {failedPages.Count}");
             return characters;
         }
 
-        #endregion Scraping
+        #endregion
 
         #region Utils
 
-        private async Task<string> GetNewCookieHeaderAsync()
+        private async Task ProcessPageAsync(int pageIndex, string cookie, ConcurrentBag<Character> characters, ConcurrentBag<int> failedPages)
         {
-            using var client = new HttpClient();
+            try
+            {
+                var request = BuildRequest(pageIndex, cookie);
+                var response = await _http.SendAsync(request);
 
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgents[Random.Shared.Next(userAgents.Length)]);
-            client.DefaultRequestHeaders.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Request for page {pageIndex} failed with {response.StatusCode}");
+                    failedPages.Add(pageIndex);
+                    return;
+                }
 
-            var response = await client.GetAsync("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
-            response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+                var parsed = ParseResponse(json);
 
-            // Extract cookies from Set-Cookie header
-            var cookies = response.Headers.TryGetValues("Set-Cookie", out var cookieValues)
-                ? cookieValues
-                : Enumerable.Empty<string>();
+                if (parsed == null)
+                {
+                    failedPages.Add(pageIndex);
+                    return;
+                }
 
-            // Convert to cookie header string
-            var cookieHeader = string.Join("; ", cookies.Select(c => c.Split(';')[0]));
+                foreach (var c in parsed)
+                    characters.Add(c);
 
-            return cookieHeader;
+                Console.WriteLine($"Page {pageIndex} scraped — total so far: {characters.Count}");
+                await Task.Delay(Random.Shared.Next(500, 1500));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing page {pageIndex}: {ex.Message}");
+                failedPages.Add(pageIndex);
+            }
         }
 
-        private HttpRequestMessage GetAndConfigureNewHttpRequestMessage(int currentIndex, string cookie)
+        private IEnumerable<Character>? ParseResponse(string json)
         {
-            var url = $"https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=legendary&reboot_index=1&page_index={currentIndex}1";
+            if (string.IsNullOrWhiteSpace(json)) return null;
+
+            var data = JsonSerializer.Deserialize<RankingsApiResponse>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (data == null || data.Ranks == null || data.Ranks.Count == 0) return null;
+
+            return data.Ranks.Select(entry => new Character
+            {
+                Name = entry.CharacterName!,
+                Level = entry.Level,
+                Job = GetJobFromId(entry.JobID, entry.JobDetail),
+                World = GetWorldFromId(entry.WorldID),
+                ScrapedAt = DateTime.UtcNow,
+                ImageUrl = entry.CharacterImgURL
+            });
+        }
+
+        private HttpRequestMessage BuildRequest(int pageIndex, string cookie)
+        {
+            var url = $"https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=legendary&reboot_index=0&page_index={pageIndex}1";
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-
-            // Headers
-            request.Headers.UserAgent.ParseAdd(userAgents[Random.Shared.Next(userAgents.Length)]);
-
-            request.Headers.Accept.Clear();
-            request.Headers.Accept.Add(new("application/json"));
-            request.Headers.Accept.Add(new("text/plain"));
-            request.Headers.Accept.Add(new("*/*"));
-
-            request.Headers.AcceptLanguage.Clear();
-            request.Headers.AcceptLanguage.ParseAdd(acceptLanguages[Random.Shared.Next(acceptLanguages.Length)]);
-
-            request.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate, br, zstd");
-
-            request.Headers.ConnectionClose = false;
-
-            request.Headers.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=heroic");
-
-            request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "empty");
-            request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "cors");
-
-            // ---! Cookie !---
+            request.Headers.UserAgent.ParseAdd(_userAgents[Random.Shared.Next(_userAgents.Length)]);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.AcceptLanguage.ParseAdd(_acceptLanguages[Random.Shared.Next(_acceptLanguages.Length)]);
+            request.Headers.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=both");
             request.Headers.TryAddWithoutValidation("Cookie", cookie);
 
             return request;
         }
 
+        private async Task<string> GetNewCookieHeaderAsync()
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgents[Random.Shared.Next(_userAgents.Length)]);
+            client.DefaultRequestHeaders.Referrer = new Uri("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=both");
+
+            var response = await client.GetAsync("https://www.nexon.com/maplestory/rankings/north-america/overall/legendary?world_type=both");
+            response.EnsureSuccessStatusCode();
+
+            var cookies = response.Headers.TryGetValues("Set-Cookie", out var values) ? values : Enumerable.Empty<string>();
+            return string.Join("; ", cookies.Select(c => c.Split(';')[0]));
+        }
+
         private string GetJobFromId(int jobID, int jobDetail)
         {
-            // JobID = Class
-            // JobDetail = Class Branch (if applicable)
-            switch (jobID)
+            return jobID switch
             {
-                // Explorers
-                case 0:
-                    return "Beginner";
-                case 1: // Warriors
-                    if      (jobDetail == 12) return "Hero";
-                    else if (jobDetail == 22) return "Paladin";
-                    else if (jobDetail == 32) return "Dark Knight";
-                    else                      return "Warrior";
-                case 2: // Magicians
-                    if      (jobDetail == 12) return "Fire Poison Archmage";
-                    else if (jobDetail == 22) return "Ice Lightning Archmage";
-                    else if (jobDetail == 32) return "Bishop";
-                    else                      return "Magician";
-                case 3: // Archers
-                    if      (jobDetail == 12) return "Bowmaster";
-                    else if (jobDetail == 22) return "Marksman";
-                    else if (jobDetail == 32) return "Pathfinder";
-                    else                      return "Archer";
-                case 4: // Thiefs
-                    if      (jobDetail == 12) return "Night Lord";
-                    else if (jobDetail == 22) return "Shadower";
-                    else if (jobDetail == 34) return "Blade Master";
-                    else                      return "Thief";
-                case 5: // Pirates
-                    if      (jobDetail == 12) return "Buccaneer";
-                    else if (jobDetail == 22) return "Corsair";
-                    else if (jobDetail == 32) return "Cannon Master";
-                    else                      return "Pirate";
-                // Cygnus Knights
-                case 10:
-                    return "Noblesse";
-                case 11:
-                    return "Dawn Warrior";
-                case 12:
-                    return "Blaze Wizard";
-                case 13:
-                    return "Wind Archer";
-                case 14:
-                    return "Night Walker";
-                case 15:
-                    return "Thunder Breaker";
-                case 202:
-                    return "Mihile";
-                // Resistance
-                case 30:
-                    return "Citizen";
-                case 31:
-                    return "Demon Slayer";
-                case 32:
-                    return "Battle Mage";
-                case 33:
-                    return "Wild Hunter";
-                case 35:
-                    return "Mechanic";
-                case 209:
-                    return "Demon Avenger";
-                case 208:
-                    return "Xenon";
-                case 215:
-                    return "Blaster";
-                // Heroes
-                case 20:
-                    return "Legend";
-                case 21:
-                    return "Aran";
-                case 22:
-                    return "Evan";
-                case 23:
-                    return "Mercedes";
-                case 24:
-                    return "Phantom";
-                case 203:
-                    return "Luminous";
-                case 212:
-                    return "Shade";
-                // Nova
-                case 204:
-                    return "Kaiser";
-                case 205:
-                    return "Angelic Buster";
-                case 216:
-                    return "Cadena";
-                case 222:
-                    return "Kain";
-                // Flora
-                case 217:
-                    return "Illium";
-                case 218:
-                    return "Ark";
-                case 221:
-                    return "Adele";
-                case 224:
-                    return "Khali";
-                // Sengoku
-                case 206:
-                    return "Hayato";
-                case 207:
-                    return "Kanna";
-                // Anima
-                case 223:
-                    return "Lara";
-                case 220:
-                    return "Hoyoung";
-                // Jianghu
-                case 225:
-                    return "Lynn";
-                case 226:
-                    return "Mo Xuan";
-                // Other
-                case 210:
-                    return "Zero";
-                case 214:
-                    return "Kinesis";
-                case 227:
-                    return "Sia Astelle";
-            }
-            return "???";
+                0 => "Beginner",
+                1 => jobDetail switch
+                {
+                    12 => "Hero",
+                    22 => "Paladin",
+                    32 => "Dark Knight",
+                    _ => "Warrior"
+                },
+                2 => jobDetail switch
+                {
+                    12 => "Fire Poison Archmage",
+                    22 => "Ice Lightning Archmage",
+                    32 => "Bishop",
+                    _ => "Magician"
+                },
+                3 => jobDetail switch
+                {
+                    12 => "Bowmaster",
+                    22 => "Marksman",
+                    32 => "Pathfinder",
+                    _ => "Archer"
+                },
+                4 => jobDetail switch
+                {
+                    12 => "Night Lord",
+                    22 => "Shadower",
+                    34 => "Blade Master",
+                    _ => "Thief"
+                },
+                5 => jobDetail switch
+                {
+                    12 => "Buccaneer",
+                    22 => "Corsair",
+                    32 => "Cannon Master",
+                    _ => "Pirate"
+                },
+                10 => "Noblesse",
+                11 => "Dawn Warrior",
+                12 => "Blaze Wizard",
+                13 => "Wind Archer",
+                14 => "Night Walker",
+                15 => "Thunder Breaker",
+                202 => "Mihile",
+                30 => "Citizen",
+                31 => "Demon Slayer",
+                32 => "Battle Mage",
+                33 => "Wild Hunter",
+                35 => "Mechanic",
+                209 => "Demon Avenger",
+                208 => "Xenon",
+                215 => "Blaster",
+                20 => "Legend",
+                21 => "Aran",
+                22 => "Evan",
+                23 => "Mercedes",
+                24 => "Phantom",
+                203 => "Luminous",
+                212 => "Shade",
+                204 => "Kaiser",
+                205 => "Angelic Buster",
+                216 => "Cadena",
+                222 => "Kain",
+                217 => "Illium",
+                218 => "Ark",
+                221 => "Adele",
+                224 => "Khali",
+                206 => "Hayato",
+                207 => "Kanna",
+                223 => "Lara",
+                220 => "Hoyoung",
+                225 => "Lynn",
+                226 => "Mo Xuan",
+                210 => "Zero",
+                214 => "Kinesis",
+                227 => "Sia Astelle",
+                _ => "???"
+            };
         }
+
+        private string GetWorldFromId(int worldID)
+        {
+            return worldID switch
+            {
+                0 => "Beginner",
+                1 => "Bera",
+                19 => "Scania",
+                45 => "Kronos",
+                70 => "Hyperion",
+                _ => "???"
+            };
+        }
+
+        #endregion Utils
+
+        #region Database
 
         public async Task SaveCharacterToDatabase(Character character)
         {
             using var scope = _serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<MapleTinderDbContext>();
 
-            // Check if character already exists by name and world
             var existingCharacter = await dbContext.Characters
                 .FirstOrDefaultAsync(c => c.Name == character.Name && c.World == character.World);
 
             if (existingCharacter != null)
             {
-                // Update existing character
                 existingCharacter.Level = character.Level;
                 existingCharacter.Job = character.Job;
                 existingCharacter.ImageUrl = character.ImageUrl;
@@ -429,7 +316,6 @@ namespace scraper.Services
             }
             else
             {
-                // Add new character
                 await dbContext.Characters.AddAsync(character);
             }
 
@@ -443,38 +329,31 @@ namespace scraper.Services
 
             var characterList = characters.ToList();
 
-            // Process in smaller batches for better performance and memory management
             for (int i = 0; i < characterList.Count; i += batchSize)
             {
                 var batch = characterList.Skip(i).Take(batchSize).ToList();
-                await ProcessBatch(dbContext, batch);
+                await ProcessBatchAsync(dbContext, batch);
 
-                // Force garbage collection to free up memory
-                if (i % 5000 == 0)
-                {
-                    GC.Collect();
-                }
+                if (i % 5000 == 0) GC.Collect();
             }
         }
 
-        private async Task ProcessBatch(MapleTinderDbContext dbContext, List<Character> batch)
+        private async Task ProcessBatchAsync(MapleTinderDbContext dbContext, List<Character> batch)
         {
-            // Get all existing characters in this batch by name+world
-            var characterNames = batch.Select(c => c.Name).ToList();
-            var characterWorlds = batch.Select(c => c.World).ToList();
+            var names = batch.Select(c => c.Name).ToList();
+            var worlds = batch.Select(c => c.World).ToList();
 
-            var existingCharacters = await dbContext.Characters
-                .Where(c => characterNames.Contains(c.Name) && characterWorlds.Contains(c.World))
+            var existing = await dbContext.Characters
+                .Where(c => names.Contains(c.Name) && worlds.Contains(c.World))
                 .ToListAsync();
 
             foreach (var character in batch)
             {
-                var existingCharacter = existingCharacters
+                var existingCharacter = existing
                     .FirstOrDefault(c => c.Name == character.Name && c.World == character.World);
 
                 if (existingCharacter != null)
                 {
-                    // Update existing character
                     existingCharacter.Level = character.Level;
                     existingCharacter.Job = character.Job;
                     existingCharacter.ImageUrl = character.ImageUrl;
@@ -482,7 +361,6 @@ namespace scraper.Services
                 }
                 else
                 {
-                    // Add new character
                     await dbContext.Characters.AddAsync(character);
                 }
             }
@@ -490,6 +368,6 @@ namespace scraper.Services
             await dbContext.SaveChangesAsync();
         }
 
-        #endregion Utils
+        #endregion
     }
 }
