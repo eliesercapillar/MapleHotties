@@ -52,6 +52,7 @@ namespace api.Controllers
             return Ok();
         }
 
+        // GET: api/UserHistories/recent?quantity=4
         [HttpGet("recent")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<HistoryCharacterDTO>>> Recent([FromQuery] int quantity = 4)
@@ -112,6 +113,38 @@ namespace api.Controllers
                 {
                     Character = history.Character,
                     Status = history.Status,
+                    SeenAt = history.SeenAt
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        // GET: api/UserHistories/favourites
+        [HttpGet("favourites")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<HistoryCharacterDTO>>> AllFavourites()
+        {
+            var userId = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                var favourites = await _context.UserHistory
+                    .Where(uh => uh.UserId == userId && uh.Status == "favourited")
+                    .Include(uh => uh.Character)
+                    .OrderByDescending(uh => uh.SeenAt)
+                    .ToListAsync();
+
+                var result = favourites.Select(history => new HistoryCharacterDTO
+                {
+                    Character = history.Character,
+                    Status = history.Status,  // Will always be "favourited"
                     SeenAt = history.SeenAt
                 }).ToList();
 

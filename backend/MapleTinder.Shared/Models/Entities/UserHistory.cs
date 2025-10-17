@@ -14,7 +14,7 @@ namespace MapleTinder.Shared.Models.Entities
 
         public int CharacterId { get; set; } // FK from Character
 
-        public string Status { get; set; } = null!; // "Nope" | "Like" | "Favourite"
+        public string Status { get; set; } = null!; // "noped" | "liked" | "favourited"
         public DateTime SeenAt { get; set; }
 
         // Navigation Properties

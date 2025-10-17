@@ -23,23 +23,38 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, watch, computed, ref } from "vue";
 import { useHistoryStore } from "@/stores/historyStore";
 import CharacterSummaryCard from "./CharacterSummaryCard.vue";
 
+const props = defineProps({
+    display: {
+        type: String,
+        required: true,
+        validator: (value: string) => ['history', 'favourites'].includes(value)
+    }
+});
+
 const historyStore = useHistoryStore();
 
-onMounted(async () => {
+onMounted(() => {
   historyStore.fetchHistory();
 })
 
-const cards = computed(() => 
-  historyStore.cards.map((card) => ({
-    // Use character ID as top level id for RecycleScroller component.
-    id: card.character.id,
+watch(() => props.display, async (newDisplay) => {
+  if (newDisplay === 'favourites' && !historyStore.favouriteCards.length) await historyStore.fetchFavourites();
+  else if (newDisplay === 'history' && !historyStore.historyCards.length) await historyStore.fetchHistory();
+});
+
+const cards = computed(() => {
+  const source = props.display === 'favourites' ? historyStore.favouriteCards : historyStore.historyCards;
+  
+  return source.map((card) => ({
+    id: card.character.id, // Use character ID as top level id for RecycleScroller component.
     ...card
-  }))
-)
+  }));
+})
+
 
 </script>
 

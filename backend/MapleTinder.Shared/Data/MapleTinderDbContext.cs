@@ -13,10 +13,7 @@ namespace MapleTinder.Shared.Data
 
         public DbSet<Character> Characters { get; set; }
         public DbSet<CharacterStats> CharacterStats { get; set; }
-
         public DbSet<UserHistory> UserHistory { get; set; }
-        public DbSet<UserFavourite> UserFavourites { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -57,15 +54,8 @@ namespace MapleTinder.Shared.Data
                 eb.HasKey(uh => new { uh.UserId, uh.CharacterId }); // Composite PK
 
                 eb.HasIndex(uh => uh.UserId);
+                eb.HasIndex(uh => new { uh.UserId, uh.Status });
                 eb.HasIndex(uh => new { uh.UserId, uh.SeenAt });
-            });
-
-            builder.Entity<UserFavourite>(eb =>
-            {
-                eb.HasKey(uf => new { uf.UserId, uf.CharacterId }); // Composite PK
-
-                eb.HasIndex(uf => uf.UserId);
-                eb.HasIndex(uf => new { uf.UserId, uf.SeenAt });
             });
 
             builder.Entity<CharacterStats>(eb =>

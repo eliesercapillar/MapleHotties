@@ -170,25 +170,13 @@ export const useSwipeStore = defineStore('swipe', () =>
         pending.value = []; // Clear pending immediately
 
         try {
-            const favourites = batchToFlush.filter(swipe => swipe.status === 'favourited');
-            
-            // Attempt to save to UserHistory
             const historySuccess = await saveToUserHistory(batchToFlush);
-            
-            // Attempt to save favourites to UserFavourites (if any)
-            const favouritesSuccess = favourites.length > 0 ? await saveToUserFavourites(favourites) : true;
 
             // Handle failures by adding to retry queue
-            if (!historySuccess) {
-                addToRetryQueue(batchToFlush, 'history');
-            }
-            
-            if (!favouritesSuccess && favourites.length > 0) {
-                addToRetryQueue(favourites, 'favourites');
-            }
+            if (!historySuccess) addToRetryQueue(batchToFlush);
+
         } catch (err) {
-            // Add entire batch to retry queue
-            addToRetryQueue(batchToFlush, 'history');
+            addToRetryQueue(batchToFlush);
             console.error("Failed to flush swipe events:", err);
         } finally {
             isFlushingPending.value = false;
@@ -201,16 +189,16 @@ export const useSwipeStore = defineStore('swipe', () =>
 
     /* retry
     *   A list of failed swipe events that need to be retried.
-    *   addToRetryQueue    @params - events: SwipeEvent[], type: 'history' | 'favourites'
+    *   addToRetryQueue    @params - events: SwipeEvent[]
     *   retryFailedSwipes
     *=====================================*/
-    const retry = ref([] as Array<{ events: SwipeEvent[], type: 'history' | 'favourites' }>);
+    const retry = ref([] as Array<{ events: SwipeEvent[] }>);
     const isRetrying = ref(false);
 
-    function addToRetryQueue(events: SwipeEvent[], type: 'history' | 'favourites') {
-        retry.value.push({ events, type });
+    function addToRetryQueue(events: SwipeEvent[]) {
+        retry.value.push({ events });
         persistRetrySwipes();
-        console.log(`Added ${events.length} events to retry queue for ${type}`);
+        console.log(`Added ${events.length} events to retry queue`);
     }
 
     async function retryFailedSwipes() {
@@ -222,29 +210,16 @@ export const useSwipeStore = defineStore('swipe', () =>
         }
 
         isRetrying.value = true;
-        const failedRetries: Array<{ events: SwipeEvent[], type: 'history' | 'favourites' }> = [];
+        const failedRetries: Array<{ events: SwipeEvent[] }> = [];
 
         try {
             for (const retryItem of retry.value) {
-                let success = false;
-                
-                if (retryItem.type === 'history') {
-                    success = await saveToUserHistory(retryItem.events);
-                } 
-                else if (retryItem.type === 'favourites') {
-                    success = await saveToUserFavourites(retryItem.events);
-                }
+                let success = await saveToUserHistory(retryItem.events);
 
-                if (success) {
-                    console.log(`Successfully retried ${retryItem.events.length} ${retryItem.type} events`);
-                } 
-                else {
-                    failedRetries.push(retryItem);
-                }
+                if (!success) failedRetries.push(retryItem);
             }
 
-            // Update retry queue with only failed items
-            retry.value = failedRetries;
+            retry.value = failedRetries; // Update retry queue with only failed items
             persistRetrySwipes();
 
         } catch (err) {
@@ -307,25 +282,6 @@ export const useSwipeStore = defineStore('swipe', () =>
             return response.ok;
         } catch (error) {
             console.error('Failed to save to UserHistory:', error);
-            return false;
-        }
-    }
-
-    // Helper function to save to UserFavourites
-    async function saveToUserFavourites(favourites: SwipeEvent[]): Promise<boolean> {
-        try {
-            const url = `https://localhost:7235/api/UserFavourites/batch_save`;
-
-            const response = await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify(favourites)
-            });
-
-            console.log(`Successfully saved ${favourites.length} entries to history.`)
-
-            return response.ok;
-        } catch (error) {
-            console.error('Failed to save to UserFavourites:', error);
             return false;
         }
     }
