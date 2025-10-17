@@ -45,8 +45,8 @@ MapleTinder is a web app where Maplestory players can vote on the outfits of oth
 - Containerization: Docker & Docker Compose
 - CI/CD: GitHub Actions -->
 
-<!-- ## Software Architecture
-![MapleHotties Architecture Diagram](/docs/architecture_v1.png) -->
+## Software Architecture
+![MapleHotties Architecture Diagram](./docs/architecture_diagram_v1.png)
 
 <!-- ## API Documentation
 
