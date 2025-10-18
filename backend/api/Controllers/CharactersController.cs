@@ -76,6 +76,8 @@ namespace api.Controllers
                 var selectedCharacters = new List<Character>();
                 var usedIds = new HashSet<int>();
 
+                // TODO: Figure out how to make this faster either in the frontend or here.
+                // Currently, there is a cold start when first loading the app.
                 while (selectedCharacters.Count < count && usedIds.Count < unseenIdsCount)
                 {
                     var id = random.Next(0, unseenIdsCount);

@@ -63,7 +63,6 @@ export const useSwipeStore = defineStore('swipe', () =>
     const isLoading = ref(false);
     const curPage = ref(1);
 
-    // TODO: change to use random characters api endpoint
     async function fetchCards() {
         if (isLoading.value) return;
         
