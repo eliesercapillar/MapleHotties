@@ -53,7 +53,7 @@ namespace MapleTinder.Shared.Data
             {
                 eb.HasKey(uh => new { uh.UserId, uh.CharacterId }); // Composite PK
 
-                eb.HasIndex(uh => uh.UserId);
+                eb.HasIndex(uh => uh.UserId); // redundant, TODO: Remove, add migration, and update
                 eb.HasIndex(uh => new { uh.UserId, uh.Status });
                 eb.HasIndex(uh => new { uh.UserId, uh.SeenAt });
             });

@@ -46,58 +46,42 @@ namespace api.Controllers
         public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters([FromQuery] int count = 10)
         {
             var userId = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            
             if (userId == null) return Unauthorized();
 
             try
             {
                 var seenCharacterIds = await _context.UserHistory
-                .Where(usc => usc.UserId == userId)
-                .Select(usc => usc.CharacterId)
-                .ToHashSetAsync();
+                    .Where(usc => usc.UserId == userId)
+                    .Select(usc => usc.CharacterId)
+                    .ToHashSetAsync();
 
-                var unseenIdsCount = await _context.Characters
+                // TODO: In the future, figure out pros/cons with
+                //       raw SQL and ORDER BY NEWID() 
+                //       vs.
+                //       my current EF Core in-memory shuffling approach.
+
+                var unseenCharacters = await _context.Characters
                     .Where(c => !seenCharacterIds.Contains(c.Id))
-                    .CountAsync();
+                    .Take(count * 3)
+                    .ToListAsync();
 
+                // Shuffle in-memory
                 var random = new Random();
+                return Ok(unseenCharacters
+                    .OrderBy(x => random.Next())
+                    .Take(count));
 
-                // if we have a small number of unseen characters, just get them all
-                if (unseenIdsCount <= count * 2)
-                {
-                    var allUnseen = await _context.Characters
-                        .Where(c => !seenCharacterIds.Contains(c.Id))
-                        .ToListAsync();
+                // ORDER BY NEWID() approach
+                // might not be doing it right? Im getting the same characters when testing.
 
-                    // Shuffle in memory and take what we need
-                    return Ok(allUnseen.OrderBy(x => random.Next()).Take(count));
-                }
+                //var unseenCharacters = await _context.Characters
+                //    .Where(c => !seenCharacterIds.Contains(c.Id))
+                //    .OrderBy(c => EF.Functions.Random()) 
+                //    .Take(count)
+                //    .ToListAsync();
 
-                var selectedCharacters = new List<Character>();
-                var usedIds = new HashSet<int>();
-
-                // TODO: Figure out how to make this faster either in the frontend or here.
-                // Currently, there is a cold start when first loading the app.
-                while (selectedCharacters.Count < count && usedIds.Count < unseenIdsCount)
-                {
-                    var id = random.Next(0, unseenIdsCount);
-
-                    if (usedIds.Add(id))
-                    {
-                        var character = await _context.Characters
-                            .Where(c => !seenCharacterIds.Contains(c.Id))
-                            .Skip(id)
-                            .FirstOrDefaultAsync();
-
-                        if (character != null)
-                        {
-                            selectedCharacters.Add(character);
-                            seenCharacterIds.Add(character.Id);
-                        }
-                    }
-                }
-
-                return Ok(selectedCharacters);
+                //return Ok(unseenCharacters);
             }
             catch (Exception ex)
             {

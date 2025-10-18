@@ -63,12 +63,14 @@ export const useSwipeStore = defineStore('swipe', () =>
     const isLoading = ref(false);
     const curPage = ref(1);
 
-    async function fetchCards() {
+    async function fetchCards(initialLoad = false) {
         if (isLoading.value) return;
         
+        const fetchCount = initialLoad ? 30 : 15;
         isLoading.value = true;
+        
         try {
-            const url = `https://localhost:7235/api/Characters/random`;
+            const url = `https://localhost:7235/api/Characters/random?quantity=${fetchCount}`;
             const response = await apiFetch(url);
             if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
             

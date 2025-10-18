@@ -1,6 +1,6 @@
 <template>
     <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-        <SkeletonCard v-if="swipeStore.cards.length == 0"/>
+        <SkeletonCard v-if="swipeStore.isLoading || swipeStore.cards.length == 0"/>
         <div v-else class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
           <motion.div id="button_anim_bar"
             class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
@@ -34,11 +34,11 @@ import RateInfoModal from "@/components/rate_app/RateInfoModal.vue";
 const swipeStore = useSwipeStore();
 
 onMounted(async () => {
-  swipeStore.fetchCards();
+  swipeStore.fetchCards(true); // Initial fetch, get 30 cards instead.
 })
 
 watch(() => swipeStore.cards.length, (len) => {
-  if (!swipeStore.isLoading && len <= 5) {
+  if (!swipeStore.isLoading && len <= 10) {
     swipeStore.fetchCards()
   }}
 )
