@@ -203,7 +203,11 @@ useMotionValueEvent(x, "change", (latest) => { swipeStore.saveXPos(latest); });
 useMotionValueEvent(y, "change", (latest) => { swipeStore.saveYPos(latest); });
 
 
-const handleDragStart = () => { swipeStore.setDragging(true); };
+const handleDragStart = () => { 
+  x.stop();
+  y.stop();
+  swipeStore.setDragging(true);
+};
 
 const handleDragEnd = () => {
   swipeStore.setDragging(false);
