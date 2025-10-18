@@ -10,13 +10,16 @@
     @dragStart="handleDragStart"
     @dragEnd="handleDragEnd"
   >
-    <img
-      id="card_background"
-      :src="card.bgURL"
-      alt="SwipeCard"
-      class="h-[667px] w-[375px] object-cover rounded-lg select-none"
-      draggable="false"
-    />
+    <picture>
+      <source :srcset="card.bgURL.replace('/bgs/', '/bgs/optimized/').replace('.png', '.webp')" type="image/webp">
+      <img
+        id="card_background"
+        :src="card.bgURL"
+        alt=""
+        class="h-[667px] w-[375px] object-cover rounded-lg select-none"
+        draggable="false"
+      />
+    </picture>
     <!-- TODO: Add remove width & height once upscaled pngs are implemented -->
     <img 
       id="character_sprite"
@@ -46,7 +49,6 @@
       </div>
     </div>
     <div id="overlays">
-      <!-- TODO: Add y checking logic -->
       <motion.div id="fav_overlay" class="absolute bottom-[2%] left-[50%]" :style="{ opacity: favOpacity, marginLeft: '-128px' }">
         <img
           class="h-[256px] w-[256px]"
@@ -133,7 +135,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
       return;
   }
 
-  // Create swipe event
   const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString());
 
   if (status === 'favourited') {
