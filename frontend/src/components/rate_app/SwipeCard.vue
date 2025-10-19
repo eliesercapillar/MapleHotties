@@ -77,18 +77,26 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue/dist/iconify.js";
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  animate,
-  useMotionValueEvent,
-} from "motion-v";
+import { motion, useMotionValue, useTransform, animate} from "motion-v";
 import { useSwipeStore } from '@/stores/swipeStore'
 
-const props = defineProps<{
-  index: number;
-}>();
+const props = defineProps({
+  index: {
+    type: Number,
+    required: true
+  }
+});
+
+// #region Constants
+const SWIPE_THRESHOLD_X = 300;
+const SWIPE_THRESHOLD_Y = 300;
+const IN_CENTER_THRESHOLD = 150;
+const OVERLAY_MAX_X = 300;
+const OVERLAY_MAX_Y = 250; // Typically less vertical real estate, so this is lowered slightly.
+const ROTATION_RANGE = 30;
+const ANIMATION_DURATION = 0.15;
+
+// #endregion Constants
 
 const swipeStore = useSwipeStore();
 const cards = computed(() => swipeStore.cards)
@@ -97,16 +105,16 @@ const isActive = computed(() => props.index === cards.value.length - 1)
 
 const x = useMotionValue(0);
 const y = useMotionValue(0);
-const rotate = useTransform(x, [-300, 300], [-30, 30]);
+const rotate = useTransform(x, [-OVERLAY_MAX_X, OVERLAY_MAX_X], [-ROTATION_RANGE, ROTATION_RANGE]);
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown);
-});
+// #region Life Cycle Hooks
+onMounted(() => { window.addEventListener('keydown', handleKeyDown); });
 
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown);
-});
+onUnmounted(() => { window.removeEventListener('keydown', handleKeyDown); });
 
+// #endregion Life Cycle Hooks
+
+// #region Event Handlers
 const handleKeyDown = (event: KeyboardEvent) => {
   if (!isActive.value) return;
   
@@ -115,93 +123,18 @@ const handleKeyDown = (event: KeyboardEvent) => {
     event.preventDefault();
   }
 
-  let targetPos = 0;
-  let status;
-
   switch (event.key) {
     case 'ArrowLeft':
-      targetPos = -window.innerWidth;
-      status = 'noped';
+      animateSwipe(-window.innerWidth, 0, 'noped');
       break;
     case 'ArrowRight':
-      targetPos = window.innerWidth;
-      status = 'liked';
+      animateSwipe(window.innerWidth, 0, 'liked');
       break;
     case 'ArrowUp':
-      targetPos = -window.innerHeight;
-      status = 'favourited';
+      animateSwipe(0, -window.innerHeight, 'favourited');
       break;
-    default:
-      return;
-  }
-
-  const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString());
-
-  if (status === 'favourited') {
-    animate(y, targetPos, {
-      duration: 0.15,
-      onComplete: () => swipeStore.onSwipe(swipeEvent),
-    });
-  } else {
-    animate(x, targetPos, {
-      duration: 0.15,
-      onComplete: () => swipeStore.onSwipe(swipeEvent),
-    });
   }
 };
-
-function mapRange(value: number, inMin: number, inMax: number, outMin = 0, outMax = 1) {
-  const ratio = (value - inMin) / (inMax - inMin);
-  return Math.min(outMax, Math.max(outMin, ratio * (outMax - outMin) + outMin));
-}
-
-const likeOpacity = useTransform([x, y], (values: number[]) => {
-  const currentX = values[0];
-  const currentY = values[1];
-  const xThreshold = 150;
-  const xMax = 300;
-
-  const isCentered = Math.abs(currentX) < xThreshold;
-  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
-  const isSwipingUp = currentY < 0;
-
-  // Only hide x-axis overlays if we're centered AND the upward movement is stronger than sideways
-  return isSwipingUp && isCentered && isUpStronger ? 0 : mapRange(currentX, 0, xMax);
-});
-
-const nopeOpacity = useTransform([x, y], (values: number[]) => {
-  const currentX = values[0];
-  const currentY = values[1];
-  const xThreshold = 150;
-  const xMax = 300;
-
-  const isCentered = Math.abs(currentX) < xThreshold;
-  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
-  const isSwipingUp = currentY < 0;
-
-  // Only hide x-axis overlays if we're centered AND the upward movement is stronger than sideways
-  return isSwipingUp && isCentered && isUpStronger ? 0 : mapRange(currentX, 0, -xMax);
-});
-
-const favOpacity = useTransform([x, y], (values: number[]) => {
-  const currentX = values[0];
-  const currentY = values[1];
-  const xThreshold = 150;
-  const yMax = 250; // Typically, there is less vertical real estate so i'll lower this slightly.
-
-  const isCentered = Math.abs(currentX) < xThreshold;
-  const isUpStronger = Math.abs(currentY) > Math.abs(currentX);
-  const isSwipingUp = currentY < 0;
-
-  // Show fav overlay when centered, swiping up, AND upward movement is stronger than sideways
-  return isCentered && isSwipingUp && isUpStronger ? mapRange(currentY, 0, -yMax) : 0;
-});
-
-
-useMotionValueEvent(x, "change", (latest) => { swipeStore.saveXPos(latest); });
-
-useMotionValueEvent(y, "change", (latest) => { swipeStore.saveYPos(latest); });
-
 
 const handleDragStart = () => { 
   x.stop();
@@ -214,32 +147,73 @@ const handleDragEnd = () => {
 
   const currentX = x.get();
   const currentY = y.get();
-  const isCentered = Math.abs(currentX) < 150;
-  const xThresholdHit = Math.abs(currentX) > 300;
-  const yThresholdHit = currentY < -300;
-
-  if (isCentered && yThresholdHit) {
-    const targetY = -window.innerHeight; // Move outside viewport
+  const isCentered = Math.abs(currentX) < IN_CENTER_THRESHOLD;
+  const xThresholdHit = Math.abs(currentX) > SWIPE_THRESHOLD_X;
+  const yThresholdHit = currentY < -SWIPE_THRESHOLD_Y;
     
-    const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, "favourited", new Date().toISOString())
-
-    animate(y, targetY, {
-      duration: 0.15,
-      onComplete: () => swipeStore.onSwipe(swipeEvent),
-    });
+  if (isCentered && yThresholdHit) {
+    animateSwipe(0, -window.innerHeight, 'favourited');
   } 
   else if (xThresholdHit) {
-    const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth; // Move outside viewport
-
-    const status = currentX > 0 ? "liked" : "noped";
-
-    const swipeEvent = swipeStore.createSwipeEvent(card.value.character.id, status, new Date().toISOString())
-
-    animate(x, targetX, {
-      duration: 0.15,
-      onComplete: () => swipeStore.onSwipe(swipeEvent),
-    });
+    const status = currentX > 0 ? 'liked' : 'noped';
+    const targetX = currentX > 0 ? window.innerWidth : -window.innerWidth;
+    animateSwipe(targetX, 0, status);
   }
 };
+
+// #endregion Event Handlers
+
+// #region Opacities
+const likeOpacity = useTransform([x, y], (values: number[]) => {
+  const [currentX, currentY] = values;
+  const { isCentered, isUpStronger, isSwipingUp } = calculateSwipeContext(currentX, currentY);
+
+  // Only hide x-axis overlays if we're centered AND the upward movement is stronger than sideways
+  return isSwipingUp && isCentered && isUpStronger ? 0 : mapRange(currentX, 0, OVERLAY_MAX_X);
+});
+
+const nopeOpacity = useTransform([x, y], (values: number[]) => {
+  const [currentX, currentY] = values;
+  const { isCentered, isUpStronger, isSwipingUp } = calculateSwipeContext(currentX, currentY);
+
+  // Only hide x-axis overlays if we're centered AND the upward movement is stronger than sideways
+  return isSwipingUp && isCentered && isUpStronger ? 0 : mapRange(currentX, 0, -OVERLAY_MAX_X);
+});
+
+const favOpacity = useTransform([x, y], (values: number[]) => {
+  const [currentX, currentY] = values;
+  const { isCentered, isUpStronger, isSwipingUp } = calculateSwipeContext(currentX, currentY);
+
+  // Show fav overlay when centered, swiping up, AND upward movement is stronger than sideways
+  return isCentered && isSwipingUp && isUpStronger ? mapRange(currentY, 0, -OVERLAY_MAX_Y) : 0;
+});
+
+// #endregion Opacities
+
+// #region Helper Functions
+function animateSwipe(targetX: number, targetY: number, status: 'liked' | 'noped' | 'favourited') {
+  const axis = status === 'favourited' ? y : x;
+  const targetPos = status === 'favourited' ? targetY : targetX;
+
+  animate(axis, targetPos, {
+    duration: ANIMATION_DURATION,
+    onComplete: () => swipeStore.onSwipe(card.value.character, status, new Date().toISOString()),
+  });
+}
+
+function mapRange(value: number, inMin: number, inMax: number, outMin = 0, outMax = 1) {
+  const ratio = (value - inMin) / (inMax - inMin);
+  return Math.min(outMax, Math.max(outMin, ratio * (outMax - outMin) + outMin));
+}
+
+function calculateSwipeContext(currentX: number, currentY: number) {
+  return {
+    isCentered: Math.abs(currentX) < IN_CENTER_THRESHOLD,
+    isUpStronger: Math.abs(currentY) > Math.abs(currentX),
+    isSwipingUp: currentY < 0,
+  };
+}
+
+// #endregion Helper Functions
 </script>
 
