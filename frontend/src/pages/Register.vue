@@ -117,7 +117,8 @@ async function register() {
     }
 
 
-    const url = `http://localhost:5051/api/Auth/register`;
+    const url = `https://localhost:7235/auth/register`;
+    // const url = `http://localhost:5051/api/Auth/register`;
     const payload = {
         method: 'POST',
         headers: {

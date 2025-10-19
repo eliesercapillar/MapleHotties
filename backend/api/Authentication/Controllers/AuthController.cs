@@ -65,7 +65,7 @@ namespace api.Authentication.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return Problem(ex.Message);
             }
         }
 
