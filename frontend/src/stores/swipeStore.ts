@@ -77,7 +77,11 @@ export const useSwipeStore = defineStore('swipe', () =>
         isLoading.value = true;
         
         try {
-            const url = `https://localhost:7235/api/Characters/random?quantity=${fetchCount}`;
+            // Exclude cards currently in the stack from being retrieved
+            const excludeIds = cards.value.map(c => c.character.id).join(',');
+            const excludeParam = excludeIds ? `&exclude=${excludeIds}` : '';
+
+            const url = `https://localhost:7235/api/Characters/random?quantity=${fetchCount}${excludeParam}`;
             const response = await apiFetch(url);
             if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
             

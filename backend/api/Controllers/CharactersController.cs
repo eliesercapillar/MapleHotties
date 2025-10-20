@@ -43,7 +43,7 @@ namespace api.Controllers
         // GET: api/Characters/random?count=10
         [HttpGet("random")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters([FromQuery] int count = 10)
+        public async Task<ActionResult<IEnumerable<Character>>> GetRandomCharacters([FromQuery] int quantity = 10, [FromQuery] string? exclude = null)
         {
             var userId = User?.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User?.FindFirstValue(ClaimTypes.NameIdentifier);
             
@@ -56,21 +56,34 @@ namespace api.Controllers
                     .Select(usc => usc.CharacterId)
                     .ToHashSetAsync();
 
+                var excludedIds = new HashSet<int>();
+                if (!string.IsNullOrEmpty(exclude))
+                {
+                    excludedIds = exclude
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => int.TryParse(id.Trim(), out var parsed) ? parsed : -1)
+                        .Where(id => id > 0)
+                        .ToHashSet();
+                }
+
+                excludedIds.UnionWith(seenCharacterIds);
+
                 // TODO: In the future, figure out pros/cons with
                 //       raw SQL and ORDER BY NEWID() 
                 //       vs.
                 //       my current EF Core in-memory shuffling approach.
 
+
                 var unseenCharacters = await _context.Characters
                     .Where(c => !seenCharacterIds.Contains(c.Id))
-                    .Take(count * 3)
+                    .Take(quantity * 3)
                     .ToListAsync();
 
                 // Shuffle in-memory
                 var random = new Random();
                 return Ok(unseenCharacters
                     .OrderBy(x => random.Next())
-                    .Take(count));
+                    .Take(quantity));
 
                 // ORDER BY NEWID() approach
                 // might not be doing it right? Im getting the same characters when testing.
