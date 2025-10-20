@@ -5,7 +5,7 @@
     <img
       id="card_background"
       src="/bgs/fairy_fountain.png"
-      alt="SkeletonCard"
+      alt=""
       class="relative h-card w-card object-cover rounded-lg select-none"
       draggable="false"
     />

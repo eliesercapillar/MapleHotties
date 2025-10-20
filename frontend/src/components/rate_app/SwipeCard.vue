@@ -24,7 +24,7 @@
     <img 
       id="character_sprite"
       :src="card.character.imageUrl"
-      alt="Player Character"
+      alt=""
       class="absolute top-[50%] left-[50%] select-none"
       width="480" height="480"
       style="transform: translate(-50%, -50%); "

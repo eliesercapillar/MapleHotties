@@ -2,10 +2,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import Backgrounds from "@/data/Backgrounds.json";
 import { useHistoryStore } from './historyStore';
-import { useFavouritesStore } from './favouritesStore';
 import { apiFetch } from '@/utils/api'
+import { isLoggedIn } from '@/utils/auth';
 
-//#region Interfaces
+// #region Interfaces
 
 interface ApiCharacter {
   id: number
@@ -28,11 +28,15 @@ interface SwipeEvent {
   seenAt: string;
 }
 
-//#endregion
+// #endregion
+
+// #region Helper Functions
 
 function getRandomBG(): string {
   return Backgrounds.data[Math.floor(Math.random() * Backgrounds.data.length)]
 }
+
+// #endregion
 
 const RETRY_SWIPES_KEY = 'retrySwipes';
 const BATCH_SIZE = 10;
@@ -41,7 +45,8 @@ const FLUSH_INTERVAL = 30000; // 30 seconds
 export const useSwipeStore = defineStore('swipe', () => 
 {
     const historyStore = useHistoryStore();
-    const favouritesStore = useFavouritesStore();
+
+    // #region Lifecycle Functions
 
     function initializeStore() {
         loadRetrySwipes();
@@ -52,7 +57,9 @@ export const useSwipeStore = defineStore('swipe', () =>
         clearFlushTimer();
     }
 
-    //#region Cards
+    // #endregion Lifecycle Functions
+
+    // #region Cards State & Management
 
     /* cards
     *   The stack of cards. Should always be populated.
@@ -74,12 +81,23 @@ export const useSwipeStore = defineStore('swipe', () =>
             const response = await apiFetch(url);
             if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
             
-            // Map API response into our CharacterCard shape
+            
             const data: ApiCharacter[] = await response.json()
-            const newCards: CharacterCard[] = data.map((char) => ({
+
+            const existingIds = new Set(cards.value.map(c => c.character.id));
+  
+            const newCards: CharacterCard[] = data
+                .filter(char => !existingIds.has(char.id))  // Filter duplicates just in case
+                .map((char) => ({
                 character: char,
                 bgURL: getRandomBG()
-            }))
+                }))
+
+            // TODO: remove needless filtering once Characters controller no longer returns duplicates.
+            // const newCards: CharacterCard[] = data.map((char) => ({
+            //     character: char,
+            //     bgURL: getRandomBG()
+            // }))
             
             cards.value.unshift(...newCards);
             curPage.value++;
@@ -96,28 +114,6 @@ export const useSwipeStore = defineStore('swipe', () =>
         cards.value = cards.value.filter((card) => card.character.id !== id);
     }
 
-    function findCard(id : number) : ApiCharacter {
-        return cards.value.find((card) => card.character.id === id)!.character
-    }
-
-    /* xPos
-    *   The X position of the current active card.
-    *   saveXPos @params - x: number
-    *=====================================*/
-    const xPos = ref(0);
-    function saveXPos(x : number) {
-        xPos.value = x;
-    }
-
-    /* yPos
-    *   The Y position of the current active card.
-    *   saveYPos @params - y: number
-    *=====================================*/
-    const yPos = ref(0);
-    function saveYPos(y : number) {
-        yPos.value = y;
-    }
-
     /* isDragging
     *   Whether or not the current active card is being dragged.
     *   setDragging @params - b: boolean
@@ -127,9 +123,9 @@ export const useSwipeStore = defineStore('swipe', () =>
         isDragging.value = b;
     }
 
-    //#endregion
+    // #endregion Cards State & Management
 
-    //#region Normal Flow
+    // #region Normal Flow
 
     /* pending
     *   A list of swiped cards waiting to be flushed to backend.
@@ -145,14 +141,11 @@ export const useSwipeStore = defineStore('swipe', () =>
         seenAt
     })
 
-    function onSwipe(event: SwipeEvent) {
-        const character = findCard(event.characterId)
-        removeCard(event.characterId);
+    function onSwipe(character: ApiCharacter, status: 'liked' | 'noped' | 'favourited', seenAt: string) {
+        removeCard(character.id);
 
-        historyStore.appendRecentCard(character, event.status, event.seenAt)
-        if (event.status == 'favourited') favouritesStore.appendRecentCard(character, event.seenAt);
-
-        pending.value.push(event);
+        historyStore.appendRecentCard(character, status, seenAt)
+        pending.value.push(createSwipeEvent(character.id, status, seenAt));
 
         if (pending.value.length >= BATCH_SIZE) flushPending();
     }
@@ -161,7 +154,7 @@ export const useSwipeStore = defineStore('swipe', () =>
         if (!pending.value.length || isFlushingPending.value) return;
 
 
-        if (!localStorage.getItem('token')) {
+        if (!isLoggedIn()) {
             console.error('Not logged in - cannot save swipes');
             return;
         }
@@ -176,10 +169,12 @@ export const useSwipeStore = defineStore('swipe', () =>
             // Handle failures by adding to retry queue
             if (!historySuccess) addToRetryQueue(batchToFlush);
 
-        } catch (err) {
+        } 
+        catch (err) {
             addToRetryQueue(batchToFlush);
             console.error("Failed to flush swipe events:", err);
-        } finally {
+        } 
+        finally {
             isFlushingPending.value = false;
         }
     }
@@ -205,7 +200,7 @@ export const useSwipeStore = defineStore('swipe', () =>
     async function retryFailedSwipes() {
         if (!retry.value.length || isRetrying.value) return;
 
-        if (!localStorage.getItem('token')) {
+        if (!isLoggedIn()) {
             console.error('Not logged in - cannot retry swipes');
             return;
         }
@@ -223,9 +218,11 @@ export const useSwipeStore = defineStore('swipe', () =>
             retry.value = failedRetries; // Update retry queue with only failed items
             persistRetrySwipes();
 
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Error during retry process:", err);
-        } finally {
+        } 
+        finally {
             isRetrying.value = false;
         }
     }
@@ -245,7 +242,8 @@ export const useSwipeStore = defineStore('swipe', () =>
                     }
                 }
             }
-        } catch (error) {
+        } 
+        catch (error) {
             localStorage.removeItem(RETRY_SWIPES_KEY);
             console.error('Failed to load retry swipes:', error);
         }
@@ -259,7 +257,8 @@ export const useSwipeStore = defineStore('swipe', () =>
             else {
                 localStorage.removeItem(RETRY_SWIPES_KEY);
             }
-        } catch (error) {
+        } 
+        catch (error) {
             console.error('Failed to persist retry swipes:', error);
         }
     }
@@ -323,14 +322,22 @@ export const useSwipeStore = defineStore('swipe', () =>
     const isFlushingStatus = computed(() => isFlushingPending.value || isRetrying.value);
 
     return { 
+        // Cards
         cards, isLoading,
         fetchCards, removeCard, 
-        pending, pendingCount, createSwipeEvent, onSwipe, flushPending,
-        retry, retryCount, retryFailedSwipes,
-        isFlushingStatus,
-        xPos, saveXPos, 
-        yPos, saveYPos,
+
+        // Drag State
         isDragging, setDragging,
+    
+        // Swipe Events
+        onSwipe, flushPending, retryFailedSwipes,
+
+        // Monitoring
+        pending, pendingCount,
+        retry, retryCount,
+        isFlushingStatus,
+
+        // Lifecycle
         initializeStore, cleanup
     }
 })
