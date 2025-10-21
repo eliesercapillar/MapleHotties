@@ -11,10 +11,10 @@
     @dragEnd="handleDragEnd"
   >
     <picture>
-      <source :srcset="card.bgURL.replace('/bgs/', '/bgs/optimized/').replace('.png', '.webp')" type="image/webp">
+      <source :srcset="card.bgURL.optimized" type="image/webp">
       <img
         id="card_background"
-        :src="card.bgURL"
+        :src="card.bgURL.fallback"
         alt=""
         class="h-[667px] w-[375px] object-cover rounded-lg select-none"
         draggable="false"

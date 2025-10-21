@@ -16,10 +16,15 @@ interface ApiCharacter {
   imageUrl: string
 }
 
+interface BackgroundPaths {
+  optimized: string;
+  fallback: string;
+}
+
 interface CharacterCard 
 {
   character : ApiCharacter
-  bgURL: string;
+  bgURL: BackgroundPaths;
 }
 
 interface SwipeEvent {
@@ -32,15 +37,19 @@ interface SwipeEvent {
 
 // #region Helper Functions
 
-function getRandomBG(): string {
-  return Backgrounds.data[Math.floor(Math.random() * Backgrounds.data.length)]
+function getRandomBG(): BackgroundPaths {
+  const bg = Backgrounds.data[Math.floor(Math.random() * Backgrounds.data.length)];
+  return {
+    optimized: bg.optimized,
+    fallback: bg.fallback
+  };
 }
 
 // #endregion
 
 const RETRY_SWIPES_KEY = 'retrySwipes';
 const BATCH_SIZE = 10;
-const FLUSH_INTERVAL = 30000; // 30 seconds
+const FLUSH_INTERVAL = 10000; // 10 seconds
 
 export const useSwipeStore = defineStore('swipe', () => 
 {

@@ -61,11 +61,10 @@ function preloadImage(url: string): Promise<void> {
 }
 
 async function preloadAllBackgrounds(): Promise<void> {
-  const imagePromises = Backgrounds.data.flatMap(bgPath => {
-    const webpUrl = bgPath.replace('/bgs/', '/bgs/optimized/').replace('.png', '.webp');
+  const imagePromises = Backgrounds.data.flatMap(bg => {
     return [
-      preloadImage(webpUrl),
-      preloadImage(bgPath)
+      preloadImage(bg.optimized),
+      preloadImage(bg.fallback)
     ];
   });
   

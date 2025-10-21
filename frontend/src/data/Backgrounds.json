@@ -1,14 +1,44 @@
 {
     "data": [
-        "/bgs/kerning_city.png",
-        "/bgs/leafre.png",
-        "/bgs/maple_island.png",
-        "/bgs/florina_beach.png",
-        "/bgs/partem.png",
-        "/bgs/ellinia_forest.png",
-        "/bgs/fairy_fountain.png",
-        "/bgs/elluel.png",
-        "/bgs/elodin.png",
-        "/bgs/crimson_queen.png"
+        {
+            "optimized": "/bgs/optimized/kerning_city.webp",
+            "fallback": "/bgs/kerning_city.png"
+        },
+        {
+            "optimized": "/bgs/optimized/leafre.webp",
+            "fallback": "/bgs/leafre.png"
+        },
+        {
+            "optimized": "/bgs/optimized/maple_island.webp",
+            "fallback": "/bgs/maple_island.png"
+        },
+        {
+            "optimized": "/bgs/optimized/florina_beach.webp",
+            "fallback": "/bgs/florina_beach.png"
+        },
+        {
+            "optimized": "/bgs/optimized/partem.webp",
+            "fallback": "/bgs/partem.png"
+        },
+        {
+            "optimized": "/bgs/optimized/ellinia_forest.webp",
+            "fallback": "/bgs/ellinia_forest.png"
+        },
+        {
+            "optimized": "/bgs/optimized/fairy_fountain.webp",
+            "fallback": "/bgs/fairy_fountain.png"
+        },
+        {
+            "optimized": "/bgs/optimized/elluel.webp",
+            "fallback": "/bgs/elluel.png"
+        },
+        {
+            "optimized": "/bgs/optimized/elodin.webp",
+            "fallback": "/bgs/elodin.png"
+        },
+        {
+            "optimized": "/bgs/optimized/crimson_queen.webp",
+            "fallback": "/bgs/crimson_queen.png"
+        }
     ]
 }
