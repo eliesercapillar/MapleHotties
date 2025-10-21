@@ -77,7 +77,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue/dist/iconify.js";
-import { motion, useMotionValue, useTransform, animate} from "motion-v";
+import { motion, useMotionValue, useMotionValueEvent, useTransform, animate} from "motion-v";
 import { useSwipeStore } from '@/stores/swipeStore'
 
 const props = defineProps({
@@ -160,6 +160,10 @@ const handleDragEnd = () => {
     animateSwipe(targetX, 0, status);
   }
 };
+
+useMotionValueEvent(x, "change", (latest) => { swipeStore.setXPos(latest); });
+
+useMotionValueEvent(y, "change", (latest) => { swipeStore.setYPos(latest); });
 
 // #endregion Event Handlers
 

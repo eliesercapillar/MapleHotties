@@ -136,6 +136,25 @@ export const useSwipeStore = defineStore('swipe', () =>
         isDragging.value = b;
     }
 
+    /* xPos
+    *   The X position of the current active card.
+    *   setXPos @params - x: number
+    *=====================================*/
+
+    const xPos = ref(0);
+    function setXPos(x : number) {
+        xPos.value = x;
+    }
+
+    /* yPos
+    *   The Y position of the current active card.
+    *   setYPos @params - y: number
+    *=====================================*/
+    const yPos = ref(0);
+    function setYPos(y : number) {
+        yPos.value = y;
+    }
+
     // #endregion Cards State & Management
 
     // #region Normal Flow
@@ -338,9 +357,14 @@ export const useSwipeStore = defineStore('swipe', () =>
         // Cards
         cards, isLoading,
         fetchCards, removeCard, 
+        
+        // Card Position
+        xPos, setXPos,
+        yPos, setYPos,
 
         // Drag State
         isDragging, setDragging,
+
     
         // Swipe Events
         onSwipe, flushPending, retryFailedSwipes,
