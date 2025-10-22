@@ -4,7 +4,6 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -20,7 +19,6 @@
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 16% 15%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --chart-1: 12 76% 61%;
@@ -29,19 +27,27 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-
+    
     --sidebar-nav-h: 90px;
     --sidebar-options-h: 47px;
-    --button-primary: 72 100% 5.1%;
-    --button-highlight: 6 100% 58%;
     --card-main-h: 667px;
     --card-main-w: 375px;
+    
+    --background: 214 17.1% 8.0%;
+    --border: 217 16.5% 15.5%;
 
+    --button-primary: 72 100% 5.1%;
+    --button-highlight: 6 100% 58%;
+
+    
     --colour-nope-main: 348 100% 61%;
     --colour-like-main: 84 68% 50%;
     --colour-favourite-main: 206 100% 50%;
+    --colour-purp-main: 284 91% 65%;
 
-    --colour-background-primary: 217 16% 15%;
+
+
+    --card-button-primary: 217 16% 15%;
     --colour-background-secondary: 217 16% 15%;
 
   }

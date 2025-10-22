@@ -8,6 +8,7 @@ export default {
 			nope: 'hsl(var(--colour-nope-main))',
 			like: 'hsl(var(--colour-like-main))',
 			favourite: 'hsl(var(--colour-favourite-main))',
+			purp: 'hsl(var(--colour-purp-main))',
 		},
 		height: {
 			card: 'var(--card-main-h)',
@@ -21,6 +22,7 @@ export default {
 			'nope-gradient': 'linear-gradient(135deg, #f92999, #ff3f29)',
 			'like-gradient': 'linear-gradient(135deg, #e4f10a, #37bb4e)',
 			'fav-gradient': 'linear-gradient(135deg, #00dbff, #0048ff)',
+			'purp-gradient': 'linear-gradient(135deg, #fe55e1, #cf5afb)',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -28,12 +30,10 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-			bg_primary: 'hsl(var(--colour-background-primary))',
-			bg_secondary: 'hsl(var(--colour-background-secondary))',
-
 			button_primary: 'hsl(var(--button-primary))',
 			button_highlight: 'hsl(var(--button-highlight))',
 
+			card_button_primary: 'hsl(var(--card-button-primary))',
 
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
