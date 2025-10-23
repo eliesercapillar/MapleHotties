@@ -1,39 +1,25 @@
 <template>
   <div class="relative bg-background min-h-screen flex flex-row text-white">
-    <AppSidebar
-      @click-rate="clickRateApp"
-      @click-leaderboard="clickLeaderboard"
-    />
-    <div class="w-full h-full bg-black-grey-radial">
-      <RateApp v-if="showRateApp"/>
-      <!-- <Leaderboard v-if="showLeaderboard"/> -->
+    <BaseSidebar>
+      <template #content>
+        <RateHistory v-if="navigationStore.currentPage === 'Rate'" />
+        <SearchForm v-else-if="navigationStore.currentPage === 'Leaderboard'" />
+      </template>
+    </BaseSidebar>
+    <div class="relative w-full h-full bg-black-grey-radial">
+      <router-view/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import router from "@/router";
-import AppSidebar from '@/components/rate_app/AppSidebar.vue'
-import RateApp from "./sub_pages/RateApp.vue";
+import BaseSidebar from "@/components/Sidebar/BaseSidebar.vue";
+import { useNavigationStore } from "@/stores/navigationStore";
+import RateHistory from "@/components/Sidebar/RateHistory.vue";
+import SearchForm from "@/components/Sidebar/SearchForm.vue";
+
+const navigationStore = useNavigationStore();
 // import Leaderboard from "./Leaderboard.vue";
-
-const showRateApp = ref(true);
-const showLeaderboard = ref(false);
-const showGame = ref(false);
-const showDetails = ref(false);
-
-
-function clickRateApp() {
-  showRateApp.value = true;
-  showLeaderboard.value = false;
-  showGame.value = false;
-  showDetails.value = false;
-}
-
-function clickLeaderboard() {
-  router.push("/leaderboard");
-}
 
 
 </script>

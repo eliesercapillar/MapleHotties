@@ -3,7 +3,7 @@
         <SkeletonCard v-if="isInitializing || swipeStore.cards.length == 0"/>
         <div v-else class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
           <motion.div id="button_anim_bar"
-            class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-[#111418]"
+            class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-background"
             style="bottom: -14px; left: 8px"
             :animate="{ scale: swipeStore.isDragging ? 0.6 : 1 }"
             :transition="{ duration: 0.3, ease: 'easeInOut' }"
@@ -37,19 +37,10 @@ const isInitializing = ref(true);
 
 
 onMounted(async () => {
-  await Promise.all([
-    preloadAllBackgrounds(),
-    swipeStore.fetchCards(true) // Initial fetch, start with 30 cards instead.
-  ]);
-  
+  await preloadAllBackgrounds();
   isInitializing.value = false;
 })
 
-watch(() => swipeStore.cards.length, (len) => {
-  if (!swipeStore.isLoading && len <= 10) {
-    swipeStore.fetchCards()
-  }}
-)
 
 function preloadImage(url: string): Promise<void> {
   return new Promise((resolve, reject) => {

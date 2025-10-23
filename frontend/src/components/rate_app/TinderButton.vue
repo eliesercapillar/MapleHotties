@@ -1,7 +1,7 @@
 <template>
   <motion.button
     class="relative flex items-center justify-center w-16 h-16 rounded-full overflow-hidden"
-    :style="{ background: isPressed ? props.pressedGradient : '#21262e' }"
+    :style="{ background: isPressed ? props.pressedGradient : 'hsl(var(--card-button-primary))' }"
     :animate="{ scale: buttonScale }"
     :transition="{ duration: 0.3, ease: 'easeInOut' }"
     @pointerenter="onPointerEnter"

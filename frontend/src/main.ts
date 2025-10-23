@@ -21,9 +21,6 @@ swipeStore.initializeStore();
 // Save swipe history when closing application.
 window.addEventListener('beforeunload', (event) => {
     swipeStore.flushPending();
-    
-    // Optionally show a warning if there are pending swipes
-    // if (swipeStore.pendingCount > 0) event.preventDefault();
 });
 
 // Save swipe history when changing pages.

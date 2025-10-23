@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { onMounted, watch, computed, ref } from "vue";
 import { useHistoryStore } from "@/stores/historyStore";
-import CharacterSummaryCard from "./CharacterSummaryCard.vue";
+import CharacterSummaryCard from "@/components/CharacterSummaryCard.vue";
 
 const props = defineProps({
     display: {

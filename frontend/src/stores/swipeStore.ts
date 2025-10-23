@@ -47,6 +47,10 @@ function getRandomBG(): BackgroundPaths {
 
 // #endregion
 
+const INITIAL_FETCH_QUANTITY = 30;
+const NORMAL_FETCH_QUANTITY = 15;
+const REFILL_THRESHOLD = 10;
+
 const RETRY_SWIPES_KEY = 'retrySwipes';
 const BATCH_SIZE = 10;
 const FLUSH_INTERVAL = 10000; // 10 seconds
@@ -60,6 +64,7 @@ export const useSwipeStore = defineStore('swipe', () =>
     function initializeStore() {
         loadRetrySwipes();
         setupFlushTimer();
+        fetchCards(INITIAL_FETCH_QUANTITY);
     }
 
     function cleanup() {
@@ -79,18 +84,17 @@ export const useSwipeStore = defineStore('swipe', () =>
     const isLoading = ref(false);
     const curPage = ref(1);
 
-    async function fetchCards(initialLoad = false) {
+    async function fetchCards(quantity : number = 15) {
         if (isLoading.value) return;
         
-        const fetchCount = initialLoad ? 30 : 15;
         isLoading.value = true;
-        
+
         try {
             // Exclude cards currently in the stack from being retrieved
             const excludeIds = cards.value.map(c => c.character.id).join(',');
             const excludeParam = excludeIds ? `&exclude=${excludeIds}` : '';
 
-            const url = `https://localhost:7235/api/Characters/random?quantity=${fetchCount}${excludeParam}`;
+            const url = `https://localhost:7235/api/Characters/random?quantity=${quantity}${excludeParam}`;
             const response = await apiFetch(url);
             if (!response.ok) throw new Error(`Failed to fetch characters: ${response.status}`);
             
@@ -179,7 +183,13 @@ export const useSwipeStore = defineStore('swipe', () =>
         historyStore.appendRecentCard(character, status, seenAt)
         pending.value.push(createSwipeEvent(character.id, status, seenAt));
 
+        checkAndRefillCards();
+
         if (pending.value.length >= BATCH_SIZE) flushPending();
+    }
+
+    function checkAndRefillCards() {
+        if (cards.value.length <= REFILL_THRESHOLD) fetchCards(NORMAL_FETCH_QUANTITY); 
     }
 
     async function flushPending() {
