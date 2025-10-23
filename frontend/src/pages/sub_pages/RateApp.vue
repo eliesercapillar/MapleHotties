@@ -1,6 +1,6 @@
 <template>
     <main class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-        <SkeletonCard v-if="isInitializing || swipeStore.cards.length == 0"/>
+        <SkeletonCard v-if="swipeStore.cards.length == 0"/>
         <div v-else class="relative h-[667px] w-[375px] rounded-lg shadow-md shadow-slate-600">
           <motion.div id="button_anim_bar"
             class="absolute h-[60%] w-[95%] z-[0] rounded-lg bg-background"
@@ -22,10 +22,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref } from "vue";
 import { motion } from "motion-v";
 import { useSwipeStore } from "@/stores/swipeStore";
-import Backgrounds from "@/data/Backgrounds.json";
 import SkeletonCard from "@/components/rate_app/SkeletonCard.vue";
 import SwipeCard from "@/components/rate_app/SwipeCard.vue";
 import SwipeCardButtons from "@/components/rate_app/SwipeCardButtons.vue";
@@ -33,33 +31,4 @@ import Instructions from "@/components/rate_app/Instructions.vue";
 import RateInfoModal from "@/components/rate_app/RateInfoModal.vue";
 
 const swipeStore = useSwipeStore();
-const isInitializing = ref(true);
-
-
-onMounted(async () => {
-  await preloadAllBackgrounds();
-  isInitializing.value = false;
-})
-
-
-function preloadImage(url: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
-    img.src = url;
-  });
-}
-
-async function preloadAllBackgrounds(): Promise<void> {
-  const imagePromises = Backgrounds.data.flatMap(bg => {
-    return [
-      preloadImage(bg.optimized),
-      preloadImage(bg.fallback)
-    ];
-  });
-  
-  await Promise.allSettled(imagePromises);
-}
-
 </script>

@@ -61,14 +61,35 @@ export const useSwipeStore = defineStore('swipe', () =>
 
     // #region Lifecycle Functions
 
-    function initializeStore() {
+    async function initializeStore() {
         loadRetrySwipes();
         setupFlushTimer();
+        await preloadAllBackgrounds();
         fetchCards(INITIAL_FETCH_QUANTITY);
     }
 
     function cleanup() {
         clearFlushTimer();
+    }
+
+    function preloadImage(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+        img.src = url;
+    });
+    }
+
+    async function preloadAllBackgrounds(): Promise<void> {
+        const imagePromises = Backgrounds.data.flatMap(bg => {
+            return [
+            preloadImage(bg.optimized),
+            preloadImage(bg.fallback)
+            ];
+        });
+        
+        await Promise.allSettled(imagePromises);
     }
 
     // #endregion Lifecycle Functions
