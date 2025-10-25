@@ -1,10 +1,10 @@
 <template>
-    <div class="bg-[#111418] flex flex-col justify-between px-2 h-[calc(100vh-var(--sidebar-nav-h))]">
+    <div class="bg-background flex flex-col justify-between px-2 h-[calc(100vh-var(--sidebar-nav-h))]">
       <form @submit.prevent="onSubmit">
-        <h2 class="p-2 font-bold text-lg">Search:</h2>
+        <h2 class="p-2 font-bold text-lg">Filter by:</h2>
         <FormField name="characterName" v-slot="{ componentField }">
           <div id="search" class="w-full p-2">
-            <Input type="text" placeholder="Search for a character..." class="text-black" maxlength="12" v-bind="componentField"/>
+            <Input type="text" placeholder="Search for a character..." class="text-white" maxlength="12" v-bind="componentField"/>
           </div>
         </FormField>
         <FormField name="rankingType" v-slot="{ componentField }">
@@ -114,32 +114,21 @@
           </div>
         </FormField>
         <div class="w-full p-2 flex justify-end">
-          <Button type="submit" class="bg-nope-gradient font-bold">Search</Button>
+          <Button type="submit" class="bg-nope-gradient font-bold text-md">Update
+            <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="64" d="M320 146s24.36-12-64-12a160 160 0 1 0 160 160" />
+              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="64" d="m256 58l80 80l-80 80" />
+            </svg>
+          </Button>
         </div>
       </form>
-      <footer class="w-full p-2 text-white">
-        <div>
-          <div class="flex items-center gap-2">
-            <img src="/logos/mt_mushroom.png" class="w-10 h-10"/>
-            <span class="text-2xl">MapleHotties</span>
-          </div>
-          <p class="text-md my-2">The hottest players in Maplestory GMS.</p>
-          <Socials class="pt-2"/>
-        </div>
-        <div class="pt-2">
-          <p class="font-thin text-xs">© 2025 maplehotties.com | All rights reserved.</p>
-          <div class="pt-1">
-            <p class="font-thin text-xs">Made with ❤️ by KPJS</p>
-            <p class="font-thin text-xs pt-1">Any suggestions? Join the <a href="@" class="text-blue-400">community Discord server!</a></p>
-          </div>
-        </div>
-      </footer>
+      <FooterSidebar/>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { Input } from '@/components/ui/input'
+import { Icon } from '@iconify/vue/dist/iconify.js';
 import Button from "@/components/ui/button/Button.vue";
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -153,7 +142,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Jobs from "@/data/Jobs.json";
-import Socials from "@/components/Socials.vue";
+import FooterSidebar from './FooterSidebar.vue';
 
 import { FormField } from '@/components/ui/form'
 import { useForm } from 'vee-validate'

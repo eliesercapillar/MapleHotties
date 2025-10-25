@@ -5,26 +5,17 @@ type Page = 'Rate' | 'Play' | 'Leaderboard';
 
 export const useNavigationStore = defineStore('navigation', () => 
 {
-    const currentPage = ref<Page>('Rate');
+    const currentPage = ref<Page>(
+        router.currentRoute.value.path.includes('/app/play') ? 'Play' : 
+        router.currentRoute.value.path.includes('/app/leaderboard') ? 'Leaderboard' : 
+        'Rate'
+    );
 
-
-    function navigateToRate() 
-    {
-        currentPage.value = 'Rate';
-        router.push('/app/rate');
-    }
+    function navigateToRate() { router.push('/app/rate');}
     
-    function navigateToPlay() 
-    {
-        currentPage.value = 'Play';
-        router.push('/app/play'); 
-    }
+    function navigateToPlay() { router.push('/app/play'); }
 
-    function navigateToLeaderboard() 
-    {
-        currentPage.value = 'Leaderboard';
-        router.push('/app/leaderboard');
-    }
+    function navigateToLeaderboard() { router.push('/app/leaderboard') };
 
     function logout() {
         localStorage.removeItem('token');

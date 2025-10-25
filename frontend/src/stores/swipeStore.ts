@@ -65,7 +65,8 @@ export const useSwipeStore = defineStore('swipe', () =>
         loadRetrySwipes();
         setupFlushTimer();
         await preloadAllBackgrounds();
-        fetchCards(INITIAL_FETCH_QUANTITY);
+        await fetchCards(INITIAL_FETCH_QUANTITY); //TODO, during initial fetch, user needs to be logged in or we get a 401. This is likely bad practice lol.
+        // Create an authenticationStore.ts and move logic for initial fetch there after auth checks.
     }
 
     function cleanup() {
@@ -260,6 +261,7 @@ export const useSwipeStore = defineStore('swipe', () =>
         console.log(`Added ${events.length} events to retry queue`);
     }
 
+    // TODO: If this fails, retry queue is never flushed and timer will force it to constantly send requests to server.
     async function retryFailedSwipes() {
         if (!retry.value.length || isRetrying.value) return;
 
@@ -335,6 +337,7 @@ export const useSwipeStore = defineStore('swipe', () =>
         try {
             const url = `https://localhost:7235/api/UserHistory/batch_save`;
 
+            // TODO: Saving to UserHistory is very important, consider navigator.sendBeacon(). Look up docs before deciding.
             const response = await apiFetch(url, {
                 method: 'POST',
                 body: JSON.stringify(batch)

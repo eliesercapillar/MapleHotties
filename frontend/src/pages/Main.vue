@@ -1,8 +1,9 @@
 <template>
-  <div class="relative bg-background min-h-screen flex flex-row text-white">
-    <BaseSidebar>
+  <div v-auto-animate class="relative bg-background min-h-screen flex flex-row text-white">
+    <BaseSidebar v-if="!playStore.isCurrentlyPlaying">
       <template #content>
         <RateHistory v-if="navigationStore.currentPage === 'Rate'" />
+        <PlaySettings v-else-if="navigationStore.currentPage === 'Play'" />
         <SearchForm v-else-if="navigationStore.currentPage === 'Leaderboard'" />
       </template>
     </BaseSidebar>
@@ -15,11 +16,13 @@
 <script setup lang="ts">
 import BaseSidebar from "@/components/Sidebar/BaseSidebar.vue";
 import { useNavigationStore } from "@/stores/navigationStore";
-import RateHistory from "@/components/Sidebar/RateHistory.vue";
-import SearchForm from "@/components/Sidebar/SearchForm.vue";
+import { usePlayStore } from "@/stores/playStore";
+import RateHistory from "@/components/Sidebar/RateHistorySidebar.vue";
+import PlaySettings from "@/components/Sidebar/PlaySettingsSidebar.vue";
+import SearchForm from "@/components/Sidebar/SearchFormSidebar.vue";
+import { vAutoAnimate } from "@formkit/auto-animate/vue";
 
 const navigationStore = useNavigationStore();
-// import Leaderboard from "./Leaderboard.vue";
-
+const playStore = usePlayStore();
 
 </script>

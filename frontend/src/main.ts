@@ -13,10 +13,12 @@ const app = createApp(App);
 app.use(pinia);
 app.use(router);
 app.component('RecycleScroller', RecycleScroller);
-app.mount('#app');
 
 const swipeStore = useSwipeStore();
-swipeStore.initializeStore();
+await swipeStore.initializeStore();
+
+app.mount('#app');
+
 
 // Save swipe history when closing application.
 window.addEventListener('beforeunload', (event) => {

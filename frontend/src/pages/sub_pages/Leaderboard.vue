@@ -14,7 +14,7 @@
   
 <script setup lang="ts">
 import { useLeaderboardStore } from "@/stores/leaderboardStore";
-import LeaderboardTable from "@/components/leaderboard/LeaderboardTable.vue";
+import LeaderboardTable from "@/components/leaderboard_app/LeaderboardTable.vue";
 
 const leaderboardStore = useLeaderboardStore();
 

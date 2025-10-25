@@ -5,26 +5,22 @@
         </DialogTrigger>
         <DialogContent class="bg-background border-border">
             <DialogHeader>
-                <DialogTitle class="text-white">Rating Outfits</DialogTitle>
+                <DialogTitle class="text-white">How To Play</DialogTitle>
             </DialogHeader>
             <DialogDescription class="text-white">
-                Cards displaying a character's outfit will appear one by one. 
+                Given two characters, you must decide whether or not the card on the right has a higher or lower All-time Rating than the card on the left.
             </DialogDescription>
             <DialogDescription class="text-white">
-                Rate the character's outfit by clicking the buttons underneath the card, swiping, or using the arrow keys.
-                Swiping up marks that character as a favourite.
+                Lock in your answer by clicking the top or bottom half of the card on the right, or using the up or down arrow keys.
             </DialogDescription>
             <DialogDescription class="text-white">
-                Favourited characters count for twice as many likes.
-                You only have 5 favourites a day, so only use them wisely!
+                New characters will be shown as you progress, with each being compared to the previous card.
             </DialogDescription>
             <DialogDescription class="text-white">
-                Check the <RouterLink class="text-blue-400" to="/app/leaderboard">leaderboard</RouterLink> to see the top rated characters by the community!
+                Try to get as many correct as you can. The game ends when you get one wrong.
             </DialogDescription>
             <DialogDescription class="text-slate-500 text-xs italic">
-                Leaderboard rankings reset weekly and monthly. 
-                <br/>
-                Character sprite data is refreshed weekly.
+                All-Time Ratings are determined by the <RouterLink class="text-blue-400" to="/app/leaderboard">community</RouterLink> and may change between play sessions.
             </DialogDescription>
         </DialogContent>
     </Dialog>
