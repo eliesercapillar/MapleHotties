@@ -7,31 +7,43 @@
       </div>
       <h3>How to Play</h3>
       <div id="instructions" class="grid grid-rows-2 grid-cols-2 items-center justify-center">
-        <div >
+        <div class="p-4 flex flex-col items-center justify-center">
           <span>Given two characters, decide whether or not the card on the right has a higher or lower All-time <span class="text-like">Like Rating</span> than the card on the left.</span>
           <div class="flex items-center justify-center select-none">
             <InfoCharacterPlayCard 
-              :static="true"
+              :type="'default'"
               :name="'Xæra'"
               :level="285"
               :job="'Xenon'"
-              :image-url="'/rockoguy.png'"
+              :image-url="'https://msavatar1.nexon.net/Character/MMANDIACIHJNNOPKMBKOPNEFFFBFCPKGDBLOKKLHDCEBDCBBNEPMIOEAGBOKIGAFAOMFEEPICGIJGGMFNCIOLLEBLGPCLCJHNFAIAOBEOICGMLDFDFOLCGCHCFPIGEEAJHPOHEBINNCPAGBOJMNGCAIBFKCIKKHFIFFGCIFAHMJPECIAHFJHIJGCMLKDMPGIPGOGHLMLDDBNIMCPJFACGFPPBHNAFFDMJAANFKIKEOCOEBPMOKBLNCEJLADFCGKC.png'"
+              :like-count="'5,000'"
             />
-            <InfoCharacterPlayCard 
-              :static="false"
-              :name="'DWlGHT'"
-              :level="290"
-              :job="'Dual Blade'"
-              :image-url="'/rockoguy.png'"
-            />
-            <div class="flex flex-col">
-              <span>More!</span>
-              <span>Less!</span>
+            <div class="grid items-center justify-center w-12 h-12">
+              <span class="row-[1] col-[1] z-[1] text-white text-bold text-md text-center">VS</span>
             </div>
+            <InfoCharacterPlayCard 
+              :type="'animatedCursor'"
+              :name="'ROCKOGUY'"
+              :level="292"
+              :job="'Adele'"
+              :image-url="'https://msavatar1.nexon.net/Character/LCAPKANJACELHFCMBJHENCNGLDDHEMHEGKEGEGACAGFEBIHPJPLKHOJEFKEMDEJCCLJALHLFHIGGCJGMIOEKEFLCLEMLNDNJDJLPHBEFKOKPIGHEGCPCDFIEPPOGLMJMLEKFGDKPPJHCOGKODMHCBJAMGLDDGMLDILNEICKGBBMBGKBBHFOGAKKGEAIFDHNIBHAMJPKHHNDNLKEHPHHADKJLFNKCEIEEGBPKPEOJLFHFGMJADOFKHIBEPFOOJKEN.png'"
+              :like-count="'???'"
+            />
           </div>
         </div>
-        <div>
+        <div class="p-4 flex flex-col items-center justify-center">
           <span>Lock in your answer by clicking the top or bottom half of the card on the right, or using the up or down arrow keys.</span>
+          <div class="flex items-center justify-center select-none">
+            <InfoCharacterPlayCard 
+              :type="'static'"
+              :name="'ROCKOGUY'"
+              :level="292"
+              :job="'Adele'"
+              :image-url="'https://msavatar1.nexon.net/Character/LCAPKANJACELHFCMBJHENCNGLDDHEMHEGKEGEGACAGFEBIHPJPLKHOJEFKEMDEJCCLJALHLFHIGGCJGMIOEKEFLCLEMLNDNJDJLPHBEFKOKPIGHEGCPCDFIEPPOGLMJMLEKFGDKPPJHCOGKODMHCBJAMGLDDGMLDILNEICKGBBMBGKBBHFOGAKKGEAIFDHNIBHAMJPKHHNDNLKEHPHHADKJLFNKCEIEEGBPKPEOJLFHFGMJADOFKHIBEPFOOJKEN.png'"
+              :like-count="'???'"
+            />
+            <Icon icon="mdi:arrow-up-bold-box"></Icon>
+          </div>
         </div>
         <div>
           <span>New characters will be shown as you progress, with each being compared to the previous card.</span>
@@ -43,20 +55,6 @@
       <span class="text-slate-500 text-xs italic">
           All-Time Ratings are determined by the <RouterLink class="text-blue-400" to="/app/leaderboard">community</RouterLink> and may change between play sessions.
       </span>
-      <!-- <SkeletonCard v-if="playStore.cards.length === 0"/>
-      <motion.div class="w-[calc(100vw/2)] h-full flex items-center justify-center shrink-0"
-        v-for="(card, index) in playStore.cards"
-        :key="`${card.character.id}-${index}`"
-        :style="{ x: x }"
-      >
-        <PlayCard :index="index"/>
-      </motion.div>
-      <motion.div v-if="playStore.isCurrentlyPlaying" class="absolute select-none grid items-center justify-center top-1/2 -translate-y-1/2 lg:w-32 lg:h-32"
-        :style="{ scale: scale }"
-      >
-        <Icon class="row-[1] col-[1] z-0 w-full h-full" icon="carbon:circle-solid"/>
-        <span class="row-[1] col-[1] z-[1] text-black text-5xl text-center">VS</span>
-      </motion.div> -->
     </main>
     <PlayInfoModal/>
 </template>
@@ -65,9 +63,6 @@
 import { onMounted, onUnmounted, watch } from "vue";
 import { motion, useMotionValue, animate } from 'motion-v'
 import InfoCharacterPlayCard from "@/components/play_app/InfoCharacterPlayCard.vue"
-import CharacterSummaryCard from "@/components/CharacterSummaryCard.vue";
-import SkeletonCard from "@/components/rate_app/SkeletonCard.vue";
-import PlayCard from "@/components/play_app/PlayCard.vue";
 import PlayInfoModal from "@/components/play_app/PlayInfoModal.vue";
 import { Icon } from "@iconify/vue/dist/iconify.js";
 import { usePlayStore } from "@/stores/playStore";

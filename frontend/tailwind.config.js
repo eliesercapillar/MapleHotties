@@ -19,6 +19,16 @@ export default {
   		backgroundImage: {
   			'black-grey-radial': 'radial-gradient(circle, rgba(47,47,55,1) 0%, rgba(0,0,0,1) 100%)',
 			'black-shadow-fade': 'linear-gradient(to top, rgb(0, 0, 0) 40%, rgba(255, 255, 255, 0) 100%)',
+			
+			'black-bottom-up-vignette-fade': 'linear-gradient(to top, rgba(0, 0, 0, 0.6) 20%, rgba(0, 0, 0, 0) 100%)',
+			'black-top-down-vignette-fade': 'linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 20%, rgba(0, 0, 0, 0) 100%)',
+			
+			'like-bottom-up-vignette-fade': 'linear-gradient(to top, rgba(55, 187, 78, 0.6) 20%, rgba(228, 241, 10, 0) 100%)',
+			'like-top-down-vignette-fade': 'linear-gradient(to bottom, rgba(228, 241, 10, 0.6) 20%, rgba(55, 187, 78, 0) 100%)',
+			
+			'nope-bottom-up-vignette-fade': 'linear-gradient(to top, rgba(255, 63, 41, 0.6) 20%, rgba(249, 41, 153, 0) 100%)',
+			'nope-top-down-vignette-fade': 'linear-gradient(to bottom, rgba(249, 41, 153, 0.6) 20%, rgba(255, 63, 41, 0) 100%)',
+
 			'nope-gradient': 'linear-gradient(135deg, #f92999, #ff3f29)',
 			'like-gradient': 'linear-gradient(135deg, #e4f10a, #37bb4e)',
 			'fav-gradient': 'linear-gradient(135deg, #00dbff, #0048ff)',

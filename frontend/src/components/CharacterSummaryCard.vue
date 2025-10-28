@@ -1,6 +1,6 @@
 <template>
     <div
-        class="relative flex flex-col justify-center rounded-lg border-[1px] aspect-[3/4] h-[240px] w-[170px] mx-1 mb-2"
+        class="relative flex flex-col justify-center rounded-lg aspect-[3/4] h-[240px] w-[170px] mx-1 mb-2"
         :style="{
             background: getBackgroundGradient(props.status),
             border: getBorderColour(props.status)
